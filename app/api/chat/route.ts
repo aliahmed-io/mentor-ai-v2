@@ -1,5 +1,5 @@
+import { generateFromGemini } from '@/lib/chatbot/gemini'
 import { NextRequest, NextResponse } from 'next/server'
-import { generateFromGemini } from '../../../lib/gemini'
 
 // Global sessions store (in production, use Redis or database)
 const sessions = global['__SESSIONS_UPLOAD__'] || (global['__SESSIONS_UPLOAD__'] = new Map())

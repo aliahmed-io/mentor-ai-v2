@@ -1,6 +1,6 @@
 // utils/extractText.ts
 import fs from 'fs'
-import pdfParse from 'pdf-parse'
+import { PDFParse } from 'pdf-parse'
 import mammoth from 'mammoth'
 import AdmZip from 'adm-zip'
 import { XMLParser } from 'fast-xml-parser'
@@ -21,7 +21,9 @@ try {
 // PDF
 if (mimeType === 'application/pdf' || lower.endsWith('.pdf')) {
 const buffer = fs.readFileSync(filePath)
-const data = await pdfParse(buffer)
+const parser = new PDFParse({ data: buffer })
+const data = await parser.getText()
+if (typeof (parser as any).destroy === 'function') { await (parser as any).destroy() }
 return data && data.text ? data.text : ''
 }
 

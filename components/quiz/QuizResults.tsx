@@ -39,8 +39,8 @@ export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizRes
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 p-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="p-2 md:p-4">
+      <div className="mx-auto max-w-6xl">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -59,7 +59,7 @@ export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizRes
           <p className="text-xl text-gray-600">Here&apos;s how you performed</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Score Overview */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -67,7 +67,7 @@ export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizRes
             transition={{ delay: 0.3 }}
             className="lg:col-span-1"
           >
-            <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+            <Card>
               <CardHeader className="text-center">
                 <CardTitle className="flex items-center justify-center gap-2">
                   <Trophy className="w-6 h-6" />
@@ -128,7 +128,7 @@ export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizRes
             transition={{ delay: 0.4 }}
             className="lg:col-span-2"
           >
-            <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BookOpen className="w-6 h-6" />
@@ -220,7 +220,7 @@ export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizRes
             transition={{ delay: 0.5 }}
             className="mt-8"
           >
-            <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="w-6 h-6" />

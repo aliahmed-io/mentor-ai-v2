@@ -41,8 +41,8 @@ export default function QuizQuestion({
   const progress = ((currentIndex + 1) / totalQuestions) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="p-2 md:p-4">
+      <div className="mx-auto max-w-4xl">
         {/* Header with Progress */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -57,7 +57,7 @@ export default function QuizQuestion({
               Topic: <span className="font-semibold text-purple-600">{question.topic}</span>
             </div>
           </div>
-          <Progress value={progress} className="h-3 bg-gray-200" />
+          <Progress value={progress} className="h-2" />
         </motion.div>
 
         {/* Question Card */}
@@ -69,7 +69,7 @@ export default function QuizQuestion({
             exit={{ opacity: 0, x: -50 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+            <Card>
               <CardHeader className="pb-6">
                 <CardTitle className="text-2xl font-bold text-gray-800 leading-relaxed">
                   {question.question}

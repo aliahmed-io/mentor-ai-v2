@@ -61,14 +61,14 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 flex items-center justify-center">
+    <div className="p-2 md:p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-2xl"
+        className="w-full max-w-2xl mx-auto"
       >
-        <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+        <Card>
           <CardHeader className="text-center space-y-4">
             <motion.div
               initial={{ scale: 0 }}

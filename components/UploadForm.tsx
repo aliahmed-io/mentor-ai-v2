@@ -1,5 +1,7 @@
 'use client'
 import React, { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 interface UploadFormProps {
   onUploaded: (data: { sessionId: string; text: string }) => void
@@ -37,43 +39,20 @@ export default function UploadForm({ onUploaded }: UploadFormProps) {
   }
 
   return (
-    <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      <div>
-        <input 
-          type="file" 
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-          accept=".pdf,.docx,.pptx,.txt,.png,.jpg,.jpeg,.gif,.bmp,.tiff,.webp"
-          style={{
-            padding: '8px',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            width: '100%'
-          }}
-        />
-      </div>
-      
+    <form onSubmit={onSubmit} className="flex flex-col gap-3">
+      <Input
+        type="file"
+        onChange={(e) => setFile(e.target.files?.[0] || null)}
+        accept=".pdf,.docx,.pptx,.txt,.png,.jpg,.jpeg,.gif,.bmp,.tiff,.webp"
+      />
+
       {error && (
-        <div style={{ color: '#d32f2f', fontSize: '14px' }}>
-          Error: {error}
-        </div>
+        <div className="text-sm text-red-600">Error: {error}</div>
       )}
-      
-      <button 
-        type="submit" 
-        disabled={loading || !file}
-        style={{
-          padding: '10px 16px',
-          border: 'none',
-          borderRadius: '6px',
-          background: loading || !file ? '#ccc' : '#0070f3',
-          color: '#fff',
-          cursor: loading || !file ? 'not-allowed' : 'pointer',
-          fontSize: '14px',
-          fontWeight: '500'
-        }}
-      >
+
+      <Button type="submit" disabled={loading || !file}>
         {loading ? 'Uploading...' : 'Upload File'}
-      </button>
+      </Button>
     </form>
   )
 }
