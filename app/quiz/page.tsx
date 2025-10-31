@@ -3,7 +3,9 @@
 import { QuizProvider } from '@/contexts/QuizContext';
 import Quiz from '@/components/quiz/Quiz';
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 export default function Home() {
   const [recent, setRecent] = useState<Array<{ id: string; topic: string; difficulty: string; questionCount: number; createdAt: string }>>([]);
@@ -39,9 +41,7 @@ export default function Home() {
                   <span className="font-medium">{q.topic}</span>
                   <span className="ml-2 text-muted-foreground">{q.difficulty} • {q.questionCount} questions</span>
                 </div>
-                <Button asChild variant="ghost" size="sm">
-                  <a href={`/quiz/${q.id}`}>Open</a>
-                </Button>
+                <Link href={`/quiz/${q.id}`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}>Open</Link>
               </li>
             ))}
           </ul>

@@ -67,45 +67,9 @@ export default function PresentationHeader({ title }: PresentationHeaderProps) {
           </motion.div>
         </div>
 
-        <SideBarDropdown />
+        {/* Profile moved to global sidebar */}
       </header>
     );
 
-  return (
-    <header className="flex h-12 w-full items-center justify-between border-b border-accent bg-background px-4">
-      {/* Left section with breadcrumb navigation */}
-      <div className="flex items-center gap-2">
-        <Link
-          href="/presentation"
-          className="text-muted-foreground hover:text-foreground"
-        >
-          <Brain className="h-5 w-5"></Brain>
-        </Link>
-        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-        <span className="font-medium">{presentationTitle}</span>
-      </div>
 
-      {/* Right section with actions */}
-      <div className="flex items-center gap-2">
-        {/* Save status indicator */}
-        <SaveStatus />
-
-        {/* Theme selector moved to right editor panel */}
-
-        {/* Export button - Only in presentation page, not outline or present mode */}
-        {isPresentationPage && !isPresenting && (
-          <ExportButton presentationId={currentPresentationId ?? ""} />
-        )}
-
-        {/* Share button - Only in presentation page, not outline */}
-        {isPresentationPage && !isPresenting && <ShareButton />}
-
-        {/* Present button - Only in presentation page, not outline */}
-        {isPresentationPage && <PresentButton />}
-
-        {/* User profile dropdown - Keep this on all pages */}
-        {!isPresenting && <SideBarDropdown />}
-      </div>
-    </header>
-  );
 }

@@ -3,7 +3,9 @@ import React, { useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import Link from 'next/link'
 import UploadForm from '@/components/UploadForm'
 import { useRouter } from 'next/navigation'
 
@@ -138,9 +140,7 @@ export default function FlashcardPage() {
                   <span className="font-medium">{s.topic || 'Untitled'}</span>
                   <span className="ml-2 text-muted-foreground">{s.count} cards</span>
                 </div>
-                <Button asChild variant="ghost" size="sm">
-                  <a href={`/flashcard/${s.id}`}>Open</a>
-                </Button>
+                <Link href={`/flashcard/${s.id}`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}>Open</Link>
               </li>
             ))}
           </ul>

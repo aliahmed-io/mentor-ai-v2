@@ -75,7 +75,7 @@ export function PresentationDashboard({
     <div className="notebook-section relative h-full w-full">
       <PresentationsSidebar side={sidebarSide} />
       <div className="mx-auto max-w-4xl space-y-12 px-6 py-12">
-        <PresentationHeader />
+
 
         <div className="space-y-8">
           <PresentationInput handleGenerate={handleGenerate} />

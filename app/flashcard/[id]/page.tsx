@@ -3,7 +3,8 @@ import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { ArrowLeft, ArrowRight, RotateCcw, Eye, EyeOff } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 
@@ -67,7 +68,7 @@ export default function FlashcardStudyPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm"><Link href="/flashcard"><ArrowLeft className="h-4 w-4" /></Link></Button>
+          <Link href="/flashcard" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}><ArrowLeft className="h-4 w-4" /></Link>
           <h1 className="text-xl font-semibold">Flashcards</h1>
         </div>
         <Card>
@@ -85,7 +86,7 @@ export default function FlashcardStudyPage() {
     <div className="space-y-6">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm"><Link href="/flashcard"><ArrowLeft className="h-4 w-4" /></Link></Button>
+          <Link href="/flashcard" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}><ArrowLeft className="h-4 w-4" /></Link>
           <h1 className="text-xl font-semibold">Study Flashcards</h1>
         </div>
         <div className="text-sm text-muted-foreground">

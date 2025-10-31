@@ -103,12 +103,11 @@ export default function Chat({ sessionId }: ChatProps) {
               }`}
             >
               {msg.role === 'assistant' ? (
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  className="prose prose-sm max-w-none prose-headings:my-2 prose-p:my-2 prose-li:my-1 prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded"
-                >
-                  {msg.content}
-                </ReactMarkdown>
+                <div className="prose prose-sm max-w-none prose-headings:my-2 prose-p:my-2 prose-li:my-1 prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {msg.content}
+                  </ReactMarkdown>
+                </div>
               ) : (
                 msg.content
               )}

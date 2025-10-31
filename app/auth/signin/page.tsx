@@ -23,7 +23,7 @@ export default function SignIn() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-slate-900 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-neutral-950 px-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>

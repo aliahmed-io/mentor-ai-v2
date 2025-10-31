@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentProps } from "react";
 import Image from "next/image";
+import SideBarDropdown from "@/components/auth/Dropdown";
 
 type SidebarProps = ComponentProps<"nav"> & {
   itemsClassName?: string;
@@ -62,8 +63,9 @@ export default function Sidebar({ className, itemsClassName, ...rest }: SidebarP
             })}
           </ul>
         </div>
-        <div className="px-4 py-3 text-xs text-neutral-400">
-          v0.1
+        <div className="mt-auto border-t border-neutral-800 px-3 py-3">
+          <SideBarDropdown shouldViewFullName align="start" side="top" />
+          
         </div>
       </div>
     </nav>
