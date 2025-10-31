@@ -67,9 +67,7 @@ export default function FlashcardStudyPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/flashcard"><ArrowLeft className="h-4 w-4" /></Link>
-          </Button>
+          <Button asChild variant="ghost" size="sm"><Link href="/flashcard"><ArrowLeft className="h-4 w-4" /></Link></Button>
           <h1 className="text-xl font-semibold">Flashcards</h1>
         </div>
         <Card>
@@ -87,9 +85,7 @@ export default function FlashcardStudyPage() {
     <div className="space-y-6">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/flashcard"><ArrowLeft className="h-4 w-4" /></Link>
-          </Button>
+          <Button asChild variant="ghost" size="sm"><Link href="/flashcard"><ArrowLeft className="h-4 w-4" /></Link></Button>
           <h1 className="text-xl font-semibold">Study Flashcards</h1>
         </div>
         <div className="text-sm text-muted-foreground">
