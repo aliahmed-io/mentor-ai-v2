@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { IncomingForm } from 'formidable'
 import fs from 'fs'
 import { extractTextFromFile } from '../../../utils/extractText'
+import { db } from '@/server/db'
+import { auth } from '@/server/auth'
 
 // Global sessions store (in production, use Redis or database)
 const sessions = global['__SESSIONS_UPLOAD__'] || (global['__SESSIONS_UPLOAD__'] = new Map())
@@ -29,6 +31,18 @@ export async function POST(request: NextRequest) {
       // Create a session id
       const sessionId = Math.random().toString(36).slice(2, 9)
       sessions.set(sessionId, { fileText: text, history: [] })
+      try {
+        const session = await auth()
+        await db.chatSession.create({
+          data: {
+            id: sessionId,
+            userId: session?.user?.id ?? null,
+            fileText: text,
+          },
+        })
+      } catch (e) {
+        console.warn('Failed to persist chat session', e)
+      }
 
       return NextResponse.json({ 
         sessionId, 

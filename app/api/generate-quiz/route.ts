@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { QuizSetup } from '@/types/quiz';
+import { auth } from '@/server/auth';
+import { db } from '@/server/db';
 
 // JSON schema for quiz questions
 const quizQuestionsSchema = {
@@ -84,6 +86,23 @@ FORMAT: Return a JSON object with a "questions" array containing the questions i
     }
 
     const result = JSON.parse(response.text);
+
+    // Persist quiz set (non-breaking: still return questions array)
+    try {
+      const session = await auth();
+      await db.quizSet.create({
+        data: {
+          userId: session?.user?.id ?? null,
+          topic: setup.topic,
+          difficulty: setup.difficulty,
+          questionCount: setup.questionCount,
+          questions: result.questions,
+        },
+      });
+    } catch (e) {
+      console.warn('Failed to persist quiz set:', e);
+    }
+
     return NextResponse.json(result.questions);
 
   } catch (error) {

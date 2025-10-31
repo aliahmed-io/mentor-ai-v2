@@ -14,13 +14,7 @@ interface QuizResultsProps {
 }
 
 export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizResultsProps) {
-  const getGradeColor = (percentage: number) => {
-    if (percentage >= 90) return 'text-green-600';
-    if (percentage >= 80) return 'text-blue-600';
-    if (percentage >= 70) return 'text-yellow-600';
-    if (percentage >= 60) return 'text-orange-600';
-    return 'text-red-600';
-  };
+  const getGradeColor = (_percentage: number) => 'text-foreground';
 
   const getGradeEmoji = (percentage: number) => {
     if (percentage >= 90) return '🏆';
@@ -56,7 +50,7 @@ export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizRes
             {getGradeEmoji(result.percentage)}
           </motion.div>
           <h1 className="text-4xl font-bold mb-2">Quiz Complete!</h1>
-          <p className="text-xl text-gray-600">Here&apos;s how you performed</p>
+          <p className="text-xl text-muted-foreground">Here&apos;s how you performed</p>
         </motion.div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -88,16 +82,16 @@ export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizRes
 
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">{result.correctAnswers}</div>
-                    <div className="text-gray-600">Correct</div>
+                    <div className="text-2xl font-bold text-foreground">{result.correctAnswers}</div>
+                    <div className="text-muted-foreground">Correct</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-red-600">{result.incorrectAnswers}</div>
-                    <div className="text-gray-600">Incorrect</div>
+                    <div className="text-2xl font-bold text-foreground">{result.incorrectAnswers}</div>
+                    <div className="text-muted-foreground">Incorrect</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-600">{result.unanswered}</div>
-                    <div className="text-gray-600">Skipped</div>
+                    <div className="text-2xl font-bold text-foreground">{result.unanswered}</div>
+                    <div className="text-muted-foreground">Skipped</div>
                   </div>
                 </div>
 
@@ -110,10 +104,7 @@ export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizRes
                     <RotateCcw className="w-4 h-4" />
                     Retake Quiz
                   </Button>
-                  <Button
-                    onClick={onNewQuiz}
-                    className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
-                  >
+                  <Button onClick={onNewQuiz} className="w-full">
                     New Quiz
                   </Button>
                 </div>
@@ -152,43 +143,37 @@ export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizRes
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.1 * index }}
-                        className={`p-4 rounded-lg border-l-4 ${
-                          !wasAnswered
-                            ? 'border-l-gray-400 bg-gray-50'
-                            : isCorrect
-                            ? 'border-l-green-500 bg-green-50'
-                            : 'border-l-red-500 bg-red-50'
-                        }`}
+                        className={`rounded-lg border bg-card p-4`}
                       >
                         <div className="flex items-start gap-3">
                           <div className="mt-1">
                             {!wasAnswered ? (
-                              <AlertCircle className="w-5 h-5 text-gray-500" />
+                              <AlertCircle className="h-5 w-5 text-muted-foreground" />
                             ) : isCorrect ? (
-                              <CheckCircle className="w-5 h-5 text-green-600" />
+                              <CheckCircle className="h-5 w-5 text-muted-foreground" />
                             ) : (
-                              <XCircle className="w-5 h-5 text-red-600" />
+                              <XCircle className="h-5 w-5 text-muted-foreground" />
                             )}
                           </div>
                           <div className="flex-1">
-                            <div className="font-semibold text-gray-800 mb-2">
+                            <div className="mb-2 font-semibold text-foreground">
                               {index + 1}. {question.question}
                             </div>
                             
                             {!wasAnswered ? (
-                              <div className="text-gray-600 mb-2">
+                              <div className="mb-2 text-muted-foreground">
                                 <span className="font-medium">Not answered</span>
                               </div>
                             ) : (
                               <div className="mb-2">
-                                <div className="text-sm text-gray-600">
-                                  Your answer: <span className={isCorrect ? 'text-green-600' : 'text-red-600'}>
+                                <div className="text-sm text-muted-foreground">
+                                  Your answer: <span className="text-foreground">
                                     {question.options[userAnswer!]}
                                   </span>
                                 </div>
                                 {!isCorrect && (
-                                  <div className="text-sm text-gray-600">
-                                    Correct answer: <span className="text-green-600">
+                                  <div className="text-sm text-muted-foreground">
+                                    Correct answer: <span className="text-foreground">
                                       {question.options[question.correctAnswer]}
                                     </span>
                                   </div>
@@ -197,7 +182,7 @@ export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizRes
                             )}
 
                             {(!wasAnswered || !isCorrect) && (
-                              <div className="text-sm text-gray-700 bg-blue-50 p-3 rounded border-l-4 border-l-blue-400">
+                              <div className="rounded border bg-muted p-3 text-sm text-foreground">
                                 <strong>Explanation:</strong> {question.explanation}
                               </div>
                             )}

@@ -50,11 +50,11 @@ export default function QuizQuestion({
           className="mb-8"
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-muted-foreground">
               Question {currentIndex + 1} of {totalQuestions}
             </div>
-            <div className="text-sm text-gray-600">
-              Topic: <span className="font-semibold text-purple-600">{question.topic}</span>
+            <div className="text-sm text-muted-foreground">
+              Topic: <span className="font-semibold text-foreground">{question.topic}</span>
             </div>
           </div>
           <Progress value={progress} className="h-2" />
@@ -85,18 +85,18 @@ export default function QuizQuestion({
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => onAnswerSelect(index)}
-                      className={`w-full p-4 rounded-xl border-2 text-left transition-all duration-200 ${
+                      className={`w-full rounded-xl border-2 p-4 text-left transition-all duration-200 ${
                         selectedAnswer === index
-                          ? 'border-purple-500 bg-gradient-to-r from-purple-50 to-pink-50 shadow-md'
-                          : 'border-gray-200 hover:border-purple-300 hover:bg-gray-50'
+                          ? 'border-primary bg-muted shadow-sm'
+                          : 'border-muted hover:bg-muted/50'
                       }`}
                     >
                       <div className="flex items-center gap-4">
                         <div
                           className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                             selectedAnswer === index
-                              ? 'border-purple-500 bg-purple-500'
-                              : 'border-gray-300'
+                              ? 'border-primary bg-primary'
+                              : 'border-muted'
                           }`}
                         >
                           {selectedAnswer === index && (
@@ -123,11 +123,7 @@ export default function QuizQuestion({
                     transition={{ delay: 0.2 }}
                     className="flex justify-center pt-4"
                   >
-                    <Button
-                      variant="outline"
-                      onClick={onClearAnswer}
-                      className="flex items-center gap-2 hover:bg-red-50 hover:border-red-300"
-                    >
+                    <Button variant="outline" onClick={onClearAnswer} className="flex items-center gap-2">
                       <RotateCcw className="w-4 h-4" />
                       Clear Selection
                     </Button>
@@ -148,11 +144,7 @@ export default function QuizQuestion({
 
                   <div className="flex gap-3">
                     {isLastQuestion ? (
-                      <Button
-                        onClick={onFinish}
-                        disabled={isAnalyzing}
-                        className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 px-8 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
+                      <Button onClick={onFinish} disabled={isAnalyzing} className="px-8 disabled:opacity-50 disabled:cursor-not-allowed">
                         {isAnalyzing ? (
                           <>
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -163,11 +155,7 @@ export default function QuizQuestion({
                         )}
                       </Button>
                     ) : (
-                      <Button
-                        onClick={onNext}
-                        disabled={!canGoNext}
-                        className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
-                      >
+                      <Button onClick={onNext} disabled={!canGoNext} className="flex items-center gap-2">
                         Next
                         <ArrowRight className="w-4 h-4" />
                       </Button>
@@ -186,16 +174,16 @@ export default function QuizQuestion({
           transition={{ delay: 0.4 }}
           className="flex justify-center mt-8"
         >
-          <div className="flex gap-2 p-4 bg-white/80 rounded-full shadow-lg backdrop-blur-sm">
+          <div className="flex gap-2 rounded-full bg-card p-4 shadow-sm">
             {Array.from({ length: totalQuestions }, (_, index) => (
               <div
                 key={index}
                 className={`w-3 h-3 rounded-full transition-all duration-200 ${
                   index === currentIndex
-                    ? 'bg-purple-500 scale-125'
+                    ? 'bg-primary scale-125'
                     : index < currentIndex
-                    ? 'bg-green-400'
-                    : 'bg-gray-300'
+                    ? 'bg-muted-foreground'
+                    : 'bg-muted'
                 }`}
               />
             ))}

@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/components/ui/use-toast'
 
 type ChatProps = {
   sessionId: string
@@ -19,6 +20,7 @@ export default function Chat({ sessionId }: ChatProps) {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
+  const { toast } = useToast()
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -61,6 +63,23 @@ export default function Chat({ sessionId }: ChatProps) {
     }
   }
 
+  // Load history when sessionId changes
+  useEffect(() => {
+    let active = true
+    ;(async () => {
+      if (!sessionId) return
+      try {
+        const res = await fetch(`/api/chat/session/${sessionId}`, { cache: 'no-store' })
+        if (!res.ok) return
+        const data = await res.json()
+        if (!active) return
+        const msgs: Message[] = Array.isArray(data?.messages) ? data.messages : []
+        setMessages(msgs)
+      } catch {}
+    })()
+    return () => { active = false }
+  }, [sessionId])
+
   return (
     <div className="rounded-lg border bg-card p-5">
       <div className="mb-4 max-h-[60vh] overflow-y-auto pr-2">
@@ -94,6 +113,27 @@ export default function Chat({ sessionId }: ChatProps) {
                 msg.content
               )}
             </div>
+            {msg.role === 'assistant' && (
+              <div className="mt-1 flex justify-end">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      const res = await fetch('/api/chat/docs', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sessionId, title: 'AI Note', content: msg.content }),
+                      })
+                      if (!res.ok) throw new Error('Failed to save')
+                      toast({ title: 'Saved', description: 'Assistant message saved as document.' })
+                    } catch (e: any) {
+                      toast({ title: 'Failed to save', description: e.message || 'Error', variant: 'destructive' })
+                    }
+                  }}
+                >Save as doc</Button>
+              </div>
+            )}
           </div>
         ))}
 

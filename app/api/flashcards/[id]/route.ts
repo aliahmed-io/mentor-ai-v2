@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/server/db'
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const store: Map<string, unknown> | undefined = (global as any)['__FLASHCARDS__']
-  const cards = store?.get(params.id)
-  if (!cards) {
+  const set = await db.flashcardSet.findUnique({
+    where: { id: params.id },
+    include: { cards: true },
+  })
+  if (!set) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
-  return NextResponse.json({ id: params.id, flashcards: cards })
+  const flashcards = set.cards.map((c) => ({ id: c.id, front: c.front, back: c.back, tags: c.tags }))
+  return NextResponse.json({ id: set.id, flashcards })
 }
 
 

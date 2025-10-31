@@ -74,14 +74,14 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center"
+              className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted"
             >
-              <Brain className="w-8 h-8 text-white" />
+              <img src="/white-short-logo.svg" alt="Quiz Logo" className="h-8 w-8" />
             </motion.div>
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <CardTitle className="text-3xl font-bold text-foreground">
               Create Your Quiz
             </CardTitle>
-            <CardDescription className="text-lg text-gray-600">
+            <CardDescription className="text-lg text-muted-foreground">
               Customize your learning experience with AI-powered questions
             </CardDescription>
           </CardHeader>
@@ -107,7 +107,7 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
                   className="text-lg py-6"
                   required
                 />
-                <div className="flex flex-wrap gap-2 mt-2">
+                <div className="mt-2 flex flex-wrap gap-2">
                   {topicSuggestions.map((suggestion) => (
                     <Button
                       key={suggestion}
@@ -115,7 +115,7 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
                       variant="outline"
                       size="sm"
                       onClick={() => setTopic(suggestion)}
-                      className="text-xs hover:bg-blue-50 hover:border-blue-300"
+                      className="text-xs"
                     >
                       {suggestion}
                     </Button>
@@ -139,17 +139,17 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setDifficulty(option.value)}
-                      className={`p-4 rounded-lg border-2 transition-all text-left ${
+                      className={`rounded-lg border-2 p-4 text-left transition-all ${
                         difficulty === option.value
-                          ? 'border-blue-500 bg-blue-50 shadow-md'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-primary bg-muted shadow-sm'
+                          : 'border-muted hover:bg-muted/50'
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-xl">{option.icon}</span>
                         <div>
                           <div className="font-semibold">{option.label}</div>
-                          <div className="text-sm text-gray-600">{option.description}</div>
+                          <div className="text-sm text-muted-foreground">{option.description}</div>
                         </div>
                       </div>
                     </motion.button>
@@ -185,7 +185,7 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
                         variant="outline"
                         size="sm"
                         onClick={() => setQuestionCount(count)}
-                        className={questionCount === count ? 'bg-blue-50 border-blue-300' : ''}
+                        className={questionCount === count ? 'bg-muted' : ''}
                       >
                         {count}
                       </Button>
@@ -215,7 +215,7 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
                   <div className="flex items-center gap-3">
                     <Label
                       htmlFor="file-upload"
-                      className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                      className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-dashed border-gray-300 px-4 py-2 transition-colors hover:border-muted-foreground/40 hover:bg-muted"
                     >
                       <Upload className="w-4 h-4" />
                       Upload Text File
@@ -228,7 +228,7 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
                       className="hidden"
                     />
                     {fileContent && (
-                      <span className="text-sm text-green-600 flex items-center gap-1">
+                      <span className="flex items-center gap-1 text-sm text-muted-foreground">
                         ✅ File uploaded successfully
                       </span>
                     )}
@@ -243,11 +243,7 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
                 transition={{ delay: 0.7 }}
                 className="pt-4"
               >
-                <Button
-                  type="submit"
-                  className="w-full py-6 text-lg font-semibold bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all"
-                  disabled={!topic.trim()}
-                >
+                <Button type="submit" className="w-full py-6 text-lg font-semibold" disabled={!topic.trim()}>
                   Generate Quiz ✨
                 </Button>
               </motion.div>

@@ -144,3 +144,80 @@ model GeneratedImage {
     user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
     prompt    String
 }
+
+// ==========================
+// Additional app persistence
+// ==========================
+
+model FlashcardSet {
+    id        String          @id @default(cuid())
+    userId    String?
+    user      User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+    topic     String?
+    count     Int
+    createdAt DateTime        @default(now())
+    cards     FlashcardCard[]
+
+    @@index([userId, createdAt])
+}
+
+model FlashcardCard {
+    id     String        @id @default(cuid())
+    setId  String
+    set    FlashcardSet  @relation(fields: [setId], references: [id], onDelete: Cascade)
+    front  String
+    back   String
+    tags   String[]
+
+    @@index([setId])
+}
+
+model QuizSet {
+    id            String   @id @default(cuid())
+    userId        String?
+    user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+    topic         String
+    difficulty    String
+    questionCount Int
+    questions     Json
+    createdAt     DateTime @default(now())
+
+    @@index([userId, createdAt])
+}
+
+model ChatSession {
+    id           String        @id @default(cuid())
+    userId       String?
+    user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+    createdAt    DateTime      @default(now())
+    lastActiveAt DateTime      @default(now())
+    fileText     String?
+    messages     ChatMessage[]
+    documents    ChatDocument[]
+
+    @@index([userId, lastActiveAt])
+}
+
+model ChatMessage {
+    id        String      @id @default(cuid())
+    sessionId String
+    session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+    role      String
+    content   String
+    createdAt DateTime    @default(now())
+
+    @@index([sessionId, createdAt])
+}
+
+model ChatDocument {
+    id        String       @id @default(cuid())
+    sessionId String?
+    session   ChatSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+    userId    String?
+    user      User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+    title     String
+    content   String
+    createdAt DateTime     @default(now())
+
+    @@index([userId, createdAt])
+}

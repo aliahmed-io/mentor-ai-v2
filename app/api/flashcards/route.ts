@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenAI } from '@google/genai'
+import { auth } from '@/server/auth'
+import { db } from '@/server/db'
 
 const flashcardsSchema = {
   type: 'object',
@@ -76,13 +78,20 @@ ${material}
     const parsed = JSON.parse(response.text)
     const cards = Array.isArray(parsed?.flashcards) ? parsed.flashcards : []
 
-    // store in-memory session (dev/demo only)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const store: Map<string, unknown> = (global as any)['__FLASHCARDS__'] || ((global as any)['__FLASHCARDS__'] = new Map())
-    const id = Math.random().toString(36).slice(2, 10)
-    store.set(id, cards)
+    const session = await auth()
+    const set = await db.flashcardSet.create({
+      data: {
+        userId: session?.user?.id ?? null,
+        topic: topic ?? null,
+        count,
+        cards: {
+          create: cards.map((c: any) => ({ front: c.front, back: c.back, tags: c.tags ?? [] })),
+        },
+      },
+      select: { id: true },
+    })
 
-    return NextResponse.json({ id, flashcards: cards })
+    return NextResponse.json({ id: set.id, flashcards: cards })
   } catch (error) {
     console.error('Error generating flashcards:', error)
     return NextResponse.json({ error: 'Failed to generate flashcards' }, { status: 500 })

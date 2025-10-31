@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
@@ -21,6 +21,7 @@ export default function FlashcardPage() {
   const [count, setCount] = useState(12)
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [recent, setRecent] = useState<Array<{ id: string; topic: string | null; count: number; createdAt: string }>>([])
 
   const handleUploaded = (data: { sessionId: string; text: string }) => {
     if (!data) return
@@ -58,6 +59,19 @@ export default function FlashcardPage() {
       setIsGenerating(false)
     }
   }
+
+  useEffect(() => {
+    let active = true
+    ;(async () => {
+      try {
+        const res = await fetch('/api/flashcards/recent?limit=10', { cache: 'no-store' })
+        if (!res.ok) return
+        const data = await res.json()
+        if (active) setRecent(data)
+      } catch {}
+    })()
+    return () => { active = false }
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -111,7 +125,27 @@ export default function FlashcardPage() {
         </CardContent>
       </Card>
 
-      {/* Study UI moved to /flashcard/[id] */}
+      {/* Recent flashcards */}
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium">Recent flashcards</h3>
+        {recent.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No recent sets yet.</p>
+        ) : (
+          <ul className="divide-y rounded-md border">
+            {recent.map((s) => (
+              <li key={s.id} className="flex items-center justify-between px-4 py-2 text-sm">
+                <div className="truncate">
+                  <span className="font-medium">{s.topic || 'Untitled'}</span>
+                  <span className="ml-2 text-muted-foreground">{s.count} cards</span>
+                </div>
+                <Button asChild variant="ghost" size="sm">
+                  <a href={`/flashcard/${s.id}`}>Open</a>
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   )
 }
