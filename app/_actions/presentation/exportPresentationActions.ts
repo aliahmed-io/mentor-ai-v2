@@ -30,6 +30,9 @@ export async function exportPresentation(
       presentationId,
       session.user.id,
     );
+    if (!presentationData || !Array.isArray(presentationData.slides)) {
+      return { success: false, error: "Presentation not found or empty" };
+    }
 
     // Generate the PPT file (ArrayBuffer)
     const arrayBuffer = await convertPlateJSToPPTX(
@@ -59,16 +62,22 @@ async function fetchPresentationData(presentationId: string, userId: string) {
   // For now returning a placeholder
 
   // In a real implementation, you would fetch from your database
-  const presentation = await db.baseDocument.findFirst({
-    where: { id: presentationId, userId: userId },
+  const presentation = await db.baseDocument.findUnique({
+    where: { id: presentationId },
     include: { presentation: true },
   });
+  if (!presentation) return null as unknown as undefined;
+  // Optional: enforce access control if needed
+  if (presentation.userId && presentation.userId !== userId && !presentation.isPublic) {
+    return null as unknown as undefined;
+  }
 
   return {
     id: presentation?.id,
     title: presentation?.title,
-    slides: (
-      presentation?.presentation?.content as unknown as { slides: PlateSlide[] }
-    )?.slides,
+    slides:
+      ((presentation.presentation?.content as unknown as
+        | { slides: PlateSlide[] }
+        | undefined)?.slides ?? []),
   };
 }

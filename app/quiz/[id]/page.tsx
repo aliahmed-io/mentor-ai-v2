@@ -56,7 +56,7 @@ export default function QuizStudyPage({ params }: { params: { id: string } }) {
     setAnswers(next)
   }
 
-  const onFinish = () => {
+  const onFinish = async () => {
     const total = questions.length
     let correct = 0
     let incorrect = 0
@@ -82,6 +82,13 @@ export default function QuizStudyPage({ params }: { params: { id: string } }) {
       recommendations: [],
     }
     setResult(r)
+    try {
+      await fetch('/api/quiz/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quizSetId: id, percentage: r.percentage, correct, incorrect, unanswered, total }),
+      })
+    } catch {}
   }
 
   if (loading) {

@@ -31,12 +31,54 @@ export async function createPresentation({
   const userId = session.user.id;
 
   try {
+    // Resolve a valid user id to satisfy FK: prefer id, else email, else create
+    let effectiveUserId = userId;
+    const existingById = await db.user.findUnique({ where: { id: userId }, select: { id: true } });
+    if (!existingById) {
+      const email = session.user.email ?? undefined;
+      if (email) {
+        const existingByEmail = await db.user.findUnique({ where: { email }, select: { id: true } });
+        if (existingByEmail) {
+          effectiveUserId = existingByEmail.id;
+        } else {
+          try {
+            const created = await db.user.create({
+              data: {
+                id: userId,
+                email,
+                name: session.user.name ?? undefined,
+                image: session.user.image ?? undefined,
+              },
+              select: { id: true },
+            });
+            effectiveUserId = created.id;
+          } catch {
+            // As a last resort, try to read by email again (in case of race)
+            const fallback = email
+              ? await db.user.findUnique({ where: { email }, select: { id: true } })
+              : null;
+            effectiveUserId = fallback?.id ?? userId;
+          }
+        }
+      } else {
+        // No email in session; create a minimal user row keyed by id
+        try {
+          const created = await db.user.create({
+            data: { id: userId, name: session.user.name ?? undefined, image: session.user.image ?? undefined },
+            select: { id: true },
+          });
+          effectiveUserId = created.id;
+        } catch {
+          effectiveUserId = userId;
+        }
+      }
+    }
     const presentation = await db.baseDocument.create({
       data: {
         type: "PRESENTATION",
         documentType: "presentation",
         title: title ?? "Untitled Presentation",
-        userId,
+        userId: effectiveUserId,
         presentation: {
           create: {
             content: content as unknown as InputJsonValue,
@@ -365,13 +407,36 @@ export async function duplicatePresentation(id: string, newTitle?: string) {
       };
     }
 
+    // Resolve a valid user id for duplicate as well
+    let effectiveUserId = session.user.id;
+    const byId = await db.user.findUnique({ where: { id: session.user.id }, select: { id: true } });
+    if (!byId) {
+      const email = session.user.email ?? undefined;
+      if (email) {
+        const byEmail = await db.user.findUnique({ where: { email }, select: { id: true } });
+        if (byEmail) effectiveUserId = byEmail.id;
+        else {
+          try {
+            const created = await db.user.create({
+              data: { id: session.user.id, email, name: session.user.name ?? undefined, image: session.user.image ?? undefined },
+              select: { id: true },
+            });
+            effectiveUserId = created.id;
+          } catch {
+            const fallback = await db.user.findUnique({ where: { email }, select: { id: true } });
+            effectiveUserId = fallback?.id ?? session.user.id;
+          }
+        }
+      }
+    }
+
     // Create a new presentation with the same content
     const duplicated = await db.baseDocument.create({
       data: {
         type: "PRESENTATION",
         documentType: "presentation",
         title: newTitle ?? `${original.title} (Copy)`,
-        userId: session.user.id,
+        userId: effectiveUserId,
         isPublic: false,
         presentation: {
           create: {

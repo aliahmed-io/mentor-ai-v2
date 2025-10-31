@@ -18,6 +18,8 @@ export default function Sidebar({ className, itemsClassName, ...rest }: SidebarP
     { href: "/flashcard", label: "Flashcard" },
     { href: "/presentation", label: "Presentation" },
     { href: "/pomodoro", label: "Pomodoro" },
+    { href: "/calendar", label: "Calendar" },
+    { href: "/analytics", label: "Analytics" },
   ];
 
   return (
