@@ -37,6 +37,7 @@ import {
   type TTimelineItemElement,
 } from "../editor/plugins/timeline-plugin";
 import { type PlateNode, type PlateSlide } from "./parser";
+import { layoutVerticalFlow, type Frame } from "./layoutEngine";
 import {
   type HeadingElement,
   type ImageElement,
@@ -162,6 +163,32 @@ export class PlateJSToPPTXConverter {
     return lum > 186; // common threshold
   }
 
+  // Rough text measurement in inches based on width (in) and font size (pt)
+  // Heuristic: average character width ≈ 0.5 × fontHeight; fontHeight(in) = fontSize/72
+  // So charWidth(in) ≈ 0.5 * (fontSize/72) = fontSize * 0.00694
+  // We account for word wrapping by greedily filling lines by char count
+  private estimateTextHeight(text: string, widthIn: number, fontSizePt: number): number {
+    const minHeight = Math.max(fontSizePt / 72, 0.3);
+    const charWidthIn = Math.max(fontSizePt * 0.00694, 0.05); // clamp
+    const charsPerLine = Math.max(Math.floor(widthIn / charWidthIn), 8);
+    const words = (text || "").split(/\s+/).filter(Boolean);
+    if (words.length === 0) return minHeight + 0.2;
+
+    let lines = 1;
+    let current = 0;
+    for (const w of words) {
+      const len = w.length + 1; // include space
+      if (current + len > charsPerLine) {
+        lines += 1;
+        current = len;
+      } else {
+        current += len;
+      }
+    }
+    const lineHeightIn = Math.max((fontSizePt / 72) * 1.25, 0.28);
+    return lines * lineHeightIn + 0.2; // add small padding
+  }
+
   public async convertToPPTX(
     presentationData: PresentationData,
   ): Promise<PptxGenJS> {
@@ -182,8 +209,23 @@ export class PlateJSToPPTXConverter {
     // Calculate content area based on layout
     const contentArea = this.calculateContentArea(slide);
 
-    // Process slide content
-    await this.processElements(slide.content, contentArea, slide.alignment);
+    // Two-pass: measure → pack → render
+    const frames: Frame[] = await layoutVerticalFlow(
+      slide.content,
+      contentArea,
+      async (node, w) => this.processElement(node as PlateNode, 0, 0, w, true),
+    );
+
+    for (const frame of frames) {
+      await this.processElement(
+        frame.node as PlateNode,
+        frame.x,
+        frame.y,
+        frame.w,
+        false,
+        frame.h,
+      );
+    }
   }
 
   private calculateContentArea(slide: PlateSlide): {
@@ -341,12 +383,15 @@ export class PlateJSToPPTXConverter {
 
     let currentY = startY;
     for (const element of elements) {
+      const remaining = area.y + area.h - currentY;
+      if (remaining <= 0) break;
       const elementHeight = await this.processElement(
         element,
         area.x,
         currentY,
         area.w,
         false,
+        remaining,
       );
       currentY += elementHeight;
 
@@ -360,6 +405,7 @@ export class PlateJSToPPTXConverter {
     y: number,
     width: number,
     measureOnly: boolean = false,
+    maxHeight?: number,
   ): Promise<number> {
     if (!this.currentSlide) return 0;
 
@@ -374,6 +420,7 @@ export class PlateJSToPPTXConverter {
           width,
           32,
           measureOnly,
+          maxHeight,
         );
       case "h2":
         return this.addHeading(
@@ -383,6 +430,7 @@ export class PlateJSToPPTXConverter {
           width,
           28,
           measureOnly,
+          maxHeight,
         );
       case "h3":
         return this.addHeading(
@@ -392,6 +440,7 @@ export class PlateJSToPPTXConverter {
           width,
           24,
           measureOnly,
+          maxHeight,
         );
       case "h4":
         return this.addHeading(
@@ -401,6 +450,7 @@ export class PlateJSToPPTXConverter {
           width,
           20,
           measureOnly,
+          maxHeight,
         );
       case "h5":
         return this.addHeading(
@@ -410,6 +460,7 @@ export class PlateJSToPPTXConverter {
           width,
           18,
           measureOnly,
+          maxHeight,
         );
       case "h6":
         return this.addHeading(
@@ -419,6 +470,7 @@ export class PlateJSToPPTXConverter {
           width,
           16,
           measureOnly,
+          maxHeight,
         );
       case "p":
         return this.addParagraph(
@@ -427,6 +479,7 @@ export class PlateJSToPPTXConverter {
           y,
           width,
           measureOnly,
+          maxHeight,
         );
       case "bullets":
         return await this.addBullets(
@@ -435,6 +488,7 @@ export class PlateJSToPPTXConverter {
           y,
           width,
           measureOnly,
+          maxHeight,
         );
       case "column_group":
         return await this.addColumns(
@@ -443,6 +497,7 @@ export class PlateJSToPPTXConverter {
           y,
           width,
           measureOnly,
+          maxHeight,
         );
       case "pyramid":
         return await this.addPyramid(
@@ -459,6 +514,7 @@ export class PlateJSToPPTXConverter {
           y,
           width,
           measureOnly,
+          maxHeight,
         );
       case "timeline":
         return await this.addTimeline(
@@ -467,6 +523,7 @@ export class PlateJSToPPTXConverter {
           y,
           width,
           measureOnly,
+          maxHeight,
         );
       case "cycle":
         return await this.addCycle(
@@ -508,6 +565,7 @@ export class PlateJSToPPTXConverter {
           y,
           width,
           measureOnly,
+          maxHeight,
         );
       default:
         // Handle unknown elements as paragraphs
@@ -528,11 +586,14 @@ export class PlateJSToPPTXConverter {
     width: number,
     fontSize: number,
     measureOnly = false,
+    maxHeight?: number,
   ): number {
-    const height = Math.max(fontSize / 72 + 0.3, 0.8);
+    const runs = this.extractTextRuns(element);
+    const plain = runs.length > 0 ? runs.map(r => r.text).join(" ") : this.extractText(element);
+    let height = Math.max(this.estimateTextHeight(plain, width, fontSize), 0.8);
+    if (typeof maxHeight === "number") height = Math.min(height, Math.max(0.4, maxHeight));
     if (measureOnly) return height;
 
-    const runs = this.extractTextRuns(element);
     const textOptions = this.getTextOptions(element, fontSize);
     // Use accent color for headings to mimic gradient accent
     textOptions.color = this.THEME.accent;
@@ -549,7 +610,7 @@ export class PlateJSToPPTXConverter {
         h: height,
         ...textOptions,
         align: "left",
-        fit: "resize",
+        autoFit: true,
         wrap: true,
       });
     } else {
@@ -561,7 +622,7 @@ export class PlateJSToPPTXConverter {
         h: height,
         ...textOptions,
         align: "left",
-        fit: "resize",
+        autoFit: true,
         wrap: true,
       });
     }
@@ -575,13 +636,16 @@ export class PlateJSToPPTXConverter {
     y: number,
     width: number,
     measureOnly = false,
+    maxHeight?: number,
   ): number {
     const text = this.extractText(element);
     if (!text.trim()) return 0.2;
-    if (measureOnly) return 0.8;
+    const textOptions = this.getTextOptions(element, 14);
+    let paraHeight = Math.max(this.estimateTextHeight(text, width, textOptions.fontSize ?? 14), 0.6);
+    if (typeof maxHeight === "number") paraHeight = Math.min(paraHeight, Math.max(0.4, maxHeight));
+    if (measureOnly) return paraHeight;
 
     const runs = this.extractTextRuns(element);
-    const textOptions = this.getTextOptions(element, 14);
     // Decide paragraph/body text color: force dark text on light backgrounds
     const darkFallback = (this.THEME.secondary || "1F2937").replace("#", "");
     const paragraphColor = this.isLightColor(this.THEME.background)
@@ -598,10 +662,10 @@ export class PlateJSToPPTXConverter {
         x,
         y,
         w: width,
-        h: 0.8,
+        h: paraHeight,
         ...textOptions,
         align: "left",
-        fit: "resize",
+        autoFit: true,
         wrap: true,
       });
     } else {
@@ -609,15 +673,14 @@ export class PlateJSToPPTXConverter {
         x,
         y,
         w: width,
-        h: 0.8,
+        h: paraHeight,
         ...textOptions,
         align: "left",
-        fit: "resize",
+        autoFit: true,
         wrap: true,
       });
     }
-
-    return 0.8;
+    return paraHeight;
   }
 
   private async addBullets(
@@ -626,29 +689,29 @@ export class PlateJSToPPTXConverter {
     y: number,
     width: number,
     measureOnly = false,
+    maxHeight?: number,
   ): Promise<number> {
     const bullets = element.children.filter(
       (child) => (child as TBulletItemElement).type === "bullet",
-    );
-    const columns = Math.min(
-      3,
-      Math.max(1, bullets.length <= 2 ? bullets.length : 3),
-    );
-    const columnWidth = width / columns;
-    const gap = 0.2;
+    ) as TBulletItemElement[];
 
-    let maxHeight = 0;
+    const columns = Math.min(3, Math.max(1, bullets.length <= 2 ? bullets.length : 3));
+    const columnWidth = width / columns;
+    const gapY = 0.25;
+    const yBottom = typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
+    const colHeights = Array(columns).fill(y);
 
     for (let i = 0; i < bullets.length; i++) {
-      const bullet = bullets[i] as TBulletItemElement;
-      const columnIndex = i % columns;
-      const rowIndex = Math.floor(i / columns);
-
-      const bulletX = x + columnIndex * (columnWidth + gap);
-      const bulletY = y + rowIndex * 1.5;
+      const bullet = bullets[i]!;
+      const bulletText = this.extractText(bullet);
+      const textHeight = this.estimateTextHeight(bulletText, columnWidth - 0.6, 12);
+      // pick the column with the smallest current height (waterfall layout)
+      const columnIndex = colHeights.indexOf(Math.min(...colHeights));
+      const bulletX = x + columnIndex * columnWidth;
+      const bulletY = colHeights[columnIndex];
 
       if (!measureOnly) {
-        // Add bullet number box
+        // number box
         this.currentSlide?.addShape(this.pptx.ShapeType.rect, {
           x: bulletX,
           y: bulletY,
@@ -657,8 +720,6 @@ export class PlateJSToPPTXConverter {
           fill: { color: this.THEME.primary },
           line: { width: 0 },
         });
-
-        // Add bullet number
         this.currentSlide?.addText((i + 1).toString(), {
           x: bulletX,
           y: bulletY,
@@ -671,38 +732,30 @@ export class PlateJSToPPTXConverter {
           valign: "middle",
         });
 
-        // Add bullet content
+        // content
         const bulletRuns = this.extractTextRuns(bullet);
-        const bulletText = this.extractText(bullet);
-        if (bulletRuns.length > 0) {
-          this.currentSlide?.addText(bulletRuns, {
-            x: bulletX + 0.5,
-            y: bulletY,
-            w: columnWidth - 0.6,
-            h: 1.2,
-            fontSize: 12,
-            valign: "top",
-            align: "left",
-            color: this.THEME.text,
-          });
-        } else {
-          this.currentSlide?.addText(bulletText, {
-            x: bulletX + 0.5,
-            y: bulletY,
-            w: columnWidth - 0.6,
-            h: 1.2,
-            fontSize: 12,
-            valign: "top",
-            align: "left",
-            color: this.THEME.text,
-          });
-        }
+        const contentProps = {
+          x: bulletX + 0.5,
+          y: bulletY,
+          w: columnWidth - 0.6,
+          h: textHeight,
+          fontSize: 12,
+          valign: "top" as const,
+          align: "left" as const,
+          color: this.THEME.text,
+          autoFit: true,
+          wrap: true,
+        };
+        if (bulletRuns.length > 0) this.currentSlide?.addText(bulletRuns, contentProps);
+        else this.currentSlide?.addText(bulletText, contentProps);
       }
 
-      maxHeight = Math.max(maxHeight, (rowIndex + 1) * 1.5);
+      const nextY = bulletY + textHeight + gapY;
+      colHeights[columnIndex] = nextY;
+      if (nextY > yBottom) break;
     }
 
-    return maxHeight + 0.5;
+    return Math.max(...colHeights) - y + 0.2;
   }
 
   private async addColumns(
@@ -711,13 +764,15 @@ export class PlateJSToPPTXConverter {
     y: number,
     width: number,
     measureOnly = false,
+    maxHeight?: number,
   ): Promise<number> {
     const columns = element.children.filter(
       (child) => (child as TColumnElement).type === "column",
     );
     let currentX = x;
-    let maxHeight = 0;
+    let maxColHeight = 0;
 
+    const yBottom = typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
     for (const column of columns) {
       const columnElement = column as TColumnElement;
       const columnWidth =
@@ -727,22 +782,25 @@ export class PlateJSToPPTXConverter {
       let columnY = y;
 
       for (const child of columnElement.children) {
+        const remaining = Math.min(yBottom - columnY, maxHeight ?? Number.POSITIVE_INFINITY);
+        if (remaining <= 0) break;
         const childHeight = await this.processElement(
           child as PlateNode,
           currentX,
           columnY,
           columnWidth - 0.1,
           measureOnly,
+          remaining,
         );
         columnHeight += childHeight;
         columnY += childHeight;
       }
 
-      maxHeight = Math.max(maxHeight, columnHeight);
+      maxColHeight = Math.max(maxColHeight, columnHeight);
       currentX += columnWidth;
     }
 
-    return maxHeight;
+    return maxColHeight;
   }
 
   private async addVisualizationList(
@@ -796,6 +854,7 @@ export class PlateJSToPPTXConverter {
     y: number,
     width: number,
     measureOnly = false,
+    maxHeight?: number,
   ): Promise<number> {
     const items = element.children.filter((child) =>
       ["arrow-item", "visualization-item"].includes(
@@ -804,6 +863,7 @@ export class PlateJSToPPTXConverter {
     );
 
     let currentY = y;
+    const yBottom = typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i] as
@@ -817,11 +877,12 @@ export class PlateJSToPPTXConverter {
 
         // Add content
         const itemText = this.extractText(item);
+        const textH = this.estimateTextHeight(itemText, width - 2.3, 12);
         this.currentSlide?.addText(itemText, {
           x: x + 1.8,
           y: currentY,
           w: width - 2.3,
-          h: 0.6,
+          h: textH,
           fontSize: 12,
           valign: "middle",
           align: "left",
@@ -829,7 +890,9 @@ export class PlateJSToPPTXConverter {
         });
       }
 
-      currentY += 0.8;
+      const textH2 = this.estimateTextHeight(this.extractText(item), width - 2.3, 12);
+      currentY += textH2 + 0.2;
+      if (currentY > yBottom) break;
     }
 
     return currentY - y + 0.2;
@@ -913,6 +976,7 @@ export class PlateJSToPPTXConverter {
     y: number,
     width: number,
     measureOnly = false,
+    maxHeight?: number,
   ): Promise<number> {
     const items = element.children.filter((child) =>
       ["timeline-item", "visualization-item"].includes(
@@ -931,6 +995,7 @@ export class PlateJSToPPTXConverter {
         width,
         sidedness,
         measureOnly,
+        maxHeight,
       );
     } else {
       return await this.addHorizontalTimeline(
@@ -940,6 +1005,7 @@ export class PlateJSToPPTXConverter {
         width,
         sidedness,
         measureOnly,
+        maxHeight,
       );
     }
   }
@@ -951,7 +1017,9 @@ export class PlateJSToPPTXConverter {
     width: number,
     sidedness: string,
     measureOnly = false,
+    maxHeight?: number,
   ): Promise<number> {
+    const yBottom = typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
     if (sidedness === "single") {
       const lineX = x + 0.3;
       let currentY = y;
@@ -993,31 +1061,33 @@ export class PlateJSToPPTXConverter {
             valign: "middle",
           });
 
-          // Add content box
+          // Add content text (dynamic height)
+          const itemText = this.extractText(item);
+          const textH = this.estimateTextHeight(itemText, width - 1.4, 11);
           this.currentSlide?.addShape(this.pptx.ShapeType.rect, {
             x: x + 0.8,
             y: currentY - 0.2,
             w: width - 1.2,
-            h: 0.8,
+            h: textH + 0.2,
             fill: { color: this.THEME.background },
             line: { width: 4, color: this.THEME.primary },
           });
-
-          // Add content text
-          const itemText = this.extractText(item);
           this.currentSlide?.addText(itemText, {
             x: x + 0.9,
             y: currentY - 0.1,
             w: width - 1.4,
-            h: 0.6,
+            h: textH,
             fontSize: 11,
             valign: "middle",
             align: "left",
             color: this.THEME.text,
+            autoFit: true,
+            wrap: true,
           });
         }
 
-        currentY += 1.2;
+        currentY += this.estimateTextHeight(this.extractText(item), width - 1.4, 11) + 0.6;
+        if (currentY > yBottom) break;
       }
 
       return currentY - y + 0.3;
@@ -1082,6 +1152,7 @@ export class PlateJSToPPTXConverter {
         }
 
         currentY += 1.2;
+        if (currentY > yBottom) break;
       }
 
       return currentY - y + 0.3;
@@ -1095,7 +1166,9 @@ export class PlateJSToPPTXConverter {
     width: number,
     sidedness: string,
     measureOnly = false,
+    maxHeight?: number,
   ): Promise<number> {
+    const yBottom = typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
     if (sidedness === "single") {
       const lineY = y + 0.8;
       const itemWidth = width / items.length;
@@ -1127,31 +1200,34 @@ export class PlateJSToPPTXConverter {
           });
         }
 
+        const itemText = this.extractText(item);
+        const textH = this.estimateTextHeight(itemText, itemWidth * 0.7, 10);
         if (!measureOnly) {
-          // Add content box below
           this.currentSlide?.addShape(this.pptx.ShapeType.rect, {
-            x: itemX - itemWidth * 0.4,
-            y: lineY + 0.5,
-            w: itemWidth * 0.8,
-            h: 0.6,
-            fill: { color: this.THEME.background },
-            line: { width: 1, color: this.THEME.primary },
+          x: itemX - itemWidth * 0.4,
+          y: lineY + 0.5,
+          w: itemWidth * 0.8,
+          h: textH + 0.2,
+          fill: { color: this.THEME.background },
+          line: { width: 1, color: this.THEME.primary },
           });
         }
 
         // Add content text
-        const itemText = this.extractText(item);
         if (!measureOnly) {
           this.currentSlide?.addText(itemText, {
             x: itemX - itemWidth * 0.35,
             y: lineY + 0.55,
             w: itemWidth * 0.7,
-            h: 0.5,
+            h: textH,
             fontSize: 10,
             align: "left",
             valign: "middle",
+            autoFit: true,
+            wrap: true,
           });
         }
+        if (lineY + 0.55 + textH > yBottom) break;
       }
 
       return 2.5;
@@ -1202,32 +1278,36 @@ export class PlateJSToPPTXConverter {
         });
 
         // Add content box above/below alternating
-        const boxY = isAbove ? lineY - 1 : lineY + 0.5;
+        const itemText = this.extractText(item);
+        const textH = this.estimateTextHeight(itemText, itemWidth * 0.7, 10);
+        const boxY = isAbove ? lineY - (textH + 0.6) : lineY + 0.5;
 
         if (!measureOnly) {
           this.currentSlide?.addShape(this.pptx.ShapeType.rect, {
             x: itemX - itemWidth * 0.4,
             y: boxY,
             w: itemWidth * 0.8,
-            h: 0.6,
+            h: textH + 0.2,
             fill: { color: this.THEME.background },
             line: { width: 1, color: this.THEME.primary },
           });
         }
 
         // Add content text
-        const itemText = this.extractText(item);
         if (!measureOnly) {
           this.currentSlide?.addText(itemText, {
             x: itemX - itemWidth * 0.35,
             y: boxY + 0.05,
             w: itemWidth * 0.7,
-            h: 0.5,
+            h: textH,
             fontSize: 10,
             align: "left",
             valign: "middle",
+            autoFit: true,
+            wrap: true,
           });
         }
+        if ((isAbove ? boxY : boxY + textH) > yBottom) break;
       }
 
       return 3.5;
@@ -1240,6 +1320,7 @@ export class PlateJSToPPTXConverter {
     y: number,
     width: number,
     measureOnly = false,
+    maxHeight?: number,
   ): Promise<number> {
     const items = element.children.filter((child) =>
       ["cycle-item", "visualization-item"].includes(
@@ -1250,6 +1331,7 @@ export class PlateJSToPPTXConverter {
     const centerX = x + width / 2;
     const centerY = y + 1.5;
     const radius = Math.min(width / 3, 1.2);
+    const yBottom = typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
 
     if (!measureOnly) {
       // Add center cycle wheel SVG
@@ -1264,6 +1346,7 @@ export class PlateJSToPPTXConverter {
     }
 
     // Position items around circle
+    let maxBottom = centerY + radius + 0.4; // include wheel extent
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       const angle = (2 * Math.PI * i) / items.length - Math.PI / 2;
@@ -1299,20 +1382,28 @@ export class PlateJSToPPTXConverter {
         const textRadius = radius + 0.5;
         const textX = centerX + textRadius * Math.cos(angle) - 0.8;
         const textY = centerY + textRadius * Math.sin(angle) - 0.2;
-
-        this.currentSlide?.addText(itemText, {
-          x: Math.max(x, Math.min(x + width - 1.6, textX)),
-          y: Math.max(y, textY),
-          w: 1.6,
-          h: 0.4,
-          fontSize: 10,
-          align: "center",
-          valign: "middle",
-        });
+        const textW = 1.6;
+        const textH = this.estimateTextHeight(itemText, textW, 10);
+        const clampedX = Math.max(x, Math.min(x + width - textW, textX));
+        const clampedY = Math.max(y, textY);
+        if (clampedY + textH <= yBottom) {
+          this.currentSlide?.addText(itemText, {
+            x: clampedX,
+            y: clampedY,
+            w: textW,
+            h: textH,
+            fontSize: 10,
+            align: "center",
+            valign: "middle",
+            autoFit: true,
+            wrap: true,
+          });
+        }
+        maxBottom = Math.max(maxBottom, clampedY + textH);
       }
     }
 
-    return 3.5;
+    return Math.max(maxBottom - y + 0.3, 3.0);
   }
 
   private async addStaircase(
@@ -1439,9 +1530,11 @@ export class PlateJSToPPTXConverter {
     y: number,
     width: number,
     measureOnly = false,
+    maxHeight?: number,
   ): Promise<number> {
     const imageUrl: string | undefined = (element as Partial<ImageElement>).url;
-    const height = 2; // Default image height
+    let height = 2; // Default image height
+    if (typeof maxHeight === "number") height = Math.min(height, Math.max(0.5, maxHeight));
 
     if (!measureOnly && imageUrl && this.currentSlide) {
       try {

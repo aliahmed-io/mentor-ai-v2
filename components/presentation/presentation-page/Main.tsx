@@ -19,6 +19,7 @@ import debounce from "lodash.debounce";
 import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { LoadingState } from "./Loading";
 import { PresentationLayout } from "./PresentationLayout";
 import { PresentationSlidesView } from "./PresentationSlidesView";
@@ -52,11 +53,10 @@ export default function PresentationPage() {
   // Track the theme value as it exists in the database to avoid redundant saves on hydration
   const dbThemeRef = useRef<string | null>(null);
 
+  // Always allow fetch on the [id] page; generation happens on the generate route
   useEffect(() => {
-    if (isGeneratingPresentation) {
-      setSetShouldFetchData(false);
-    }
-  }, [isGeneratingPresentation]);
+    setSetShouldFetchData(true);
+  }, []);
 
   useEffect(() => {
     console.log("Current Slide Index", currentSlideIndex);
@@ -72,7 +72,7 @@ export default function PresentationPage() {
       }
       return result.presentation;
     },
-    enabled: !!id && !isGeneratingPresentation && shouldFetchData,
+    enabled: !!id && shouldFetchData,
   });
 
   // Create a debounced function to update the theme in the database
@@ -95,8 +95,8 @@ export default function PresentationPage() {
 
   // Update presentation state when data is fetched
   useEffect(() => {
-    // Skip if we're coming from the generation page
-    if (isGeneratingPresentation || !shouldFetchData) {
+    // Skip if fetch is disabled
+    if (!shouldFetchData) {
       return;
     }
 
@@ -115,8 +115,13 @@ export default function PresentationPage() {
         config: Record<string, unknown>;
       };
 
-      // Set slides
-      setSlides(presentationContent?.slides ?? []);
+      // Only hydrate slides from DB if non-empty to avoid wiping in-memory slides
+      const dbSlides = Array.isArray(presentationContent?.slides)
+        ? presentationContent?.slides
+        : [];
+      if (dbSlides.length > 0) {
+        setSlides(dbSlides);
+      }
 
       // If there's no thumbnail yet, derive from first available rootImage or first img element
       const currentThumb = presentationData.thumbnailUrl;
@@ -223,7 +228,6 @@ export default function PresentationPage() {
     }
   }, [
     presentationData,
-    isGeneratingPresentation,
     shouldFetchData,
     setCurrentPresentation,
     setPresentationInput,
@@ -234,6 +238,20 @@ export default function PresentationPage() {
     setPresentationStyle,
     setLanguage,
   ]);
+
+  // Fallback: if after a grace period there are still no slides, offer retry
+  const [showEmptyNotice, setShowEmptyNotice] = useState(false);
+  const slidesCount = usePresentationState((s) => s.slides.length);
+  useEffect(() => {
+    if (!isLoading) {
+      const t = setTimeout(() => {
+        if (usePresentationState.getState().slides.length === 0) {
+          setShowEmptyNotice(true);
+        }
+      }, 5000);
+      return () => clearTimeout(t);
+    }
+  }, [isLoading]);
 
   // Update theme when it changes (but not on initial hydration)
   useEffect(() => {
@@ -289,6 +307,24 @@ export default function PresentationPage() {
     >
       <div className="mx-auto max-w-[90%] space-y-8 pt-16">
         <div className="space-y-8">
+          {showEmptyNotice && slidesCount === 0 && (
+            <div className="rounded-md border bg-muted/30 p-4 text-sm">
+              <div className="mb-2 font-medium">No slides loaded yet</div>
+              <div className="mb-3 text-muted-foreground">
+                If generation finished but slides didn’t load, retry generating to refresh the content.
+              </div>
+              <Button
+                size="sm"
+                onClick={() =>
+                  usePresentationState
+                    .getState()
+                    .setShouldStartPresentationGeneration(true)
+                }
+              >
+                Retry generation
+              </Button>
+            </div>
+          )}
           <PresentationSlidesView
             isGeneratingPresentation={isGeneratingPresentation}
           />

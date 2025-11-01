@@ -3,7 +3,7 @@
 import { convertPlateJSToPPTX } from "@/components/presentation/utils/exportToPPT";
 import { type PlateSlide } from "@/components/presentation/utils/parser";
 import { auth } from "@/server/auth";
-import { db } from "@/server/db";
+import { db, withDbRetry } from "@/server/db";
 
 export async function exportPresentation(
   presentationId: string,
@@ -62,10 +62,10 @@ async function fetchPresentationData(presentationId: string, userId: string) {
   // For now returning a placeholder
 
   // In a real implementation, you would fetch from your database
-  const presentation = await db.baseDocument.findUnique({
+  const presentation = await withDbRetry(() => db.baseDocument.findUnique({
     where: { id: presentationId },
     include: { presentation: true },
-  });
+  }));
   if (!presentation) return null as unknown as undefined;
   // Optional: enforce access control if needed
   if (presentation.userId && presentation.userId !== userId && !presentation.isPublic) {

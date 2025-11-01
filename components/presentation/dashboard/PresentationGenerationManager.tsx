@@ -7,6 +7,7 @@ import { extractThinking } from "@/lib/thinking-extractor";
 import { usePresentationState } from "@/states/presentation-state";
 import { useChat, useCompletion } from "@ai-sdk/react";
 import { useEffect, useRef } from "react";
+import debounce from "lodash.debounce";
 import { toast } from "sonner";
 import { SlideParser } from "../utils/parser";
 
@@ -426,9 +427,29 @@ export function PresentationGenerationManager() {
   const { completion: presentationCompletion, complete: generatePresentation } =
     useCompletion({
       api: "/api/presentation/generate",
-      onFinish: (_prompt, _completion) => {
+      onFinish: async (_prompt, _completion) => {
         setIsGeneratingPresentation(false);
         setShouldStartPresentationGeneration(false);
+
+        // Persist final slides/content to DB to ensure /presentation/[id] hydrates correctly
+        try {
+          const state = usePresentationState.getState();
+          if (state.currentPresentationId && state.slides.length > 0) {
+            await updatePresentation({
+              id: state.currentPresentationId,
+              content: { slides: state.slides, config: state.config },
+              title: state.currentPresentationTitle ?? undefined,
+              outline: state.outline,
+              imageSource: state.imageSource,
+              presentationStyle: state.presentationStyle,
+              language: state.language,
+              thumbnailUrl: state.thumbnailUrl,
+            });
+          }
+        } catch (e) {
+          // Avoid interrupting UX if persistence fails; retries below will try again
+          console.error("Persist final slides failed:", e);
+        }
       },
       onError: (error) => {
         toast.error("Failed to generate presentation: " + error.message);
@@ -489,6 +510,29 @@ export function PresentationGenerationManager() {
       });
     }
   }, [shouldStartPresentationGeneration]);
+
+  // Debounced incremental persistence while streaming
+  const debouncedStreamSaveRef = useRef(
+    debounce(async () => {
+      try {
+        const s = usePresentationState.getState();
+        if (!s.currentPresentationId || s.slides.length === 0) return;
+        await updatePresentation({
+          id: s.currentPresentationId,
+          content: { slides: s.slides, config: s.config },
+          title: s.currentPresentationTitle ?? undefined,
+        });
+      } catch (e) {
+        // swallow; withDbRetry inside action and next run will try again
+      }
+    }, 1200),
+  );
+
+  useEffect(() => {
+    if (isGeneratingPresentation && slides.length > 0 && currentPresentationId) {
+      debouncedStreamSaveRef.current();
+    }
+  }, [slides, isGeneratingPresentation, currentPresentationId]);
 
   // Listen for manual root image generation changes (when user manually triggers image generation)
   useEffect(() => {

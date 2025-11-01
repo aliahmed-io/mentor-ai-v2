@@ -1,5 +1,4 @@
 "use client";
-import SideBarDropdown from "@/components/auth/Dropdown";
 import { Brain } from "@/components/ui/icons";
 import { usePresentationState } from "@/states/presentation-state";
 import { ChevronRight } from "lucide-react";
@@ -9,7 +8,9 @@ import { useEffect, useState } from "react";
 
 // Import our new components
 import AllweoneText from "@/components/globals/allweone-logo";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { ArrowLeft } from "lucide-react";
 import * as motion from "framer-motion/client";
 import { ExportButton } from "./buttons/ExportButton";
 import { PresentButton } from "./buttons/PresentButton";
@@ -71,5 +72,36 @@ export default function PresentationHeader({ title }: PresentationHeaderProps) {
       </header>
     );
 
+  // Default header for presentation view ([id])
+  if (isPresentationPage) {
+    return (
+      <header className="flex h-12 w-full items-center justify-between border-b border-accent bg-background px-4">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/presentation"
+            className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+          >
+            <ArrowLeft className="mr-1 h-4 w-4" /> Back
+          </Link>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Link href="/presentation" className="hover:text-foreground">
+              <Brain className="h-4 w-4" />
+            </Link>
+            <ChevronRight className="h-4 w-4" />
+            <span className="font-medium text-foreground">{presentationTitle}</span>
+          </div>
+        </div>
 
+        {!isPresenting && (
+          <div className="flex items-center gap-2">
+            <SaveStatus />
+            <ExportButton presentationId={currentPresentationId ?? ""} />
+            <PresentButton />
+          </div>
+        )}
+      </header>
+    );
+  }
+
+  return null;
 }

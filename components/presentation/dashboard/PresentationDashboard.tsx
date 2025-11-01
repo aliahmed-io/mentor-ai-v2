@@ -9,7 +9,6 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import { PresentationControls } from "./PresentationControls";
 import { PresentationExamples } from "./PresentationExamples";
-import { PresentationHeader } from "./PresentationHeader";
 import { PresentationInput } from "./PresentationInput";
 import { PresentationsSidebar } from "./PresentationsSidebar";
 import { RecentPresentations } from "./RecentPresentations";
