@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
 
-## Getting Started
+# Mentor‑AI
+Hackathon project by Ali Ahmed
 
-First, run the development server:
+</div>
 
+Mentor‑AI is a unified study assistant that helps you learn faster:
+
+- Upload documents (PDF, PPTX, DOCX, TXT, Images with OCR) and chat with AI about them
+- Auto‑generate slide decks and present them in the browser
+- Create quizzes from your own materials (now supports PDF/PPTX extraction)
+- Keep notes/exports of conversations and outlines
+- Handy extras: flashcards, calendar, pomodoro
+
+This repository is solely authored for a hackathon submission by Ali Ahmed.
+
+## Features
+
+- Chatbot with document context (OCR included) and Markdown responses
+- Save one reply or the whole conversation as a document
+- Presentation generator with themeable slides and export
+- Quiz generator from topic or uploaded PDF/PPTX/DOCX/TXT
+- Clean, dark/light theme consistent across the app
+
+## Tech Stack
+
+- Framework: Next.js 15 (App Router), React 19, TypeScript
+- UI: Tailwind CSS, Radix UI, Framer Motion
+- State/Data: Zustand, TanStack Query, Prisma + PostgreSQL
+- AI: AI SDK (OpenAI gpt‑4o‑mini)
+- Auth: NextAuth.js
+
+## Quick Start
+
+1) Install dependencies
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2) Configure environment
+Create `.env` with the following variables:
+```env
+DATABASE_URL=postgres://user:pass@host:5432/db
+OPENAI_API_KEY=your_openai_key
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=change-me
+GOOGLE_CLIENT_ID=optional
+GOOGLE_CLIENT_SECRET=optional
+UNSPLASH_ACCESS_KEY=optional
+TAVILY_API_KEY=optional
+TOGETHER_AI_API_KEY=optional
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3) Generate Prisma client and push schema
+```bash
+pnpm db:push
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4) Run the app
+```bash
+pnpm dev
+```
+Open http://localhost:3000
 
-## Learn More
+## Commands
+- `pnpm dev` – start development server
+- `pnpm build` – production build
+- `pnpm start` – run production server
+- `pnpm db:push` – push Prisma schema
+- `pnpm lint` – lint
 
-To learn more about Next.js, take a look at the following resources:
+## Notes for Judges
+- PDF/PPTX uploads are extracted on server and used for quizzes and chat context
+- “Save conversation” creates a document you can revisit
+- Presentation generator uses GPT‑4o‑mini and themed UI to match the rest of the app
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+All rights reserved © Ali Ahmed. If you need a specific license applied, please advise.

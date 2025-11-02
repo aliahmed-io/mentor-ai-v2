@@ -1,8 +1,9 @@
 {
-  "name": "presentation",
+  "name": "mentor-ai",
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "author": "Ali Ahmed",
   "scripts": {
     "build": "next build --turbo",
     "db:push": "prisma db push",
