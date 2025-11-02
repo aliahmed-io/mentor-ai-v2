@@ -31,6 +31,20 @@ This repository is solely authored for a hackathon submission by Ali Ahmed.
 - AI: AI SDK (OpenAI gpt‑4o‑mini)
 - Auth: NextAuth.js
 
+### Key Libraries (by feature)
+- AI / Chat:
+  - `ai`, `@ai-sdk/openai`
+- Presentations:
+  - `platejs` (editor), `pptxgenjs` (export), `framer-motion`
+- Quizzes:
+  - `pdf-parse` (PDF text), `mammoth` (DOCX text), server extraction for PPTX/PDF
+- UI / Accessibility:
+  - `@radix-ui/*`, `lucide-react`, `tailwindcss`, `tailwind-merge`
+- Data / State / Server:
+  - `@prisma/client`, `zustand`, `@tanstack/react-query`, `next-auth`
+- Misc:
+  - `html2canvas-pro`, `date-fns`, `lodash.debounce`
+
 ## Quick Start
 
 1) Install dependencies
@@ -77,3 +91,21 @@ Open http://localhost:3000
 
 ## License
 All rights reserved © Ali Ahmed. If you need a specific license applied, please advise.
+
+---
+
+## Environment & API Keys (details)
+
+Required
+- `DATABASE_URL`: PostgreSQL connection string for Prisma
+- `OPENAI_API_KEY`: for AI responses (GPT‑4o‑mini via AI SDK)
+- `NEXTAUTH_URL`, `NEXTAUTH_SECRET`: required for NextAuth
+
+Optional (feature‑dependent)
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`: enable Google sign‑in (NextAuth)
+- `UNSPLASH_ACCESS_KEY`: stock images for presentations
+- `TAVILY_API_KEY`: web search during outline generation
+- `TOGETHER_AI_API_KEY`: reserved for alternate providers
+
+Security
+- Keep keys in `.env` (never commit) and rotate as needed.
