@@ -17,6 +17,7 @@ export default function PomodoroPage() {
   const [running, setRunning] = useState(false);
   const [label, setLabel] = useState("Focus");
   const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [endAt, setEndAt] = useState<number | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
 
@@ -33,9 +34,39 @@ export default function PomodoroPage() {
         if (typeof s.label === 'string') setLabel(s.label);
       }
     } catch {}
-    // initialize timers based on (possibly) loaded settings
-    setSecondsLeft(focusMin * 60);
-    setPhaseTotal(focusMin * 60);
+
+    // Restore running session if present
+    try {
+      const rawState = localStorage.getItem("pomodoro_state");
+      if (rawState) {
+        const st = JSON.parse(rawState);
+        if (st && typeof st === 'object') {
+          if (st.phase === 'focus' || st.phase === 'break') setPhase(st.phase);
+          if (typeof st.cycle === 'number') setCycle(st.cycle);
+          if (typeof st.phaseTotal === 'number') setPhaseTotal(st.phaseTotal);
+          if (typeof st.startedAt === 'number') setStartedAt(st.startedAt);
+          if (typeof st.endAt === 'number') setEndAt(st.endAt);
+          if (typeof st.running === 'boolean') setRunning(st.running);
+          if (typeof st.label === 'string') setLabel(st.label);
+          if (st.running && st.endAt) {
+            const remaining = Math.max(0, Math.floor((st.endAt - Date.now()) / 1000));
+            setSecondsLeft(remaining);
+          } else {
+            const total = (st.phase === 'focus' ? st.focusMin : (st.cycle % st.longEvery === 0 ? st.longBreakMin : st.breakMin)) * 60;
+            setSecondsLeft(total);
+            setPhaseTotal(total);
+          }
+        }
+      } else {
+        // initialize timers
+        setSecondsLeft(focusMin * 60);
+        setPhaseTotal(focusMin * 60);
+      }
+    } catch {
+      setSecondsLeft(focusMin * 60);
+      setPhaseTotal(focusMin * 60);
+    }
+
     if (typeof window !== 'undefined' && "Notification" in window) {
       try { Notification.requestPermission().catch(() => {}); } catch {}
     }
@@ -50,8 +81,9 @@ export default function PomodoroPage() {
   useEffect(() => {
     if (!running) return;
     timerRef.current = setInterval(() => {
-      setSecondsLeft((s) => {
-        if (s <= 1) {
+      setSecondsLeft(() => {
+        const remaining = endAt ? Math.max(0, Math.floor((endAt - Date.now()) / 1000)) : 0;
+        if (remaining <= 0) {
           if (phase === "focus") {
             persistSession();
             const isLong = cycle % longEvery === 0;
@@ -59,6 +91,8 @@ export default function PomodoroPage() {
             setLabel("Break");
             const nextTotal = (isLong ? longBreakMin : breakMin) * 60;
             setPhaseTotal(nextTotal);
+            setStartedAt(Date.now());
+            setEndAt(Date.now() + nextTotal * 1000);
             notify("Break time", isLong ? `Long break ${longBreakMin} min` : `Break ${breakMin} min`);
             beep();
             return nextTotal;
@@ -75,17 +109,19 @@ export default function PomodoroPage() {
             setLabel("Focus");
             const nextTotal = focusMin * 60;
             setPhaseTotal(nextTotal);
+            setStartedAt(Date.now());
+            setEndAt(Date.now() + nextTotal * 1000);
             notify("Focus", `Cycle ${nextCycle}/${totalCycles}`);
             beep();
             return nextTotal;
           }
         }
-        return s - 1;
+        return remaining;
       });
     }, 1000);
     if (!startedAt) setStartedAt(Date.now());
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [running, phase, cycle, focusMin, breakMin, longBreakMin, longEvery, totalCycles, startedAt]);
+  }, [running, phase, cycle, focusMin, breakMin, longBreakMin, longEvery, totalCycles, startedAt, endAt]);
 
   useEffect(() => {
     if (!running) {
@@ -95,7 +131,12 @@ export default function PomodoroPage() {
     }
   }, [focusMin, breakMin, longBreakMin, longEvery, phase, running, cycle]);
 
-  const start = () => setRunning(true);
+  const start = () => {
+    const total = secondsLeft > 0 ? secondsLeft : (phase === 'focus' ? focusMin * 60 : (cycle % longEvery === 0 ? longBreakMin : breakMin) * 60);
+    setStartedAt(Date.now());
+    setEndAt(Date.now() + total * 1000);
+    setRunning(true);
+  };
   const pause = () => setRunning(false);
   const reset = () => {
     setRunning(false);
@@ -106,6 +147,7 @@ export default function PomodoroPage() {
     setSecondsLeft(total);
     setPhaseTotal(total);
     setStartedAt(null);
+    setEndAt(null);
   };
 
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
@@ -118,6 +160,13 @@ export default function PomodoroPage() {
       await fetch('/api/pomodoro', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ label: "Focus", duration_min: duration, started_at: started }) });
     } catch {}
   };
+  // Persist runtime state frequently so it survives refresh/tab changes
+  useEffect(() => {
+    const st = { running, phase, cycle, phaseTotal, startedAt, endAt, label, focusMin, breakMin, longBreakMin, longEvery, totalCycles };
+    try { localStorage.setItem('pomodoro_state', JSON.stringify(st)); } catch {}
+  }, [running, phase, cycle, phaseTotal, startedAt, endAt, label, focusMin, breakMin, longBreakMin, longEvery, totalCycles]);
+
+  const strokeColor = phase === 'focus' ? 'stroke-blue-600' : 'stroke-emerald-500';
 
   const notify = (title: string, body: string) => {
     try {
@@ -165,7 +214,7 @@ export default function PomodoroPage() {
               {(() => {
                 const r = 54; const C = 2 * Math.PI * r; const p = Math.max(0, Math.min(1, secondsLeft / Math.max(1, phaseTotal)));
                 const dash = C * p; const gap = C - dash;
-                return <circle cx="60" cy="60" r={r} strokeDasharray={`${dash} ${gap}`} className="stroke-blue-600 transition-[stroke-dasharray] duration-200" strokeWidth="12" strokeLinecap="round" fill="none" transform="rotate(-90 60 60)" />;
+                return <circle cx="60" cy="60" r={r} strokeDasharray={`${dash} ${gap}`} className={`${strokeColor} transition-[stroke-dasharray] duration-200`} strokeWidth="12" strokeLinecap="round" fill="none" transform="rotate(-90 60 60)" />;
               })()}
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">

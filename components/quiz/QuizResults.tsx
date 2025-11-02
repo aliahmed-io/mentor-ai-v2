@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Trophy, CheckCircle, XCircle, AlertCircle, RotateCcw, BookOpen, TrendingUp } from 'lucide-react';
+import { Trophy, CheckCircle, XCircle, AlertCircle, RotateCcw, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -41,14 +41,7 @@ export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizRes
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="text-6xl mb-4"
-          >
-            {getGradeEmoji(result.percentage)}
-          </motion.div>
+       
           <h1 className="text-4xl font-bold mb-2">Quiz Complete!</h1>
           <p className="text-xl text-muted-foreground">Here&apos;s how you performed</p>
         </motion.div>
@@ -197,58 +190,7 @@ export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizRes
           </motion.div>
         </div>
 
-        {/* Recommendations */}
-        {(result.weakTopics.length > 0 || result.recommendations.length > 0) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="mt-8"
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-6 h-6" />
-                  Recommendations
-                </CardTitle>
-                <CardDescription>
-                  Personalized suggestions to improve your performance
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {result.weakTopics.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold text-orange-600 mb-2">Areas for Improvement:</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {result.weakTopics.map((topic, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm"
-                        >
-                          {topic}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {result.recommendations.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold text-blue-600 mb-2">Study Tips:</h4>
-                    <ul className="space-y-2">
-                      {result.recommendations.map((recommendation, index) => (
-                        <li key={index} className="flex items-start gap-2 text-gray-700">
-                          <span className="text-blue-500 mt-1">•</span>
-                          {recommendation}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
+        {/* Recommendations removed by request */}
       </div>
     </div>
   );

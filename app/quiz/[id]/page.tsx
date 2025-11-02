@@ -1,14 +1,15 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { ArrowLeft } from 'lucide-react'
 import type { Question, QuizResult } from '@/types/quiz'
 import QuizQuestion from '@/components/quiz/QuizQuestion'
 import QuizResults from '@/components/quiz/QuizResults'
 
-export default function QuizStudyPage({ params }: { params: { id: string } }) {
-  const { id } = params
+export default function QuizStudyPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = React.use(params)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [questions, setQuestions] = useState<Question[]>([])
@@ -101,7 +102,7 @@ export default function QuizStudyPage({ params }: { params: { id: string } }) {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm"><Link href="/quiz"><ArrowLeft className="h-4 w-4" /></Link></Button>
+          <Link href="/quiz" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}><ArrowLeft className="h-4 w-4" /></Link>
           <h1 className="text-xl font-semibold">Quiz</h1>
         </div>
         <p className="text-sm text-muted-foreground">{error || 'No quiz found.'}</p>
@@ -113,7 +114,7 @@ export default function QuizStudyPage({ params }: { params: { id: string } }) {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm"><Link href="/quiz"><ArrowLeft className="h-4 w-4" /></Link></Button>
+          <Link href="/quiz" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}><ArrowLeft className="h-4 w-4" /></Link>
           <h1 className="text-xl font-semibold">Quiz Results</h1>
         </div>
         <QuizResults result={result} onRetakeQuiz={() => { setResult(null); setIdx(0); setAnswers(new Map()) }} onNewQuiz={() => { window.location.href = '/quiz' }} />
@@ -125,7 +126,7 @@ export default function QuizStudyPage({ params }: { params: { id: string } }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Button asChild variant="ghost" size="sm"><Link href="/quiz"><ArrowLeft className="h-4 w-4" /></Link></Button>
+        <Link href="/quiz" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}><ArrowLeft className="h-4 w-4" /></Link>
         <h1 className="text-xl font-semibold">Study Quiz</h1>
       </div>
       <QuizQuestion

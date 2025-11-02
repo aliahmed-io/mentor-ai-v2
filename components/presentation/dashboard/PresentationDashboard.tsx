@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { PresentationControls } from "./PresentationControls";
-import { PresentationExamples } from "./PresentationExamples";
 import { PresentationInput } from "./PresentationInput";
 import { PresentationsSidebar } from "./PresentationsSidebar";
 import { RecentPresentations } from "./RecentPresentations";
@@ -72,7 +71,7 @@ export function PresentationDashboard({
 
   return (
     <div className="notebook-section relative h-full w-full">
-      <PresentationsSidebar side={sidebarSide} />
+      <PresentationsSidebar side={sidebarSide ?? "right"} />
       <div className="mx-auto max-w-4xl space-y-12 px-6 py-12">
 
 
@@ -94,8 +93,6 @@ export function PresentationDashboard({
             </div>
           </div>
         </div>
-
-        <PresentationExamples />
         <RecentPresentations />
       </div>
     </div>

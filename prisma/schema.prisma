@@ -162,6 +162,7 @@ model FlashcardSet {
   count     Int
   createdAt DateTime        @default(now())
   cards     FlashcardCard[]
+  thumbnailUrl String?
 
   @@index([userId, createdAt])
 }
@@ -186,6 +187,7 @@ model QuizSet {
   questionCount Int
   questions     Json
   createdAt     DateTime @default(now())
+  thumbnailUrl  String?
 
   // ---- Added opposite relation for QuizScore.quizSet ----
   scores QuizScore[]
@@ -226,6 +228,7 @@ model ChatDocument {
   title     String
   content   String
   createdAt DateTime     @default(now())
+  thumbnailUrl String?
 
   @@index([userId, createdAt])
 }

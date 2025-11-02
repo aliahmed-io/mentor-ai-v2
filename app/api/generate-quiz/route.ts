@@ -3,6 +3,7 @@ import { GoogleGenAI } from '@google/genai';
 import { QuizSetup } from '@/types/quiz';
 import { auth } from '@/server/auth';
 import { db } from '@/server/db';
+import { getImageFromUnsplash } from '@/app/_actions/image/unsplash';
 
 // JSON schema for quiz questions
 const quizQuestionsSchema = {
@@ -90,13 +91,20 @@ FORMAT: Return a JSON object with a "questions" array containing the questions i
     // Persist quiz set (non-breaking: still return questions array)
     try {
       const session = await auth();
-      await db.quizSet.create({
+      let thumb: string | undefined;
+      try {
+        const unsplash = await getImageFromUnsplash(setup.topic);
+        if (unsplash.success && unsplash.imageUrl) thumb = unsplash.imageUrl;
+      } catch {}
+      const anyDb = db as any;
+      await anyDb.quizSet.create({
         data: {
           userId: session?.user?.id ?? null,
           topic: setup.topic,
           difficulty: setup.difficulty,
           questionCount: setup.questionCount,
           questions: result.questions,
+          thumbnailUrl: thumb ?? null,
         },
       });
     } catch (e) {

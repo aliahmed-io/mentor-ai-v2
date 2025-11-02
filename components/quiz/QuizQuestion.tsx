@@ -3,7 +3,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ArrowLeft, ArrowRight, RotateCcw, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Question } from '@/types/quiz';
 
@@ -60,7 +59,7 @@ export default function QuizQuestion({
           <Progress value={progress} className="h-2" />
         </motion.div>
 
-        {/* Question Card */}
+        {/* Question Content */}
         <AnimatePresence mode="wait">
           <motion.div
             key={question.id}
@@ -69,14 +68,12 @@ export default function QuizQuestion({
             exit={{ opacity: 0, x: -50 }}
             transition={{ duration: 0.3 }}
           >
-            <Card>
-              <CardHeader className="pb-6">
-                <CardTitle className="text-2xl font-bold text-gray-800 leading-relaxed">
+            <div className="space-y-4">
+              <div className="pb-2">
+                <div className="text-2xl font-bold leading-relaxed text-foreground">
                   {question.question}
-                </CardTitle>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
+                </div>
+              </div>
                 {/* Answer Options */}
                 <div className="space-y-3">
                   {question.options.map((option, index) => (
@@ -85,18 +82,18 @@ export default function QuizQuestion({
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => onAnswerSelect(index)}
-                      className={`w-full rounded-xl border-2 p-4 text-left transition-all duration-200 ${
+                      className={`w-full rounded-md border p-4 text-left transition ${
                         selectedAnswer === index
                           ? 'border-primary bg-muted shadow-sm'
-                          : 'border-muted hover:bg-muted/50'
+                          : 'border-border hover:bg-accent hover:text-accent-foreground'
                       }`}
                     >
                       <div className="flex items-center gap-4">
                         <div
-                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                          className={`w-6 h-6 rounded-full border flex items-center justify-center ${
                             selectedAnswer === index
                               ? 'border-primary bg-primary'
-                              : 'border-muted'
+                              : 'border-border'
                           }`}
                         >
                           {selectedAnswer === index && (
@@ -131,7 +128,7 @@ export default function QuizQuestion({
                 )}
 
                 {/* Navigation Buttons */}
-                <div className="flex justify-between items-center pt-8 border-t border-gray-200">
+                <div className="flex justify-between items-center pt-8 border-t">
                   <Button
                     variant="outline"
                     onClick={onPrevious}
@@ -162,8 +159,8 @@ export default function QuizQuestion({
                     )}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+                </div>
+              
           </motion.div>
         </AnimatePresence>
 

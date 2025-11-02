@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenAI } from '@google/genai'
 import { auth } from '@/server/auth'
 import { db } from '@/server/db'
+import { getImageFromUnsplash } from '@/app/_actions/image/unsplash'
 
 const flashcardsSchema = {
   type: 'object',
@@ -79,17 +80,40 @@ ${material}
     const cards = Array.isArray(parsed?.flashcards) ? parsed.flashcards : []
 
     const session = await auth()
-    const set = await db.flashcardSet.create({
-      data: {
-        userId: session?.user?.id ?? null,
-        topic: topic ?? null,
-        count,
-        cards: {
-          create: cards.map((c: any) => ({ front: c.front, back: c.back, tags: c.tags ?? [] })),
+    let thumb: string | undefined
+    try {
+      const unsplash = await getImageFromUnsplash(topic || (cards?.[0]?.front ?? 'flashcards'))
+      if (unsplash.success && unsplash.imageUrl) thumb = unsplash.imageUrl
+    } catch {}
+    const anyDb = db as any
+    let set: { id: string }
+    try {
+      set = await anyDb.flashcardSet.create({
+        data: {
+          userId: session?.user?.id ?? null,
+          topic: topic ?? null,
+          count,
+          thumbnailUrl: thumb ?? null,
+          cards: {
+            create: cards.map((c: any) => ({ front: c.front, back: c.back, tags: c.tags ?? [] })),
+          },
         },
-      },
-      select: { id: true },
-    })
+        select: { id: true },
+      })
+    } catch {
+      // Fallback if schema hasn't been pushed yet
+      set = await anyDb.flashcardSet.create({
+        data: {
+          userId: session?.user?.id ?? null,
+          topic: topic ?? null,
+          count,
+          cards: {
+            create: cards.map((c: any) => ({ front: c.front, back: c.back, tags: c.tags ?? [] })),
+          },
+        },
+        select: { id: true },
+      })
+    }
 
     return NextResponse.json({ id: set.id, flashcards: cards })
   } catch (error) {

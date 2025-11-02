@@ -50,7 +50,7 @@ export default function UploadForm({ onUploaded }: UploadFormProps) {
         <div className="text-sm text-red-600">Error: {error}</div>
       )}
 
-      <Button type="submit" disabled={loading || !file}>
+      <Button type="submit" variant="outline" disabled={loading || !file} className="border">
         {loading ? 'Uploading...' : 'Upload File'}
       </Button>
     </form>

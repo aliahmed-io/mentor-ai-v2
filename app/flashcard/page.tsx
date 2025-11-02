@@ -3,11 +3,10 @@ import React, { useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
-import { Button, buttonVariants } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import UploadForm from '@/components/UploadForm'
 import { useRouter } from 'next/navigation'
+import { RecentFlashcardsPanel } from '@/components/recent/RecentFlashcardsPanel'
 
 type Flashcard = {
   id: string
@@ -23,7 +22,7 @@ export default function FlashcardPage() {
   const [count, setCount] = useState(12)
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [recent, setRecent] = useState<Array<{ id: string; topic: string | null; count: number; createdAt: string }>>([])
+  
 
   const handleUploaded = (data: { sessionId: string; text: string }) => {
     if (!data) return
@@ -62,18 +61,7 @@ export default function FlashcardPage() {
     }
   }
 
-  useEffect(() => {
-    let active = true
-    ;(async () => {
-      try {
-        const res = await fetch('/api/flashcards/recent?limit=10', { cache: 'no-store' })
-        if (!res.ok) return
-        const data = await res.json()
-        if (active) setRecent(data)
-      } catch {}
-    })()
-    return () => { active = false }
-  }, [])
+  // right-side recent panel handles its own data fetching
 
   return (
     <div className="space-y-6">
@@ -95,57 +83,40 @@ export default function FlashcardPage() {
         </div>
       </header>
 
-      <Card>
-        <CardContent className="grid gap-4 p-6 md:grid-cols-2">
-          <div className="space-y-3">
-            <label className="text-sm font-medium">Paste study material</label>
-            <Textarea
-              value={material}
-              onChange={(e) => setMaterial(e.target.value)}
-              placeholder="Paste relevant notes or text here..."
-              className="min-h-[180px]"
-            />
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Optional topic</label>
-                <Input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="e.g., Biology - Cell Division" />
-              </div>
-              <div className="flex items-end">
-                <Button onClick={generate} disabled={isGenerating} className="w-full">
-                  {isGenerating ? 'Generating…' : 'Generate Flashcards'}
-                </Button>
-              </div>
-            </div>
-            {error && <div className="text-sm text-red-600">{error}</div>}
-          </div>
-
-          <div className="space-y-3">
-            <label className="text-sm font-medium">Or upload a file</label>
-            <UploadForm onUploaded={handleUploaded} />
-            <p className="text-xs text-muted-foreground">PDF, DOCX, PPTX, TXT, JPG/PNG and more are supported.</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Recent flashcards */}
-      <div className="space-y-2">
-        <h3 className="text-sm font-medium">Recent flashcards</h3>
-        {recent.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No recent sets yet.</p>
-        ) : (
-          <ul className="divide-y rounded-md border">
-            {recent.map((s) => (
-              <li key={s.id} className="flex items-center justify-between px-4 py-2 text-sm">
-                <div className="truncate">
-                  <span className="font-medium">{s.topic || 'Untitled'}</span>
-                  <span className="ml-2 text-muted-foreground">{s.count} cards</span>
+      <div>
+        <Card>
+          <CardContent className="grid gap-4 p-6 md:grid-cols-2">
+              <div className="space-y-3">
+                <label className="text-sm font-medium">Paste study material</label>
+                <Textarea
+                  value={material}
+                  onChange={(e) => setMaterial(e.target.value)}
+                  placeholder="Paste relevant notes or text here..."
+                  className="min-h-[180px]"
+                />
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Optional topic</label>
+                    <Input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="e.g., Biology - Cell Division" />
+                  </div>
+                  <div className="flex items-end">
+                    <Button onClick={generate} disabled={isGenerating} className="w-full">
+                      {isGenerating ? 'Generating…' : 'Generate Flashcards'}
+                    </Button>
+                  </div>
                 </div>
-                <Link href={`/flashcard/${s.id}`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}>Open</Link>
-              </li>
-            ))}
-          </ul>
-        )}
+                {error && <div className="text-sm text-red-600">{error}</div>}
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-sm font-medium">Or upload a file</label>
+                <UploadForm onUploaded={handleUploaded} />
+                <p className="text-xs text-muted-foreground">PDF, DOCX, PPTX, TXT, JPG/PNG and more are supported.</p>
+              </div>
+          </CardContent>
+        </Card>
       </div>
+      <RecentFlashcardsPanel />
     </div>
   )
 }

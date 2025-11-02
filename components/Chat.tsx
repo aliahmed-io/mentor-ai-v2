@@ -103,8 +103,40 @@ export default function Chat({ sessionId }: ChatProps) {
               }`}
             >
               {msg.role === 'assistant' ? (
-                <div className="prose prose-sm max-w-none prose-headings:my-2 prose-p:my-2 prose-li:my-1 prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                <div className="prose prose-sm max-w-none prose-headings:my-2 prose-p:my-2 prose-li:my-1">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      h1: ({node, ...props}) => (<h1 className="mt-2 text-xl font-bold" {...props} />),
+                      h2: ({node, ...props}) => (<h2 className="mt-2 text-lg font-semibold" {...props} />),
+                      h3: ({node, ...props}) => (<h3 className="mt-2 text-base font-semibold" {...props} />),
+                      p: ({node, ...props}) => (<p className="my-2" {...props} />),
+                      a: ({node, ...props}) => (<a className="text-primary underline hover:no-underline" target="_blank" rel="noreferrer" {...props} />),
+                      blockquote: ({node, ...props}) => (<blockquote className="border-l-2 pl-3 text-muted-foreground italic" {...props} />),
+                      ul: ({node, ...props}) => (<ul className="my-2 ml-5 list-disc" {...props} />),
+                      ol: ({node, ...props}) => (<ol className="my-2 ml-5 list-decimal" {...props} />),
+                      table: ({node, ...props}) => (
+                        <div className="my-3 w-full overflow-x-auto">
+                          <table className="w-full border-collapse text-sm" {...props} />
+                        </div>
+                      ),
+                      thead: ({node, ...props}) => (<thead className="bg-muted" {...props} />),
+                      th: ({node, ...props}) => (<th className="border px-2 py-1 text-left" {...props} />),
+                      td: ({node, ...props}) => (<td className="border px-2 py-1 align-top" {...props} />),
+                      code: ({inline, className, children, ...props}) => {
+                        if (inline) {
+                          return <code className="rounded bg-muted px-1 py-0.5" {...props}>{children}</code>
+                        }
+                        return (
+                          <pre className="rounded-md border bg-muted p-3 overflow-x-auto">
+                            <code {...props}>{children}</code>
+                          </pre>
+                        )
+                      },
+                      img: ({node, ...props}) => (<img className="max-h-64 rounded border" {...props} alt={(props as any).alt ?? ''} />),
+                      hr: ({node, ...props}) => (<hr className="my-3 border-muted" {...props} />),
+                    }}
+                  >
                     {msg.content}
                   </ReactMarkdown>
                 </div>

@@ -4,26 +4,25 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { BookOpen, Brain, FileText, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { QuizSetup as QuizSetupType } from '@/types/quiz';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface QuizSetupProps {
   onSetupComplete: (setup: QuizSetupType) => void;
 }
 
 const difficultyOptions = [
-  { value: 'easy', label: 'Easy', description: 'Basic concepts and fundamentals', icon: '🟢' },
-  { value: 'medium', label: 'Medium', description: 'Intermediate level questions', icon: '🟡' },
-  { value: 'hard', label: 'Hard', description: 'Advanced and challenging topics', icon: '🔴' },
+  { value: 'easy', label: 'Easy', description: 'Basic concepts and fundamentals'},
+  { value: 'medium', label: 'Medium', description: 'Intermediate level questions'},
+  { value: 'hard', label: 'Hard', description: 'Advanced and challenging topics'},
 ] as const;
 
 const topicSuggestions = [
-  'JavaScript', 'React', 'Python', 'TypeScript', 'Node.js',
-  'CSS', 'HTML', 'Machine Learning', 'Data Structures',
-  'Algorithms', 'Database Design', 'System Design'
+  'JavaScript', 'React', 'Python', 'TypeScript', 'Node.js'
+
 ];
 
 export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
@@ -68,8 +67,7 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
         transition={{ duration: 0.5 }}
         className="w-full max-w-2xl mx-auto"
       >
-        <Card>
-          <CardHeader className="text-center space-y-4">
+        <div className="text-center space-y-4">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -78,15 +76,11 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
             >
               <img src="/white-short-logo.svg" alt="Quiz Logo" className="h-8 w-8" />
             </motion.div>
-            <CardTitle className="text-3xl font-bold text-foreground">
-              Create Your Quiz
-            </CardTitle>
-            <CardDescription className="text-lg text-muted-foreground">
-              Customize your learning experience with AI-powered questions
-            </CardDescription>
-          </CardHeader>
+            <div className="text-3xl font-bold text-foreground">Create Your Quiz</div>
+            <div className="text-lg text-muted-foreground">Customize your learning experience with AI-powered questions</div>
+          </div>
 
-          <CardContent className="space-y-8">
+          <div className="space-y-8 mt-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Topic Selection */}
               <motion.div
@@ -131,30 +125,14 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
                 className="space-y-3"
               >
                 <Label className="text-sm font-semibold">Difficulty Level</Label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {difficultyOptions.map((option) => (
-                    <motion.button
-                      key={option.value}
-                      type="button"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setDifficulty(option.value)}
-                      className={`rounded-lg border-2 p-4 text-left transition-all ${
-                        difficulty === option.value
-                          ? 'border-primary bg-muted shadow-sm'
-                          : 'border-muted hover:bg-muted/50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{option.icon}</span>
-                        <div>
-                          <div className="font-semibold">{option.label}</div>
-                          <div className="text-sm text-muted-foreground">{option.description}</div>
-                        </div>
-                      </div>
-                    </motion.button>
-                  ))}
-                </div>
+                <Select value={difficulty} onValueChange={(v: any) => setDifficulty(v)}>
+                  <SelectTrigger className="w-full"><SelectValue placeholder="Select difficulty" /></SelectTrigger>
+                  <SelectContent>
+                    {difficultyOptions.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </motion.div>
 
               {/* Question Count */}
@@ -213,20 +191,11 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
                     className="min-h-[120px] resize-none"
                   />
                   <div className="flex items-center gap-3">
-                    <Label
-                      htmlFor="file-upload"
-                      className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-dashed border-gray-300 px-4 py-2 transition-colors hover:border-muted-foreground/40 hover:bg-muted"
-                    >
-                      <Upload className="w-4 h-4" />
-                      Upload Text File
-                    </Label>
-                    <Input
-                      id="file-upload"
-                      type="file"
-                      accept=".txt,.md,.doc,.docx"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
+                    <Label htmlFor="file-upload" className="sr-only">Upload Text File</Label>
+                    <Input id="file-upload" type="file" accept=".txt,.md,.doc,.docx" onChange={handleFileUpload} className="max-w-xs" />
+                    <Button type="button" variant="outline" className="border-dashed" onClick={() => document.getElementById('file-upload')?.click()}>
+                      <Upload className="w-4 h-4 mr-2" /> Choose file
+                    </Button>
                     {fileContent && (
                       <span className="flex items-center gap-1 text-sm text-muted-foreground">
                         ✅ File uploaded successfully
@@ -243,13 +212,12 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
                 transition={{ delay: 0.7 }}
                 className="pt-4"
               >
-                <Button type="submit" className="w-full py-6 text-lg font-semibold" disabled={!topic.trim()}>
-                  Generate Quiz ✨
+                <Button type="submit" className="w-full py-6 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90" disabled={!topic.trim()}>
+                  Generate Quiz 
                 </Button>
               </motion.div>
             </form>
-          </CardContent>
-        </Card>
+          </div>
       </motion.div>
     </div>
   );

@@ -50,6 +50,17 @@ export default function CalendarPage() {
     })
   }, [events, date])
 
+  // Mark days with events for calendar modifiers
+  const daysWithEvents = useMemo(() => {
+    const map = new Map<string, Date>()
+    for (const e of events) {
+      const d = new Date(e.start)
+      d.setHours(0,0,0,0)
+      map.set(d.toISOString(), d)
+    }
+    return Array.from(map.values())
+  }, [events])
+
   const upcoming = useMemo(() => {
     const now = Date.now()
     return [...events]
@@ -111,9 +122,22 @@ export default function CalendarPage() {
 
       <div className="grid gap-6 md:grid-cols-2">
       <Card>
+        <CardContent className="p-3">
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={(d) => d && setDate(d)}
+            className="rounded-md border w-full [--cell-size:2.25rem] md:[--cell-size:2.5rem]"
+            classNames={{ root: "w-full", months: "relative flex w-full flex-col gap-4 md:flex-row", month: "flex w-full flex-col gap-4" }}
+            modifiers={{ hasEvent: daysWithEvents }}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
         <CardContent className="p-6 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="text-sm font-medium">Calendar</div>
+            <div className="text-sm font-medium">Events on {date.toLocaleDateString()}</div>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button size="sm">Add Event</Button>
@@ -155,13 +179,6 @@ export default function CalendarPage() {
               </DialogContent>
             </Dialog>
           </div>
-          <Calendar mode="single" selected={date} onSelect={(d) => d && setDate(d)} className="rounded-md border" />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-6 space-y-3">
-          <div className="text-sm font-medium">Events on {date.toLocaleDateString()}</div>
           {selectedDayEvents.length === 0 ? (
             <p className="text-sm text-muted-foreground">No events.</p>
           ) : (
