@@ -5,9 +5,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { usePresentationState } from "@/states/presentation-state";
 import { Layout } from "lucide-react";
-import { ModelPicker } from "./ModelPicker";
 
 export function PresentationControls({
   shouldShowLabel = true,
@@ -24,9 +24,20 @@ export function PresentationControls({
   } = usePresentationState();
 
   return (
-    <div className="grid grid-cols-4 gap-4">
-      {/* Model Selection */}
-      <ModelPicker shouldShowLabel={shouldShowLabel} />
+    <div className="space-y-3">
+      {/* Static Model Display (GPT only) */}
+      <div>
+        {shouldShowLabel && (
+          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Text Model
+          </label>
+        )}
+        <div className="flex h-10 items-center rounded-md border bg-muted/50 px-3 text-sm text-muted-foreground">
+          GPT-4o-mini
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
 
       {/* Number of Slides */}
       <div>
@@ -35,21 +46,21 @@ export function PresentationControls({
             Number of slides
           </label>
         )}
-        <Select
-          value={String(numSlides)}
-          onValueChange={(v) => setNumSlides(Number(v))}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select number of slides" />
-          </SelectTrigger>
-          <SelectContent>
-            {[1, 2, 3, 4, 5, 6, 7, 8, 10, 12].map((num) => (
-              <SelectItem key={num} value={String(num)}>
-                {num} slides
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Input
+          type="number"
+          min={5}
+          max={12}
+          step={1}
+          value={numSlides}
+          onChange={(e) => {
+            const raw = Number(e.target.value);
+            const clamped = Number.isFinite(raw)
+              ? Math.max(5, Math.min(12, raw))
+              : 5;
+            setNumSlides(clamped);
+          }}
+          placeholder="5-12"
+        />
       </div>
 
       {/* Language */}
@@ -60,21 +71,12 @@ export function PresentationControls({
           </label>
         )}
         <Select value={language} onValueChange={setLanguage}>
-          <SelectTrigger>
+          <SelectTrigger className="overflow-hidden">
             <SelectValue placeholder="Select language" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="en-US">English (US)</SelectItem>
-            <SelectItem value="pt">Portuguese</SelectItem>
-            <SelectItem value="es">Spanish</SelectItem>
+          <SelectContent className="z-50 max-h-96">
+            <SelectItem value="en-US">English</SelectItem>
             <SelectItem value="fr">French</SelectItem>
-            <SelectItem value="de">German</SelectItem>
-            <SelectItem value="it">Italian</SelectItem>
-            <SelectItem value="ja">Japanese</SelectItem>
-            <SelectItem value="ko">Korean</SelectItem>
-            <SelectItem value="zh">Chinese</SelectItem>
-            <SelectItem value="ru">Russian</SelectItem>
-            <SelectItem value="hi">Hindi</SelectItem>
             <SelectItem value="ar">Arabic</SelectItem>
           </SelectContent>
         </Select>
@@ -88,13 +90,13 @@ export function PresentationControls({
           </label>
         )}
         <Select value={pageStyle} onValueChange={setPageStyle}>
-          <SelectTrigger>
+          <SelectTrigger className="overflow-hidden">
             <div className="flex items-center gap-2">
               <Layout className="h-4 w-4" />
               <SelectValue placeholder="Select page style" />
             </div>
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="z-50 max-h-96">
             <SelectItem value="default">
               <div className="flex items-center gap-3">
                 <span>Default</span>
@@ -112,6 +114,7 @@ export function PresentationControls({
             </SelectItem>
           </SelectContent>
         </Select>
+      </div>
       </div>
     </div>
   );

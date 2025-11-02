@@ -70,12 +70,19 @@ export function PresentationDashboard({
   };
 
   return (
-    <div className="notebook-section relative h-full w-full">
+    <div className="relative h-full w-full">
       <PresentationsSidebar side={sidebarSide ?? "right"} />
-      <div className="mx-auto max-w-4xl space-y-12 px-6 py-12">
+      <div className="mx-auto max-w-4xl space-y-6 px-6 py-8">
+        <header className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold">Create Presentation</h1>
+            <p className="text-sm text-muted-foreground">
+              Describe your topic and customize basics. Well generate the rest.
+            </p>
+          </div>
+        </header>
 
-
-        <div className="space-y-8">
+        <div className="space-y-6">
           <PresentationInput handleGenerate={handleGenerate} />
           <PresentationControls />
 
@@ -85,7 +92,7 @@ export function PresentationDashboard({
                 onClick={handleGenerate}
                 disabled={!presentationInput.trim() || isGeneratingOutline}
                 variant={isGeneratingOutline ? "loading" : "default"}
-                className="gap-2"
+                className="gap-2 transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
               >
                 <Wand2 className="h-4 w-4" />
                 Generate Presentation

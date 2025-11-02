@@ -7,8 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ThemeToggle } from "@/provider/theme-provider";
-import { LogOut, User } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
@@ -94,26 +93,7 @@ export default function SideBarDropdown({
         <UserDetail />
         <DropdownMenuSeparator />
 
-        <DropdownMenuGroup className="flex flex-col gap-2 p-1">
-          <DropdownMenuItem asChild>
-            <ThemeToggle />
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-
         <DropdownMenuGroup className="flex flex-col gap-2">
-          <DropdownMenuItem asChild>
-            <Button variant="outline" className="w-full">
-              <Link
-                href={userId ? `/user/${userId}` : ""}
-                className="flex h-full w-full items-center justify-center p-2"
-              >
-                <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
-              </Link>
-            </Button>
-          </DropdownMenuItem>
-
           <DropdownMenuItem asChild>
             <Button
               variant={isLoggingOut ? "outlineLoading" : "outline"}

@@ -82,6 +82,29 @@ export default function Chat({ sessionId }: ChatProps) {
 
   return (
     <div className="rounded-lg border bg-card p-5">
+      <div className="mb-3 flex items-center justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={async () => {
+            try {
+              const title = `Chat notes - ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`
+              const res = await fetch('/api/chat/docs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId, wholeConversation: true, title }),
+              })
+              if (!res.ok) throw new Error('Failed to save conversation')
+              toast({ title: 'Saved', description: 'Conversation saved as a document.' })
+            } catch (e: any) {
+              toast({ title: 'Failed to save', description: e.message || 'Error', variant: 'destructive' })
+            }
+          }}
+        >
+          Save conversation
+        </Button>
+      </div>
+
       <div className="mb-4 max-h-[60vh] overflow-y-auto pr-2">
         {messages.length === 0 && (
           <div className="py-10 text-center text-sm text-foreground">

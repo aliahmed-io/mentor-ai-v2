@@ -10,6 +10,7 @@ import { ToolCallDisplay } from "@/components/presentation/outline/ToolCallDispl
 import { ThemeBackground } from "@/components/presentation/theme/ThemeBackground";
 import { ThemeSettings } from "@/components/presentation/theme/ThemeSettings";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import {
   themes,
@@ -188,8 +189,9 @@ export default function PresentationGenerateWithIdPage() {
   ]);
 
   const handleGenerate = () => {
-    router.push(`/presentation/${id}`);
+    // Ensure state flag is set before navigating so the next page picks it up reliably
     startPresentationGeneration();
+    router.push(`/presentation/${id}`);
   };
 
   if (isLoadingPresentation) {
@@ -233,10 +235,12 @@ export default function PresentationGenerateWithIdPage() {
             <ToolCallDisplay />
             <OutlineList />
 
-            <div className="!mb-32 space-y-4 rounded-lg border bg-muted/30 p-6">
-              <h2 className="text-lg font-semibold">Customize Theme</h2>
-              <ThemeSettings />
-            </div>
+            <Card className="!mb-32">
+              <CardContent className="space-y-4 p-6">
+                <h2 className="text-lg font-semibold">Customize Theme</h2>
+                <ThemeSettings />
+              </CardContent>
+            </Card>
           </div>
         </div>
 

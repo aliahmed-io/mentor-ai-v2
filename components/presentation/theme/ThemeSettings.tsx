@@ -136,10 +136,10 @@ export function ThemeSettings() {
       <div className="space-y-4">
         <Label className="text-sm font-medium">Presentation Style</Label>
         <Select defaultValue="professional">
-          <SelectTrigger>
+          <SelectTrigger className="overflow-hidden">
             <SelectValue placeholder="Select style" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="z-50 max-h-96">
             {PRESENTATION_STYLES.map((style) => (
               <SelectItem key={style.value} value={style.value}>
                 {style.label}

@@ -44,7 +44,7 @@ export function PresentationInput({
           className="h-40 w-full resize-none rounded-lg border border-border bg-card px-4 py-3.5 pb-14 text-base text-foreground placeholder:text-muted-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
         />
 
-        <div className="absolute flex justify-between items-center bottom-3 inset-x-3 z-10">
+        <div className="absolute flex justify-between items-center bottom-3 left-3 right-0 z-10">
           <p className="text-xs text-muted-foreground">
             Press{" "}
             <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-[10px] border border-border">
@@ -56,7 +56,7 @@ export function PresentationInput({
             </kbd>{" "}
             to generate
           </p>
-          <WebSearchToggle />
+          <WebSearchToggle/>
         </div>
       </div>
     </div>

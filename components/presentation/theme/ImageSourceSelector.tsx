@@ -64,10 +64,10 @@ export function ImageSourceSelector({
           }
         }}
       >
-        <SelectTrigger>
+        <SelectTrigger className="overflow-hidden">
           <SelectValue placeholder="Select image generation method" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="z-50 max-h-96">
           <SelectGroup>
             <SelectLabel className="text-primary/80 flex items-center gap-1">
               <Wand2 size={10} />

@@ -31,26 +31,58 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
   const [questionCount, setQuestionCount] = useState(10);
   const [studyMaterial, setStudyMaterial] = useState('');
   const [fileContent, setFileContent] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
+    if (!file) return;
+
+    // For plain text-like files, read on client; otherwise, send to server to extract
+    const lower = file.name.toLowerCase();
+    const isPlain = lower.endsWith('.txt') || lower.endsWith('.md');
+
+    if (isPlain) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const content = e.target?.result as string;
+        const content = (e.target?.result as string) || '';
         setFileContent(content);
         setStudyMaterial(content);
       };
       reader.readAsText(file);
+      return;
     }
+
+    try {
+      setIsUploading(true);
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/quiz/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to extract text');
+      const content: string = data.text || '';
+      setFileContent(content);
+      setStudyMaterial(content);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const inferTopicFromText = (text: string): string => {
+    const cleaned = (text || '').replace(/\r/g, '');
+    const firstNonEmptyLine = cleaned.split('\n').map((l) => l.trim()).find((l) => l.length > 8) || cleaned.slice(0, 60);
+    const words = firstNonEmptyLine.split(/\s+/).slice(0, 8).join(' ');
+    return words || 'Uploaded Material';
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!topic.trim()) return;
+    // Allow starting if either topic or study material exists
+    if (!topic.trim() && !studyMaterial.trim()) return;
 
     const setup: QuizSetupType = {
-      topic: topic.trim(),
+      topic: topic.trim() || inferTopicFromText(studyMaterial),
       difficulty,
       questionCount,
       studyMaterial: studyMaterial.trim() || undefined,
@@ -99,8 +131,8 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   className="text-lg py-6"
-                  required
                 />
+                <p className="text-xs text-muted-foreground">Tip: If you upload a PDF/PPTX below, topic is optional.</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {topicSuggestions.map((suggestion) => (
                     <Button
@@ -126,8 +158,8 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
               >
                 <Label className="text-sm font-semibold">Difficulty Level</Label>
                 <Select value={difficulty} onValueChange={(v: any) => setDifficulty(v)}>
-                  <SelectTrigger className="w-full"><SelectValue placeholder="Select difficulty" /></SelectTrigger>
-                  <SelectContent>
+                  <SelectTrigger className="w-full overflow-hidden"><SelectValue placeholder="Select difficulty" /></SelectTrigger>
+                  <SelectContent className="z-50 max-h-96 bg-background">
                     {difficultyOptions.map((o) => (
                       <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
                     ))}
@@ -191,12 +223,15 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
                     className="min-h-[120px] resize-none"
                   />
                   <div className="flex items-center gap-3">
-                    <Label htmlFor="file-upload" className="sr-only">Upload Text File</Label>
-                    <Input id="file-upload" type="file" accept=".txt,.md,.doc,.docx" onChange={handleFileUpload} className="max-w-xs" />
-                    <Button type="button" variant="outline" className="border-dashed" onClick={() => document.getElementById('file-upload')?.click()}>
+                    <Label htmlFor="file-upload" className="sr-only">Upload Study Material</Label>
+                    <Input id="file-upload" type="file" accept=".txt,.md,.pdf,.pptx,.docx" onChange={handleFileUpload} className="max-w-xs" />
+                    <Button type="button" variant="outline" className="border-dashed" onClick={() => document.getElementById('file-upload')?.click()} disabled={isUploading}>
                       <Upload className="w-4 h-4 mr-2" /> Choose file
                     </Button>
-                    {fileContent && (
+                    {isUploading && (
+                      <span className="flex items-center gap-1 text-sm text-muted-foreground">Extracting…</span>
+                    )}
+                    {!isUploading && fileContent && (
                       <span className="flex items-center gap-1 text-sm text-muted-foreground">
                         ✅ File uploaded successfully
                       </span>
@@ -212,8 +247,8 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
                 transition={{ delay: 0.7 }}
                 className="pt-4"
               >
-                <Button type="submit" className="w-full py-6 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90" disabled={!topic.trim()}>
-                  Generate Quiz 
+                <Button type="submit" className="w-full py-6 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90" disabled={!topic.trim() && !studyMaterial.trim()}>
+                  Start Quiz
                 </Button>
               </motion.div>
             </form>

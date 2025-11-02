@@ -1,10 +1,10 @@
 "use client";
-import { Brain } from "@/components/ui/icons";
 import { usePresentationState } from "@/states/presentation-state";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 // Import our new components
 import AllweoneText from "@/components/globals/allweone-logo";
@@ -53,7 +53,7 @@ export default function PresentationHeader({ title }: PresentationHeaderProps) {
 
           <Link href={"/presentation/create"}>
             <Button size={"icon"} className="rounded-full" variant={"ghost"}>
-              <Brain></Brain>
+              <Image src="/white-short-logo.svg" alt="Home" width={20} height={20} />
             </Button>
           </Link>
 
@@ -85,7 +85,7 @@ export default function PresentationHeader({ title }: PresentationHeaderProps) {
           </Link>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Link href="/presentation" className="hover:text-foreground">
-              <Brain className="h-4 w-4" />
+              <Image src="/white-short-logo.svg" alt="Home" width={16} height={16} />
             </Link>
             <ChevronRight className="h-4 w-4" />
             <span className="font-medium text-foreground">{presentationTitle}</span>

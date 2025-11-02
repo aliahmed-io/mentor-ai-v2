@@ -68,29 +68,28 @@ export function ThemeBackground({ className, children }: ThemeBackgroundProps) {
   const colors = isDark ? currentTheme.colors.dark : currentTheme.colors.light;
 
   // Create gradient styles based on theme colors, allow override
+  // Use app theme background for better consistency and readability; add subtle tint
   const defaultBackground = isDark
     ? `
-        radial-gradient(circle at 10% 10%, ${colors.primary}20 0%, transparent 30%),
-        radial-gradient(circle at 90% 20%, ${colors.accent}20 0%, transparent 40%),
-        radial-gradient(circle at 50% 80%, ${colors.secondary}15 0%, transparent 50%),
-        ${colors.background}
+        radial-gradient(circle at 15% 20%, ${colors.primary}22 0%, transparent 35%),
+        radial-gradient(circle at 85% 80%, ${colors.accent}18 0%, transparent 45%),
+        var(--background)
       `
     : `
-        radial-gradient(circle at 10% 10%, ${colors.primary}15 0%, transparent 30%),
-        radial-gradient(circle at 90% 20%, ${colors.accent}15 0%, transparent 40%),
-        radial-gradient(circle at 50% 80%, ${colors.secondary}10 0%, transparent 50%),
-        ${colors.background}
+        radial-gradient(circle at 15% 20%, ${colors.primary}12 0%, transparent 35%),
+        radial-gradient(circle at 85% 80%, ${colors.accent}10 0%, transparent 45%),
+        var(--background)
       `;
 
   const gradientStyle = {
     background: config.backgroundOverride ?? defaultBackground,
     transition: currentTheme.transitions.default,
-    color: isDark ? colors.text : colors.text,
+    color: `hsl(var(--foreground))`,
   } as React.CSSProperties;
 
   return (
     <div
-      className={cn("h-max min-h-full w-full", className)}
+      className={cn("h-max min-h-full w-full text-foreground", className)}
       style={gradientStyle}
     >
       {children}

@@ -1,73 +1,82 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/server/db'
-import { auth } from '@/server/auth'
-import { getImageFromUnsplash } from '@/app/_actions/image/unsplash'
+import { NextResponse } from "next/server";
+import { auth } from "@/server/auth";
+import { db } from "@/server/db";
 
-export async function POST(request: NextRequest) {
+type SaveDocBody = {
+  sessionId?: string;
+  title?: string;
+  content?: string;
+  wholeConversation?: boolean;
+};
+
+export async function POST(req: Request) {
   try {
-    const { sessionId, title, content } = await request.json()
-    if (!content || typeof content !== 'string') {
-      return NextResponse.json({ error: 'missing content' }, { status: 400 })
-    }
-    const session = await auth()
-    // Try to make a cover image using Unsplash similar to presentations
-    let thumb: string | undefined
-    try {
-      const queryBase = (title && typeof title === 'string' ? title : '') || content.slice(0, 120)
-      const result = await getImageFromUnsplash(queryBase)
-      if (result.success && result.imageUrl) thumb = result.imageUrl
-    } catch {}
+    const { sessionId, title, content, wholeConversation } = (await req.json()) as SaveDocBody;
+    const session = await auth();
 
-    const anyDb = db as any
-    let doc
-    try {
-      doc = await anyDb.chatDocument.create({
-        data: {
-          sessionId: sessionId ?? null,
-          userId: session?.user?.id ?? null,
-          title: title && typeof title === 'string' ? title : 'AI Note',
-          content,
-          thumbnailUrl: thumb ?? null,
-        },
-      })
-    } catch {
-      doc = await anyDb.chatDocument.create({
-        data: {
-          sessionId: sessionId ?? null,
-          userId: session?.user?.id ?? null,
-          title: title && typeof title === 'string' ? title : 'AI Note',
-          content,
-        },
-      })
+    let finalTitle = title?.trim() || `Chat notes - ${new Date().toLocaleString()}`;
+    let finalContent = content?.trim() ?? "";
+
+    if (!finalContent) {
+      if (!sessionId) {
+        return NextResponse.json({ error: "Missing content or sessionId" }, { status: 400 });
+      }
+
+      // Build transcript when wholeConversation requested
+      const chatSession = await db.chatSession.findUnique({
+        where: { id: sessionId },
+        include: { messages: { orderBy: { createdAt: "asc" } } },
+      });
+      if (!chatSession) {
+        return NextResponse.json({ error: "Session not found" }, { status: 404 });
+      }
+
+      const fileExcerpt = chatSession.fileText ? chatSession.fileText.slice(0, 800) : "";
+      let transcript = "";
+      if (wholeConversation) {
+        const lines = chatSession.messages.map((m) =>
+          (m.role === "user" ? "**User:** " : "**Assistant:** ") + (m.content || ""),
+        );
+        transcript = lines.join("\n\n");
+      }
+
+      finalContent = `# ${finalTitle}
+${fileExcerpt ? `\n> Context excerpt:\n> ${fileExcerpt.replace(/\n/g, "\n> ")}\n` : ""}
+\n## Conversation\n\n${transcript}`.trim();
     }
-    return NextResponse.json({ id: doc.id })
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message || 'Failed to save document' }, { status: 500 })
+
+    const saved = await db.chatDocument.create({
+      data: {
+        sessionId: sessionId ?? null,
+        userId: session?.user?.id ?? null,
+        title: finalTitle,
+        content: finalContent,
+      },
+      select: { id: true },
+    });
+
+    return NextResponse.json({ success: true, id: saved.id });
+  } catch (error) {
+    console.error("/api/chat/docs error", error);
+    return NextResponse.json({ error: "Failed to save" }, { status: 500 });
   }
 }
 
-export async function GET(request: NextRequest) {
-  const session = await auth()
-  const url = new URL(request.url)
-  const limit = Math.max(1, Math.min(50, Number(url.searchParams.get('limit')) || 10))
-  const anyDb = db as any
+export async function GET(req: Request) {
   try {
-    const docs = await anyDb.chatDocument.findMany({
+    const session = await auth();
+    const url = new URL(req.url);
+    const limit = Math.max(1, Math.min(50, Number(url.searchParams.get("limit")) || 10));
+
+    const docs = await db.chatDocument.findMany({
       where: session?.user?.id ? { userId: session.user.id } : {},
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: limit,
       select: { id: true, title: true, createdAt: true, thumbnailUrl: true },
-    })
-    return NextResponse.json(docs)
-  } catch {
-    const docs = await anyDb.chatDocument.findMany({
-      where: session?.user?.id ? { userId: session.user.id } : {},
-      orderBy: { createdAt: 'desc' },
-      take: limit,
-      select: { id: true, title: true, createdAt: true },
-    })
-    return NextResponse.json(docs)
+    });
+    return NextResponse.json(docs);
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to list documents" }, { status: 500 });
   }
 }
-
 

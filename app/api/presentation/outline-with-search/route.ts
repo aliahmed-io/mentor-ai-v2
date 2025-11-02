@@ -1,4 +1,4 @@
-import { modelPicker } from "@/lib/model-picker";
+import { createOpenAI } from "@ai-sdk/openai";
 import { auth } from "@/server/auth";
 import { streamText } from "ai";
 import { NextResponse } from "next/server";
@@ -8,8 +8,6 @@ interface OutlineRequest {
   prompt: string;
   numberOfCards: number;
   language: string;
-  modelProvider?: string;
-  modelId?: string;
 }
 
 const outlineSystemPrompt = `You are an expert presentation outline generator. Your task is to create a comprehensive and engaging presentation outline based on the user's topic.
@@ -61,13 +59,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const {
-      prompt,
-      numberOfCards,
-      language,
-      modelProvider = "openai",
-      modelId,
-    } = (await req.json()) as OutlineRequest;
+    const { prompt, numberOfCards, language } = (await req.json()) as OutlineRequest;
 
     if (!prompt || !numberOfCards || !language) {
       return NextResponse.json(
@@ -78,16 +70,7 @@ export async function POST(req: Request) {
 
     const languageMap: Record<string, string> = {
       "en-US": "English (US)",
-      pt: "Portuguese",
-      es: "Spanish",
       fr: "French",
-      de: "German",
-      it: "Italian",
-      ja: "Japanese",
-      ko: "Korean",
-      zh: "Chinese",
-      ru: "Russian",
-      hi: "Hindi",
       ar: "Arabic",
     };
 
@@ -99,11 +82,10 @@ export async function POST(req: Request) {
       day: "numeric",
     });
 
-    // Create model based on selection
-    const model = modelPicker(modelProvider, modelId);
+    const openai = createOpenAI();
 
     const result = streamText({
-      model,
+      model: openai("gpt-4o-mini"),
       system: outlineSystemPrompt
         .replace("{numberOfCards}", numberOfCards.toString())
         .replace("{language}", actualLanguage)

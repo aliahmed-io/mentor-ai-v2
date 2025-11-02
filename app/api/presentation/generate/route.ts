@@ -1,4 +1,4 @@
-import { modelPicker } from "@/lib/model-picker";
+import { createOpenAI } from "@ai-sdk/openai";
 import { auth } from "@/server/auth";
 import { streamText } from "ai";
 import { NextResponse } from "next/server";
@@ -10,8 +10,6 @@ interface SlidesRequest {
   outline: string[]; // Array of main topics with markdown content
   language: string; // Language to use for the slides
   tone: string; // Style for image queries (optional)
-  modelProvider?: string; // Model provider (openai, ollama, or lmstudio)
-  modelId?: string; // Specific model ID for the provider
   searchResults?: Array<{ query: string; results: unknown[] }>; // Search results for context
 }
 // TODO: Add table and chart to the available layouts
@@ -244,8 +242,6 @@ export async function POST(req: Request) {
       outline,
       language,
       tone,
-      modelProvider = "openai",
-      modelId,
       searchResults,
     } = (await req.json()) as SlidesRequest;
 
@@ -292,7 +288,7 @@ export async function POST(req: Request) {
       day: "numeric",
     });
 
-    const model = modelPicker(modelProvider, modelId);
+    const openai = createOpenAI();
 
     // Format the prompt with template variables
     const formattedPrompt = slidesTemplate
@@ -306,7 +302,7 @@ export async function POST(req: Request) {
       .replace(/{SEARCH_RESULTS}/g, searchResultsText);
 
     const result = streamText({
-      model,
+      model: openai("gpt-4o-mini"),
       prompt: formattedPrompt,
     });
 

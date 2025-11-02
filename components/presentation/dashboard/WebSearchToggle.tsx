@@ -1,5 +1,4 @@
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 import { usePresentationState } from "@/states/presentation-state";
 import { Globe } from "lucide-react";
 
@@ -8,24 +7,30 @@ export function WebSearchToggle() {
     usePresentationState();
 
   return (
-    <div className="inline-flex items-center gap-2.5 rounded-full bg-background/95 backdrop-blur-sm px-3.5 py-2 shadow-sm border border-border transition-all hover:shadow-md">
-      <div className="flex items-center gap-2">
-        <Globe
-          className={`h-3.5 w-3.5 transition-colors ${webSearchEnabled ? "text-primary" : "text-muted-foreground"}`}
-        />
-        <Label
-          htmlFor="web-search-toggle"
-          className="text-xs font-medium leading-none cursor-pointer select-none text-foreground"
-        >
-          Web Search
-        </Label>
-      </div>
-      <Switch
-        id="web-search-toggle"
-        checked={webSearchEnabled}
-        onCheckedChange={setWebSearchEnabled}
-        disabled={isGeneratingOutline}
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      disabled={isGeneratingOutline}
+      onClick={() => setWebSearchEnabled(!webSearchEnabled)}
+      className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 transition-all mr-2 hover:shadow-md ${
+        webSearchEnabled ? "border-primary/60" : "border-border/50"
+      }`}
+      aria-pressed={webSearchEnabled}
+    >
+      <Globe
+        className={`h-3.5 w-3.5 transition-colors ${webSearchEnabled ? "text-primary" : "text-muted-foreground"}`}
       />
-    </div>
+      <span className="text-xs">Web Search</span>
+      <span
+        className={`text-[10px] leading-none px-2 py-0.5 rounded-full border text-center min-w-[28px] ${
+          webSearchEnabled
+            ? "bg-primary/10 text-primary border-primary/30"
+            : "bg-muted text-muted-foreground border-border"
+        }`}
+      >
+        {webSearchEnabled ? "On" : "Off"}
+      </span>
+    </Button>
   );
 }

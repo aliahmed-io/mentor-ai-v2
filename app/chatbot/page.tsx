@@ -66,16 +66,16 @@ export default function Home() {
           {sessionId && (
             <section className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="rounded-md border bg-blue-50 px-3 py-2 text-sm text-blue-700">
-                  <strong>Session:</strong>
+                <div className="rounded-md border bg-muted px-3 py-2 text-xs text-muted-foreground">
+                  <strong className="text-foreground">Session:</strong>
                   <code className="ml-2 rounded bg-background px-2 py-0.5 text-xs">{sessionId}</code>
                 </div>
-                <Button variant="destructive" size="sm" onClick={reset}>Reset session</Button>
+                <Button variant="secondary" size="sm" onClick={reset}>Reset session</Button>
               </div>
 
               {filePreview && (
-                <div className="rounded-md border border-green-200 bg-green-50 p-3">
-                  <strong className="text-green-700">Document excerpt (first 1k chars)</strong>
+                <div className="rounded-md border bg-card p-3">
+                  <div className="text-sm font-medium text-foreground">Document excerpt (first 1k chars)</div>
                   <pre className="mt-2 max-h-56 overflow-auto rounded border bg-background p-3 text-sm leading-relaxed">
                     {filePreview}
                   </pre>

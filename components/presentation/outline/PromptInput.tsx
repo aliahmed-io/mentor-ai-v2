@@ -25,15 +25,13 @@ export function PromptInput() {
         type="text"
         value={presentationInput}
         onChange={(e) => setPresentationInput(e.target.value)}
-        className="w-full rounded-md bg-muted px-4 py-3 pr-12 text-foreground outline-none focus:ring-2 focus:ring-indigo-400"
+        className="w-full rounded-md border border-input bg-background px-4 py-3 pr-12 text-foreground outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
         placeholder="Enter your presentation topic..."
         disabled={isGeneratingOutline}
       />
       <button
-        className={`absolute right-3 top-1/2 -translate-y-1/2 ${
-          isGeneratingOutline
-            ? "text-indigo-400"
-            : "text-indigo-400 hover:text-indigo-500"
+        className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${
+          isGeneratingOutline ? "text-primary/60" : "text-primary hover:text-primary/80"
         }`}
         onClick={handleGenerateOutline}
         disabled={isGeneratingOutline || !presentationInput.trim()}

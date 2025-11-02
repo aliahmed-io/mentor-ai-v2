@@ -17,6 +17,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "date-fns",
+      "lodash.debounce",
+      "react-icons",
+    ],
+  },
 };
 
 export default nextConfig;

@@ -34,7 +34,9 @@ export default function RootLayout({
         <NextAuthProvider>
           <TanstackProvider>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-              <SidebarShell>{children}</SidebarShell>
+              <SidebarShell>
+                {children} 
+              </SidebarShell>
             </ThemeProvider>
           </TanstackProvider>
         </NextAuthProvider>

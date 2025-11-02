@@ -125,7 +125,7 @@ export function ExportButton({
         <Button
           variant="ghost"
           size="sm"
-          className="text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground transition-all duration-200 hover:scale-[1.02]"
         >
           <Download className="mr-1 h-4 w-4" />
           Export

@@ -1,46 +1,101 @@
-import { generateFromGemini } from '@/lib/chatbot/gemini'
-import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/server/db'
+import { NextResponse } from "next/server";
+import { auth } from "@/server/auth";
+import { db } from "@/server/db";
+import { createOpenAI } from "@ai-sdk/openai";
+import { generateText } from "ai";
 
-export async function POST(request: NextRequest) {
+type ChatBody = {
+  sessionId: string;
+  message: string;
+};
+
+const SYSTEM_PROMPT = `You are a helpful study assistant.
+Always respond in clean Markdown (headings, lists, tables when helpful).
+Do not output JSON or code blocks unless explicitly asked.
+Keep responses concise and readable.`;
+
+export async function POST(req: Request) {
   try {
-    const { sessionId, message } = await request.json()
-    
-    if (!message) {
-      return NextResponse.json({ error: 'missing message' }, { status: 400 })
+    const { sessionId, message } = (await req.json()) as ChatBody;
+    if (!sessionId || !message || !message.trim()) {
+      return NextResponse.json(
+        { error: "Missing sessionId or message" },
+        { status: 400 },
+      );
     }
 
-    const s = await db.chatSession.findUnique({ where: { id: sessionId } })
-    const history = await db.chatMessage.findMany({ where: { sessionId }, orderBy: { createdAt: 'asc' }, take: 16 })
-    const historyExcerpt = history
-      .slice(-8)
-      .map((m) => `${m.role}: ${m.content}`)
-      .join('\n')
-    
-    const prompt = `You are a helpful assistant. Use the uploaded document and conversation history to answer.
+    const session = await auth();
 
-Document:
-${(s?.fileText || '').slice(0, 20000)}
+    // Ensure session exists
+    const chatSession = await db.chatSession.upsert({
+      where: { id: sessionId },
+      update: { lastActiveAt: new Date() },
+      create: {
+        id: sessionId,
+        userId: session?.user?.id ?? null,
+      },
+    });
 
-Conversation history:
-${historyExcerpt}
+    // Persist user message
+    await db.chatMessage.create({
+      data: {
+        sessionId: chatSession.id,
+        role: "user",
+        content: message.trim(),
+      },
+    });
 
-User: ${message}
+    // Gather short context: fileText excerpt + last few messages
+    const fileText = chatSession.fileText ?? "";
+    const fileExcerpt = fileText ? fileText.slice(0, 2000) : "";
 
-Assistant:`
+    const recentMessages = await db.chatMessage.findMany({
+      where: { sessionId: chatSession.id },
+      orderBy: { createdAt: "asc" },
+      take: 20,
+      select: { role: true, content: true },
+    });
 
-    const answer = await generateFromGemini(prompt)
+    const openai = createOpenAI();
+    const { text } = await generateText({
+      model: openai("gpt-4o-mini"),
+      system: SYSTEM_PROMPT,
+      messages: [
+        fileExcerpt
+          ? {
+              role: "system" as const,
+              content:
+                "The following is context extracted from the user's uploaded document. Use it only if relevant.\n\n" +
+                fileExcerpt,
+            }
+          : undefined,
+        ...recentMessages.map((m) => ({
+          role: (m.role === "user" ? "user" : "assistant") as
+            | "user"
+            | "assistant",
+          content: m.content,
+        })),
+      ].filter(Boolean) as Array<{
+        role: "system" | "user" | "assistant";
+        content: string;
+      }>,
+      maxOutputTokens: 1024,
+    });
 
-    // Persist messages and touch session
-    await db.$transaction([
-      db.chatMessage.create({ data: { sessionId, role: 'user', content: message } }),
-      db.chatMessage.create({ data: { sessionId, role: 'assistant', content: answer } }),
-      db.chatSession.update({ where: { id: sessionId }, data: { lastActiveAt: new Date() } }),
-    ])
+    const reply = text || "(no content)";
 
-    return NextResponse.json({ reply: answer })
-  } catch (err: any) {
-    console.error('Chat API error:', err)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+    // Persist assistant message
+    await db.chatMessage.create({
+      data: {
+        sessionId: chatSession.id,
+        role: "assistant",
+        content: reply,
+      },
+    });
+
+    return NextResponse.json({ reply });
+  } catch (error) {
+    console.error("/api/chat error", error);
+    return NextResponse.json({ error: "Chat failed" }, { status: 500 });
   }
 }

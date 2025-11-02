@@ -7,7 +7,6 @@ import {
   useTheme,
 } from "next-themes";
 
-import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
@@ -22,9 +21,9 @@ export function ThemeToggle() {
   };
 
   return (
-    <Button
-      variant="outline"
-      className="flex w-full items-center justify-between gap-2 text-primary"
+    <div
+      role="menuitem"
+      className="flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 hover:bg-accent"
       onClick={toggleTheme}
     >
       <span>Change Theme</span>
@@ -38,6 +37,6 @@ export function ThemeToggle() {
         />
       </div>
       <span className="sr-only">Toggle theme</span>
-    </Button>
+    </div>
   );
 }
