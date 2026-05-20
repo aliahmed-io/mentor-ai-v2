@@ -40,139 +40,142 @@ export default function QuizQuestion({
   const progress = ((currentIndex + 1) / totalQuestions) * 100;
 
   return (
-    <div className="p-2 md:p-4">
-      <div className="mx-auto max-w-4xl">
+    <div className="p-4 md:p-6 max-w-4xl mx-auto">
+      <div className="space-y-6">
         {/* Header with Progress */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="premium-card p-6 bg-[var(--card)]"
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="text-sm text-muted-foreground">
+            <span className="text-xs uppercase tracking-widest font-mono text-[var(--muted-foreground)] font-bold">
               Question {currentIndex + 1} of {totalQuestions}
-            </div>
-            <div className="text-sm text-muted-foreground">
+            </span>
+            <div className="text-xs font-mono font-bold text-[var(--muted-foreground)]">
               Topic:{" "}
-              <span className="font-semibold text-foreground">
+              <span className="font-sans font-bold text-[var(--foreground)] bg-[var(--background)] px-2.5 py-1 rounded-full border border-[var(--border)]">
                 {question.topic}
               </span>
             </div>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={progress} className="h-2 bg-[var(--muted)]" />
         </motion.div>
 
         {/* Question Content */}
         <AnimatePresence mode="wait">
           <motion.div
             key={question.id}
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
+            exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
+            className="premium-card p-8 bg-[var(--card)] space-y-6"
           >
-            <div className="space-y-4">
-              <div className="pb-2">
-                <div className="text-2xl font-bold leading-relaxed text-foreground">
-                  {question.question}
-                </div>
-              </div>
-              {/* Answer Options */}
-              <div className="space-y-3">
-                {question.options.map((option, index) => (
-                  <motion.button
-                    key={index}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => onAnswerSelect(index)}
-                    className={`w-full rounded-md border p-4 text-left transition ${
-                      selectedAnswer === index
-                        ? "border-primary bg-muted shadow-sm"
-                        : "border-border hover:bg-accent hover:text-accent-foreground"
-                    }`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div
-                        className={`w-6 h-6 rounded-full border flex items-center justify-center ${
-                          selectedAnswer === index
-                            ? "border-primary bg-primary"
-                            : "border-border"
-                        }`}
-                      >
-                        {selectedAnswer === index && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ type: "spring", stiffness: 500 }}
-                          >
-                            <Check className="w-4 h-4 text-white" />
-                          </motion.div>
-                        )}
-                      </div>
-                      <span className="flex-1 text-lg">{option}</span>
-                    </div>
-                  </motion.button>
-                ))}
-              </div>
-
-              {/* Clear Answer Button */}
-              {selectedAnswer !== null && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.2 }}
-                  className="flex justify-center pt-4"
+            <div className="pb-2">
+              <h2 className="text-2xl md:text-3xl font-serif font-bold leading-relaxed text-[var(--foreground)]">
+                {question.question}
+              </h2>
+            </div>
+            {/* Answer Options */}
+            <div className="space-y-3">
+              {question.options.map((option, index) => (
+                <motion.button
+                  key={index}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  onClick={() => onAnswerSelect(index)}
+                  className={`w-full rounded-2xl border p-5 text-left transition duration-200 flex items-center justify-between ${
+                    selectedAnswer === index
+                      ? "border-[var(--primary)] bg-[var(--primary)]/5 shadow-sm ring-1 ring-[var(--primary)] text-[var(--foreground)]"
+                      : "border-[var(--border)] bg-[var(--card)] hover:border-[var(--primary)]/40 hover:bg-[var(--background)]"
+                  }`}
                 >
-                  <Button
-                    variant="outline"
-                    onClick={onClearAnswer}
-                    className="flex items-center gap-2"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    Clear Selection
-                  </Button>
-                </motion.div>
-              )}
+                  <div className="flex items-center gap-4 flex-1">
+                    <div
+                      className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors duration-200 ${
+                        selectedAnswer === index
+                          ? "border-[var(--primary)] bg-[var(--primary)]"
+                          : "border-[var(--border)] bg-[var(--background)]"
+                      }`}
+                    >
+                      {selectedAnswer === index && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 500 }}
+                        >
+                          <Check
+                            className="w-3.5 h-3.5 text-white"
+                            strokeWidth={3}
+                          />
+                        </motion.div>
+                      )}
+                    </div>
+                    <span className="flex-1 text-base font-semibold leading-snug">
+                      {option}
+                    </span>
+                  </div>
+                </motion.button>
+              ))}
+            </div>
 
-              {/* Navigation Buttons */}
-              <div className="flex justify-between items-center pt-8 border-t">
+            {/* Clear Answer Button */}
+            {selectedAnswer !== null && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex justify-center pt-2"
+              >
                 <Button
                   variant="outline"
-                  onClick={onPrevious}
-                  disabled={!canGoPrevious}
-                  className="flex items-center gap-2"
+                  onClick={onClearAnswer}
+                  className="rounded-full border-[var(--border)] hover:bg-[var(--muted)] text-xs font-semibold px-4 flex items-center gap-1.5"
                 >
-                  <ArrowLeft className="w-4 h-4" />
-                  Previous
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Clear Selection
                 </Button>
+              </motion.div>
+            )}
 
-                <div className="flex gap-3">
-                  {isLastQuestion ? (
-                    <Button
-                      onClick={onFinish}
-                      disabled={isAnalyzing}
-                      className="px-8 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isAnalyzing ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Analyzing...
-                        </>
-                      ) : (
-                        "Finish Quiz"
-                      )}
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={onNext}
-                      disabled={!canGoNext}
-                      className="flex items-center gap-2"
-                    >
-                      Next
-                      <ArrowRight className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
+            {/* Navigation Buttons */}
+            <div className="flex justify-between items-center pt-6 border-t border-[var(--border)]">
+              <Button
+                variant="outline"
+                onClick={onPrevious}
+                disabled={!canGoPrevious}
+                className="rounded-full border-[var(--border)] hover:bg-[var(--muted)] text-xs font-semibold px-5 flex items-center gap-1.5"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Previous
+              </Button>
+
+              <div className="flex gap-3">
+                {isLastQuestion ? (
+                  <Button
+                    onClick={onFinish}
+                    disabled={isAnalyzing}
+                    className="rounded-full bg-[var(--foreground)] hover:bg-[var(--foreground)]/90 text-[var(--card)] text-xs font-semibold px-6 shadow-md flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      "Finish Quiz"
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={onNext}
+                    disabled={!canGoNext}
+                    className="rounded-full bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-[var(--primary-foreground)] text-xs font-semibold px-6 shadow-md flex items-center gap-1.5"
+                  >
+                    Next
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Button>
+                )}
               </div>
             </div>
           </motion.div>
@@ -180,21 +183,21 @@ export default function QuizQuestion({
 
         {/* Question Navigation Dots */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="flex justify-center mt-8"
+          transition={{ delay: 0.2 }}
+          className="flex justify-center"
         >
-          <div className="flex gap-2 rounded-full bg-card p-4 shadow-sm">
+          <div className="flex gap-2.5 rounded-full bg-[var(--card)] px-5 py-3.5 border border-[var(--border)] shadow-xs">
             {Array.from({ length: totalQuestions }, (_, index) => (
               <div
                 key={index}
-                className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
                   index === currentIndex
-                    ? "bg-primary scale-125"
+                    ? "bg-[var(--primary)] scale-125 ring-2 ring-[var(--primary)]/30"
                     : index < currentIndex
-                      ? "bg-muted-foreground"
-                      : "bg-muted"
+                      ? "bg-[var(--muted-foreground)]"
+                      : "bg-[var(--muted)]"
                 }`}
               />
             ))}

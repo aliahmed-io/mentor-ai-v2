@@ -36,8 +36,11 @@ export function ThemeSettings() {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
+  const presentationStyle = usePresentationState((s) => s.presentationStyle);
+  const setPresentationStyle = usePresentationState((s) => s.setPresentationStyle);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium">Theme & Layout</Label>
@@ -135,7 +138,7 @@ export function ThemeSettings() {
 
       <div className="space-y-4">
         <Label className="text-sm font-medium">Presentation Style</Label>
-        <Select defaultValue="professional">
+        <Select value={presentationStyle} onValueChange={setPresentationStyle}>
           <SelectTrigger className="overflow-hidden">
             <SelectValue placeholder="Select style" />
           </SelectTrigger>

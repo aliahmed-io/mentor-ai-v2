@@ -59,6 +59,7 @@ export function PresentationControls({
               setNumSlides(clamped);
             }}
             placeholder="5-12"
+            className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
         </div>
 

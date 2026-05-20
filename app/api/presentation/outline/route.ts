@@ -1,5 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/server/auth";
 
@@ -77,7 +78,15 @@ export async function POST(req: Request) {
       day: "numeric",
     });
 
-    const openai = createOpenAI();
+    const cookieStore = await cookies();
+    const apiKey = cookieStore.get("openai_api_key")?.value || process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "OpenAI API key is not configured. Please add your key in Settings." },
+        { status: 500 },
+      );
+    }
+    const openai = createOpenAI({ apiKey });
 
     // Format the prompt with template variables
     const formattedPrompt = outlineTemplate

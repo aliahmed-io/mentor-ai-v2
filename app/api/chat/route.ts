@@ -1,5 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateText } from "ai";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
@@ -56,7 +57,15 @@ export async function POST(req: Request) {
       select: { role: true, content: true },
     });
 
-    const openai = createOpenAI();
+    const cookieStore = await cookies();
+    const apiKey = cookieStore.get("openai_api_key")?.value || process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "OpenAI API key is not configured. Please add your key in Settings." },
+        { status: 500 },
+      );
+    }
+    const openai = createOpenAI({ apiKey });
     const { text } = await generateText({
       model: openai("gpt-4o-mini"),
       system: SYSTEM_PROMPT,

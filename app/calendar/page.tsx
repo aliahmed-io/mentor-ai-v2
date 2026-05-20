@@ -2,7 +2,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -133,57 +132,99 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 max-w-5xl mx-auto py-4">
+      {/* Editorial Header */}
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between border-b border-[var(--border)] pb-6 gap-4">
         <div>
-          <h1 className="text-2xl font-semibold">Schedule</h1>
-          <p className="text-sm text-muted-foreground">
-            Plan sessions and remember important dates
+          <span className="text-xs uppercase tracking-widest text-[var(--muted-foreground)] font-mono">
+            Planning & Organization
+          </span>
+          <h1 className="text-4xl font-serif font-bold text-[var(--foreground)] mt-1">
+            Study Sanctuary Schedule
+          </h1>
+          <p className="text-sm text-[var(--muted-foreground)] mt-1">
+            Coordinate your study sessions, set goals, and reflect on your
+            milestones in a serene environment.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+
+        {/* Navigation Actions */}
+        <div className="flex items-center gap-3 bg-[var(--card)] px-4 py-2 rounded-2xl border border-[var(--border)] shadow-sm self-start md:self-auto">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setDate(new Date())}
+            className="rounded-xl px-4 border-[var(--border)] hover:bg-[var(--muted)] text-xs font-semibold"
           >
             Today
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              setDate(new Date(date.getFullYear(), date.getMonth() - 1, 1))
-            }
-          >
-            {"<"}
-          </Button>
-          <div className="w-28 text-center text-sm text-muted-foreground">
-            {date.toLocaleDateString(undefined, {
-              month: "long",
-              year: "numeric",
-            })}
+          <div className="h-4 w-px bg-[var(--border)]" />
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                setDate(new Date(date.getFullYear(), date.getMonth() - 1, 1))
+              }
+              className="h-8 w-8 rounded-lg hover:bg-[var(--muted)] text-[var(--foreground)]"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </Button>
+            <div className="min-w-28 text-center text-xs font-mono font-bold text-[var(--foreground)]">
+              {date.toLocaleDateString(undefined, {
+                month: "long",
+                year: "numeric",
+              })}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                setDate(new Date(date.getFullYear(), date.getMonth() + 1, 1))
+              }
+              className="h-8 w-8 rounded-lg hover:bg-[var(--muted)] text-[var(--foreground)]"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </Button>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              setDate(new Date(date.getFullYear(), date.getMonth() + 1, 1))
-            }
-          >
-            {">"}
-          </Button>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardContent className="p-3">
+      <div className="grid gap-8 md:grid-cols-12">
+        {/* Left Side: Dynamic Calendar */}
+        <div className="md:col-span-7">
+          <div className="premium-card p-5 bg-[var(--card)] relative overflow-hidden">
+            {/* Subtle glow */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--primary)] opacity-[0.02] rounded-full blur-2xl pointer-events-none" />
             <Calendar
               mode="single"
               selected={date}
               onSelect={(d) => d && setDate(d)}
-              className="rounded-md border w-full [--cell-size:2.25rem] md:[--cell-size:2.5rem]"
+              className="w-full [--cell-size:2.5rem] md:[--cell-size:3rem] mx-auto"
               classNames={{
                 root: "w-full",
                 months: "relative flex w-full flex-col gap-4 md:flex-row",
@@ -191,91 +232,156 @@ export default function CalendarPage() {
               }}
               modifiers={{ hasEvent: daysWithEvents }}
             />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardContent className="p-6 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium">
-                Events on {date.toLocaleDateString()}
+        {/* Right Side: Selected Day Events & Add */}
+        <div className="md:col-span-5 space-y-6">
+          <div className="premium-card p-6 bg-[var(--card)] space-y-4">
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
+              <div>
+                <h3 className="font-serif font-bold text-lg text-[var(--foreground)]">
+                  Daily Planner
+                </h3>
+                <span className="text-[10px] text-[var(--muted-foreground)] font-mono">
+                  {date.toLocaleDateString(undefined, {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </span>
               </div>
+
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                  <Button size="sm">Add Event</Button>
+                  <Button
+                    size="sm"
+                    className="rounded-full bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-[var(--primary-foreground)] text-xs font-semibold px-4 shadow-sm"
+                  >
+                    Add Event
+                  </Button>
                 </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create Event</DialogTitle>
+                <DialogContent className="rounded-2xl border-[var(--border)] bg-[var(--card)] max-w-md p-6">
+                  <DialogHeader className="border-b border-[var(--border)] pb-3 mb-4">
+                    <DialogTitle className="font-serif text-2xl font-bold text-[var(--foreground)]">
+                      Create Schedule Item
+                    </DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <div className="space-y-1">
-                      <Label>Title</Label>
+                      <Label className="text-xs font-bold text-[var(--foreground)]">
+                        Title
+                      </Label>
                       <Input
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Event title"
+                        placeholder="Event title (e.g. Organic Chemistry Review)"
+                        className="rounded-xl border-[var(--border)] bg-[var(--background)] focus:bg-background text-sm"
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label>Description</Label>
+                      <Label className="text-xs font-bold text-[var(--foreground)]">
+                        Description
+                      </Label>
                       <Textarea
                         value={desc}
                         onChange={(e) => setDesc(e.target.value)}
-                        placeholder="Optional"
+                        placeholder="Optional notes or outline"
+                        className="rounded-xl border-[var(--border)] bg-[var(--background)] focus:bg-background text-sm min-h-[80px]"
                       />
                     </div>
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm">All day</Label>
+                    <div className="flex items-center justify-between bg-[var(--background)] p-3 rounded-xl border border-[var(--border)]">
+                      <div>
+                        <Label className="text-xs font-bold text-[var(--foreground)]">
+                          All-Day Event
+                        </Label>
+                        <p className="text-[10px] text-[var(--muted-foreground)]">
+                          Lock interval to full 24 hours
+                        </p>
+                      </div>
                       <Switch checked={allDay} onCheckedChange={setAllDay} />
                     </div>
                     {!allDay && (
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                          <Label>Start</Label>
+                          <Label className="text-xs font-bold text-[var(--foreground)]">
+                            Start Time
+                          </Label>
                           <Input
                             type="time"
                             value={startTime}
                             onChange={(e) => setStartTime(e.target.value)}
+                            className="rounded-xl border-[var(--border)] bg-[var(--background)] focus:bg-background text-sm"
                           />
                         </div>
                         <div className="space-y-1">
-                          <Label>End</Label>
+                          <Label className="text-xs font-bold text-[var(--foreground)]">
+                            End Time
+                          </Label>
                           <Input
                             type="time"
                             value={endTime}
                             onChange={(e) => setEndTime(e.target.value)}
+                            className="rounded-xl border-[var(--border)] bg-[var(--background)] focus:bg-background text-sm"
                           />
                         </div>
                       </div>
                     )}
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setOpen(false)}>
+                    <div className="flex justify-end gap-2 pt-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setOpen(false)}
+                        className="rounded-full border-[var(--border)] hover:bg-[var(--muted)] text-xs font-semibold px-4"
+                      >
                         Cancel
                       </Button>
-                      <Button onClick={createEvent}>Save</Button>
+                      <Button
+                        onClick={createEvent}
+                        className="rounded-full bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-[var(--primary-foreground)] text-xs font-semibold px-6 shadow-sm"
+                      >
+                        Save
+                      </Button>
                     </div>
                   </div>
                 </DialogContent>
               </Dialog>
             </div>
+
             {selectedDayEvents.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No events.</p>
+              <div className="text-center py-8 text-sm text-[var(--muted-foreground)] italic">
+                No events planned for this date.
+              </div>
             ) : (
-              <ul className="divide-y rounded-md border">
+              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
                 {selectedDayEvents.map((e) => (
-                  <li
+                  <div
                     key={e.id}
-                    className="flex items-center justify-between px-4 py-2 text-sm"
+                    className="flex items-start justify-between p-3 rounded-xl border border-[var(--border)] bg-[var(--background)] gap-4"
                   >
-                    <div>
-                      <div className="font-medium">{e.title}</div>
+                    <div className="space-y-1">
+                      <div className="font-bold text-xs text-[var(--foreground)]">
+                        {e.title}
+                      </div>
                       {e.description && (
-                        <div className="text-xs text-muted-foreground line-clamp-2">
+                        <div className="text-[10px] text-[var(--muted-foreground)] line-clamp-2">
                           {e.description}
                         </div>
                       )}
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-[9px] font-mono text-[var(--muted-foreground)] flex items-center gap-1">
+                        <svg
+                          className="w-3 h-3 text-[var(--primary)]"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
                         {e.allDay
                           ? "All day"
                           : `${new Date(e.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} — ${new Date(e.end).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
@@ -285,36 +391,64 @@ export default function CalendarPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => removeEvent(e.id)}
+                      className="text-xs text-[var(--destructive)] hover:text-[var(--destructive)] hover:bg-[var(--destructive)]/5 rounded-lg px-2 h-7"
                     >
                       Delete
                     </Button>
-                  </li>
+                  </div>
                 ))}
-              </ul>
+              </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
-      <Card>
-        <CardContent className="p-6 space-y-3">
-          <div className="text-sm font-medium">Upcoming</div>
-          {upcoming.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No upcoming events.</p>
-          ) : (
-            <ul className="divide-y rounded-md border">
-              {upcoming.map((e) => (
-                <li key={e.id} className="px-4 py-2 text-sm">
-                  <div className="font-medium">{e.title}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {new Date(e.start).toLocaleString()}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+      {/* Bottom: Upcoming Schedule Overview */}
+      <div className="premium-card p-6 bg-[var(--card)] space-y-4">
+        <h3 className="font-serif font-bold text-lg text-[var(--foreground)] border-b border-[var(--border)] pb-3">
+          Upcoming Schedule Overview
+        </h3>
+        {upcoming.length === 0 ? (
+          <div className="text-center py-6 text-sm text-[var(--muted-foreground)] italic">
+            No upcoming events on the horizon.
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {upcoming.map((e) => (
+              <div
+                key={e.id}
+                className="p-4 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:border-[var(--primary)] transition-all duration-300 relative overflow-hidden group"
+              >
+                <div className="absolute top-0 left-0 bottom-0 w-1 bg-[var(--primary)] opacity-40 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="font-bold text-sm text-[var(--foreground)] line-clamp-1 pl-1">
+                  {e.title}
+                </div>
+                <div className="text-[10px] text-[var(--muted-foreground)] pl-1 mt-1 font-mono flex items-center gap-1">
+                  <svg
+                    className="w-3.5 h-3.5 text-[var(--muted-foreground)]"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  {new Date(e.start).toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

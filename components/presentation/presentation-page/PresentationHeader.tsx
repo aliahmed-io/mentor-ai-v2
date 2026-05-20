@@ -1,12 +1,14 @@
 "use client";
 import * as motion from "framer-motion/client";
 import { ArrowLeft, ChevronRight } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 // Import our new components
-import AllweoneText from "@/components/globals/allweone-logo";
+import {
+  MentorLogoLong,
+  MentorLogoShort,
+} from "@/components/globals/MentorLogo";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { usePresentationState } from "@/states/presentation-state";
@@ -49,13 +51,12 @@ export default function PresentationHeader({ title }: PresentationHeaderProps) {
           {/* This component is suppose to be logo but for now its is actually hamburger menu */}
 
           <Link href={"/presentation/create"}>
-            <Button size={"icon"} className="rounded-full" variant={"ghost"}>
-              <Image
-                src="/white-short-logo.svg"
-                alt="Home"
-                width={20}
-                height={20}
-              />
+            <Button
+              size={"icon"}
+              className="rounded-full animate-pulse-slow"
+              variant={"ghost"}
+            >
+              <MentorLogoShort className="size-5" />
             </Button>
           </Link>
 
@@ -64,8 +65,8 @@ export default function PresentationHeader({ title }: PresentationHeaderProps) {
             layout="position"
             transition={{ duration: 1 }}
           >
-            <Link href="/" className="h-max">
-              <AllweoneText className="h-10 w-[7.5rem] cursor-pointer transition-transform duration-100 active:scale-95"></AllweoneText>
+            <Link href="/" className="h-max block">
+              <MentorLogoLong className="cursor-pointer transition-transform duration-100 active:scale-95" />
             </Link>
           </motion.div>
         </div>
@@ -86,13 +87,11 @@ export default function PresentationHeader({ title }: PresentationHeaderProps) {
             <ArrowLeft className="mr-1 h-4 w-4" /> Back
           </Link>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link href="/presentation" className="hover:text-foreground">
-              <Image
-                src="/white-short-logo.svg"
-                alt="Home"
-                width={16}
-                height={16}
-              />
+            <Link
+              href="/presentation"
+              className="hover:text-foreground flex items-center"
+            >
+              <MentorLogoShort className="size-4" />
             </Link>
             <ChevronRight className="h-4 w-4" />
             <span className="font-medium text-foreground">

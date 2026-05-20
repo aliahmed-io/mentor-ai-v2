@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -43,19 +43,27 @@ export function RecentFlashcardsPanel() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
+    if (typeof window === "undefined") return;
     setLoading(true);
     try {
-      const r = await fetch("/api/flashcards/recent?limit=25", {
+      const origin = window.location.origin;
+      const r = await fetch(`${origin}/api/flashcards/recent?limit=25`, {
         cache: "no-store",
       });
-      if (!r.ok) return setSets([]);
+      if (!r.ok) {
+        setSets([]);
+        return;
+      }
       const d = await r.json();
       setSets(d);
+    } catch (error) {
+      console.error("Failed to fetch recent flashcards:", error);
+      setSets([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     load();
@@ -69,19 +77,31 @@ export function RecentFlashcardsPanel() {
     });
 
   const rename = async (id: string, currentTitle: string | null) => {
+    if (typeof window === "undefined") return;
     const topic = prompt("Enter new title", currentTitle || "");
     if (!topic) return;
-    await fetch(`/api/flashcards/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ topic }),
-    });
-    await load();
+    try {
+      const origin = window.location.origin;
+      await fetch(`${origin}/api/flashcards/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic }),
+      });
+      await load();
+    } catch (error) {
+      console.error("Failed to rename flashcard:", error);
+    }
   };
 
   const del = async (id: string) => {
-    await fetch(`/api/flashcards/${id}`, { method: "DELETE" });
-    await load();
+    if (typeof window === "undefined") return;
+    try {
+      const origin = window.location.origin;
+      await fetch(`${origin}/api/flashcards/${id}`, { method: "DELETE" });
+      await load();
+    } catch (error) {
+      console.error("Failed to delete flashcard:", error);
+    }
   };
 
   if (loading) {
@@ -153,7 +173,7 @@ export function RecentFlashcardsPanel() {
               <SheetTitle>All Flashcard Sets</SheetTitle>
             </SheetHeader>
             <div className="mt-4 max-h-[70vh] overflow-y-auto">
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {sets.map((s) => (
                   <Card
                     key={s.id}
@@ -235,7 +255,7 @@ export function RecentFlashcardsPanel() {
         </Sheet>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4">
         {sets.slice(0, 3).map((s) => (
           <Card
             key={s.id}

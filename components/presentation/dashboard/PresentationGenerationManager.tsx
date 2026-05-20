@@ -370,11 +370,8 @@ export function PresentationGenerationManager() {
         outlineRafIdRef.current = requestAnimationFrame(updateOutlineWithRAF);
       }
     }
-  }, [
-    outlineMessages, // Process messages and store in buffers (non-blocking)
-    processMessages,
-    updateOutlineWithRAF,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [outlineMessages]);
 
   // Watch for outline generation start
   useEffect(() => {
@@ -390,7 +387,7 @@ export function PresentationGenerationManager() {
           setIsGeneratingOutline(true);
 
           // Get the current input after reset (it's preserved)
-          const { presentationInput } = usePresentationState.getState();
+          const { presentationInput, numSlides, language } = usePresentationState.getState();
 
           // Start the RAF cycle for outline updates
           if (outlineRafIdRef.current === null) {
@@ -422,16 +419,8 @@ export function PresentationGenerationManager() {
     };
 
     void startOutlineGeneration();
-  }, [
-    shouldStartOutlineGeneration,
-    appendOutlineMessage,
-    language,
-    numSlides, // Reset all state except ID and input when starting new generation
-    resetForNewGeneration,
-    setIsGeneratingOutline,
-    setShouldStartOutlineGeneration,
-    updateOutlineWithRAF,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldStartOutlineGeneration]);
 
   const { completion: presentationCompletion, complete: generatePresentation } =
     useCompletion({
@@ -485,7 +474,8 @@ export function PresentationGenerationManager() {
         toast.error("Error processing presentation content");
       }
     }
-  }, [presentationCompletion, updateSlidesWithRAF]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [presentationCompletion]);
 
   useEffect(() => {
     if (shouldStartPresentationGeneration) {
@@ -514,11 +504,8 @@ export function PresentationGenerationManager() {
         },
       });
     }
-  }, [
-    shouldStartPresentationGeneration,
-    generatePresentation,
-    setIsGeneratingPresentation,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldStartPresentationGeneration]);
 
   // Debounced incremental persistence while streaming
   const debouncedStreamSaveRef = useRef(

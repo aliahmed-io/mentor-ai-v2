@@ -1,48 +1,48 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FAF8F5;
-  --foreground: #232B28;
-  --card: #FDFDFB;
-  --card-foreground: #232B28;
-  --popover: #FDFDFB;
-  --popover-foreground: #232B28;
-  --primary: #4D6B56;
-  --primary-foreground: #FAF8F5;
-  --secondary: #EADFC9;
-  --secondary-foreground: #232B28;
-  --muted: #EDE8DF;
-  --muted-foreground: #5B6661;
-  --accent: #DFECE3;
-  --accent-foreground: #232B28;
-  --destructive: #D35C5C;
-  --destructive-foreground: #FAF8F5;
-  --border: #E5D9C2;
-  --input: #E5D9C2;
-  --ring: #4D6B56;
-  --radius: 0.75rem;
+  --background: #F6F4F0;
+  --foreground: #221F1C;
+  --card: #FFFFFF;
+  --card-foreground: #221F1C;
+  --popover: #FFFFFF;
+  --popover-foreground: #221F1C;
+  --primary: #96c8a2;
+  --primary-foreground: #101612;
+  --secondary: #E5E1D8;
+  --secondary-foreground: #221F1C;
+  --muted: #EDEAE1;
+  --muted-foreground: #696257;
+  --accent: #EDEAE1;
+  --accent-foreground: #221F1C;
+  --destructive: #BD4A4A;
+  --destructive-foreground: #FFFFFF;
+  --border: #DCD7CD;
+  --input: #DCD7CD;
+  --ring: #96c8a2;
+  --radius: 1.25rem;
 }
 
 .dark {
-  --background: #101412;
-  --foreground: #E6ECE8;
-  --card: #161D1A;
-  --card-foreground: #E6ECE8;
-  --popover: #161D1A;
-  --popover-foreground: #E6ECE8;
-  --primary: #82A78E;
-  --primary-foreground: #101412;
-  --secondary: #3A3025;
-  --secondary-foreground: #EADFC9;
-  --muted: #1A221E;
-  --muted-foreground: #8FA098;
-  --accent: #22332A;
-  --accent-foreground: #E6ECE8;
-  --destructive: #B23B3B;
-  --destructive-foreground: #E6ECE8;
-  --border: #2A3530;
-  --input: #2A3530;
-  --ring: #82A78E;
+  --background: #F6F4F0;
+  --foreground: #221F1C;
+  --card: #FFFFFF;
+  --card-foreground: #221F1C;
+  --popover: #FFFFFF;
+  --popover-foreground: #221F1C;
+  --primary: #96c8a2;
+  --primary-foreground: #101612;
+  --secondary: #E5E1D8;
+  --secondary-foreground: #221F1C;
+  --muted: #EDEAE1;
+  --muted-foreground: #696257;
+  --accent: #EDEAE1;
+  --accent-foreground: #221F1C;
+  --destructive: #BD4A4A;
+  --destructive-foreground: #FFFFFF;
+  --border: #DCD7CD;
+  --input: #DCD7CD;
+  --ring: #96c8a2;
 }
 
 @theme {
@@ -70,8 +70,9 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
   
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-plus-jakarta-sans);
+  --font-mono: var(--font-space-mono);
+  --font-serif: var(--font-fraunces);
 }
 
 @layer base {
@@ -81,6 +82,89 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: var(--font-plus-jakarta-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  h1, h2, h3, .font-serif {
+    font-family: var(--font-fraunces), Georgia, Cambria, "Times New Roman", Times, serif;
   }
 }
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(1.5deg);
+  }
+}
+
+@keyframes float-delayed {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(14px) rotate(-1.5deg);
+  }
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.05);
+  }
+}
+
+.animate-float {
+  animation: float 8s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 10s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 12s ease-in-out infinite;
+}
+
+/* Custom Premium Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+  border: 2px solid var(--background);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Custom Premium Focus & Input Styles */
+input:focus, select:focus, textarea:focus {
+  outline: none !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(150, 200, 162, 0.25) !important;
+}
+
+.premium-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 30px rgba(34, 31, 28, 0.02);
+  border-radius: var(--radius);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.premium-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(150, 200, 162, 0.08);
+  border-color: var(--primary);
+}
+

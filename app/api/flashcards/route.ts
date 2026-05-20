@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { getImageFromUnsplash } from "@/app/_actions/image/unsplash";
 import { auth } from "@/server/auth";
@@ -42,10 +43,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const cookieStore = await cookies();
+    const apiKey = cookieStore.get("gemini_api_key")?.value || process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: "GEMINI_API_KEY environment variable is not set" },
+        { error: "Gemini API key is not configured. Please add your key in Settings." },
         { status: 500 },
       );
     }

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Spinner } from "./spinner";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background active:scale-95 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-full text-sm font-medium ring-offset-background active:scale-95 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
@@ -16,25 +16,25 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "border border-input bg-card hover:bg-accent hover:text-accent-foreground",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/85",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 p-0 m-0 underline",
         loading:
           "bg-primary text-primary-foreground flex justify-center items-center disabled",
         noBackground: "bg-transparent p-0 m-0 text-sm text-inherit",
         outlineLoading:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground flex justify-center items-center disabled",
+          "border border-input bg-card hover:bg-accent hover:text-accent-foreground flex justify-center items-center disabled",
         noBackgroundLoading:
           "bg-transparent p-0 m-0 text-sm text-inherit flex justify-center items-center disabled",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-8 w-8 md:h-10 md:w-10",
-        xs: "h-5 rounded-md p-1",
+        default: "h-10 px-6 py-2",
+        sm: "h-9 rounded-full px-4",
+        lg: "h-11 rounded-full px-8",
+        icon: "h-8 w-8 md:h-10 md:w-10 rounded-full",
+        xs: "h-5 rounded-full px-2",
       },
     },
     defaultVariants: {

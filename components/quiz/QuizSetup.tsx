@@ -3,16 +3,10 @@
 import { motion } from "framer-motion";
 import { BookOpen, FileText, Upload } from "lucide-react";
 import { useState } from "react";
+import { MentorLogoShort } from "@/components/globals/MentorLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { QuizSetup as QuizSetupType } from "@/types/quiz";
 
@@ -121,114 +115,110 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
   };
 
   return (
-    <div className="p-2 md:p-4">
+    <div className="p-1 md:p-1">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-2xl mx-auto"
+        transition={{ duration: 0.4 }}
+        className="premium-card bg-[var(--card)] p-8 relative overflow-hidden"
       >
-        <div className="text-center space-y-4">
+        {/* Decorative corner accent */}
+        <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--primary)] opacity-[0.02] rounded-full blur-xl pointer-events-none" />
+
+        <div className="text-center space-y-3 pb-6 border-b border-[var(--border)]">
           <motion.div
-            initial={{ scale: 0 }}
+            initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted"
+            className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--primary)]/10 border border-[var(--primary)]/20"
           >
-            {/* biome-ignore lint/performance/noImgElement: static local SVG logo */}
-            <img
-              src="/white-short-logo.svg"
-              alt="Quiz Logo"
-              className="h-8 w-8"
-            />
+            <MentorLogoShort className="size-7 text-[var(--primary)]" />
           </motion.div>
-          <div className="text-3xl font-bold text-foreground">
-            Create Your Quiz
-          </div>
-          <div className="text-lg text-muted-foreground">
-            Customize your learning experience with AI-powered questions
-          </div>
+          <h1 className="text-3xl font-serif font-bold text-[var(--foreground)]">
+            Create AI Quiz
+          </h1>
+          <p className="text-sm text-[var(--muted-foreground)]">
+            Configure learning milestones or translate uploaded study guides
+            into an interactive examination.
+          </p>
         </div>
 
-        <div className="space-y-8 mt-6">
+        <div className="space-y-6 mt-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Topic Selection */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="space-y-3"
-            >
+            <div className="space-y-2.5">
               <Label
                 htmlFor="topic"
-                className="text-sm font-semibold flex items-center gap-2"
+                className="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)] flex items-center gap-1.5"
               >
-                <BookOpen className="w-4 h-4" />
+                <BookOpen className="w-3.5 h-3.5 text-[var(--primary)]" />
                 Quiz Topic
               </Label>
               <Input
                 id="topic"
-                placeholder="e.g., JavaScript, React, Python..."
+                placeholder="e.g., JavaScript, React Fundamentals, Cellular Biology..."
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
-                className="text-lg py-6"
+                className="text-sm py-5 rounded-xl border-[var(--border)] bg-[var(--background)] focus:bg-background transition-all duration-300"
               />
-              <p className="text-xs text-muted-foreground">
-                Tip: If you upload a PDF/PPTX below, topic is optional.
+              <p className="text-[10px] text-[var(--muted-foreground)] italic">
+                Optional if study material or a file is provided below.
               </p>
-              <div className="mt-2 flex flex-wrap gap-2">
+
+              <div className="flex flex-wrap gap-2 pt-1">
                 {topicSuggestions.map((suggestion) => (
-                  <Button
+                  <button
                     key={suggestion}
                     type="button"
-                    variant="outline"
-                    size="sm"
                     onClick={() => setTopic(suggestion)}
-                    className="text-xs"
+                    className="text-[10px] font-semibold bg-[var(--background)] hover:bg-[var(--muted)] text-[var(--foreground)] border border-[var(--border)] rounded-full px-3 py-1 transition-all duration-200"
                   >
                     {suggestion}
-                  </Button>
+                  </button>
                 ))}
               </div>
-            </motion.div>
+            </div>
 
             {/* Difficulty Selection */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-              className="space-y-3"
-            >
-              <Label className="text-sm font-semibold">Difficulty Level</Label>
-              <Select
-                value={difficulty}
-                onValueChange={(v: any) => setDifficulty(v)}
-              >
-                <SelectTrigger className="w-full overflow-hidden">
-                  <SelectValue placeholder="Select difficulty" />
-                </SelectTrigger>
-                <SelectContent className="z-50 max-h-96 bg-background">
-                  {difficultyOptions.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>
-                      {o.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </motion.div>
+            <div className="space-y-2.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)]">
+                Difficulty Level
+              </Label>
+              <div className="grid grid-cols-3 gap-3">
+                {difficultyOptions.map((o) => {
+                  const active = difficulty === o.value;
+                  return (
+                    <button
+                      key={o.value}
+                      type="button"
+                      onClick={() => setDifficulty(o.value)}
+                      className={`p-3 rounded-xl border text-left transition-all duration-200 ${
+                        active
+                          ? "border-[var(--primary)] bg-[var(--primary)]/5 shadow-sm ring-1 ring-[var(--primary)]"
+                          : "border-[var(--border)] bg-[var(--card)] hover:border-[var(--primary)]/40"
+                      }`}
+                    >
+                      <div className="font-bold text-xs text-[var(--foreground)]">
+                        {o.label}
+                      </div>
+                      <div className="text-[9px] text-[var(--muted-foreground)] mt-1 font-serif italic leading-tight">
+                        {o.description}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             {/* Question Count */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-              className="space-y-3"
-            >
-              <Label htmlFor="questionCount" className="text-sm font-semibold">
+            <div className="space-y-2.5">
+              <Label
+                htmlFor="questionCount"
+                className="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)]"
+              >
                 Number of Questions
               </Label>
-              <div className="flex items-center gap-4">
-                <Input
+              <div className="flex flex-wrap items-center gap-3 bg-[var(--background)] p-2.5 rounded-xl border border-[var(--border)]">
+                <input
                   id="questionCount"
                   type="number"
                   min="5"
@@ -237,94 +227,83 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
                   onChange={(e) =>
                     setQuestionCount(parseInt(e.target.value, 10) || 10)
                   }
-                  className="w-32"
+                  className="w-16 bg-background rounded-lg border border-[var(--border)] px-2 py-1.5 text-center text-xs font-bold text-[var(--foreground)]"
                 />
-                <div className="flex gap-2">
+                <div className="flex gap-1.5">
                   {[5, 10, 15, 20].map((count) => (
-                    <Button
+                    <button
                       key={count}
                       type="button"
-                      variant="outline"
-                      size="sm"
                       onClick={() => setQuestionCount(count)}
-                      className={questionCount === count ? "bg-muted" : ""}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${
+                        questionCount === count
+                          ? "bg-[var(--primary)] text-[var(--primary-foreground)] shadow-xs"
+                          : "hover:bg-[var(--muted)] text-[var(--muted-foreground)]"
+                      }`}
                     >
                       {count}
-                    </Button>
+                    </button>
                   ))}
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Study Material */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
-              className="space-y-3"
-            >
-              <Label className="text-sm font-semibold flex items-center gap-2">
-                <FileText className="w-4 h-4" />
+            <div className="space-y-2.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)] flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5 text-[var(--primary)]" />
                 Study Material (Optional)
               </Label>
               <div className="space-y-3">
                 <Textarea
-                  placeholder="Paste your study material here, or upload a file below..."
+                  placeholder="Paste references, text snippets, or lecture notes here..."
                   value={studyMaterial}
                   onChange={(e) => setStudyMaterial(e.target.value)}
-                  className="min-h-[120px] resize-none"
+                  className="min-h-[100px] text-sm rounded-xl border-[var(--border)] bg-[var(--background)] focus:bg-background resize-none"
                 />
-                <div className="flex items-center gap-3">
-                  <Label htmlFor="file-upload" className="sr-only">
-                    Upload Study Material
-                  </Label>
-                  <Input
+
+                {/* Custom File Upload Drag Zone */}
+                <div className="border border-dashed border-[var(--border)] hover:border-[var(--primary)] rounded-xl p-5 bg-[var(--background)] transition-all duration-300 flex flex-col items-center justify-center text-center cursor-pointer relative group">
+                  <input
                     id="file-upload"
                     type="file"
                     accept=".txt,.md,.pdf,.pptx,.docx"
                     onChange={handleFileUpload}
-                    className="max-w-xs"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="border-dashed"
-                    onClick={() =>
-                      document.getElementById("file-upload")?.click()
-                    }
+                    className="absolute inset-0 opacity-0 cursor-pointer z-10"
                     disabled={isUploading}
-                  >
-                    <Upload className="w-4 h-4 mr-2" /> Choose file
-                  </Button>
+                  />
+                  <Upload className="w-6 h-6 text-[var(--muted-foreground)] group-hover:text-[var(--primary)] mb-1.5 transition-colors duration-300" />
+                  <div className="text-xs font-bold text-[var(--foreground)]">
+                    Drag & drop or select study guide
+                  </div>
+                  <div className="text-[9px] text-[var(--muted-foreground)] mt-0.5">
+                    Supports PDF, PPTX, DOCX, TXT, MD
+                  </div>
+
                   {isUploading && (
-                    <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                      Extracting…
-                    </span>
+                    <div className="mt-2 text-xs text-[var(--primary)] font-mono animate-pulse">
+                      Extracting contents...
+                    </div>
                   )}
                   {!isUploading && fileContent && (
-                    <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                      ✅ File uploaded successfully
-                    </span>
+                    <div className="mt-2 text-xs text-[var(--primary)] font-semibold">
+                      ✅ Document parsed successfully
+                    </div>
                   )}
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Submit Button */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-              className="pt-4"
-            >
+            <div className="pt-2">
               <Button
                 type="submit"
-                className="w-full py-6 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
+                className="w-full py-6 rounded-full text-sm font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary)]/90 shadow-md transition-all duration-300 hover:scale-101"
                 disabled={!topic.trim() && !studyMaterial.trim()}
               >
-                Start Quiz
+                Assemble & Start Quiz
               </Button>
-            </motion.div>
+            </div>
           </form>
         </div>
       </motion.div>

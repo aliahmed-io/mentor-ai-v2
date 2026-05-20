@@ -1,7 +1,27 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { auth } from "@/server/auth";
+
+const slidesRequestSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  prompt: z.string().optional().default("No specific prompt provided"),
+  outline: z
+    .array(z.string())
+    .min(1, "Outline must contain at least one topic"),
+  language: z.string().min(1, "Language is required"),
+  tone: z.string().optional().default("professional"),
+  searchResults: z
+    .array(
+      z.object({
+        query: z.string().default(""),
+        results: z.array(z.unknown()).default([]),
+      }),
+    )
+    .optional(),
+});
 
 // Use AI SDK types for proper type safety
 
@@ -13,7 +33,6 @@ interface SlidesRequest {
   tone: string; // Style for image queries (optional)
   searchResults?: Array<{ query: string; results: unknown[] }>; // Search results for context
 }
-// TODO: Add table and chart to the available layouts
 const slidesTemplate = `
 You are an expert presentation designer.Your task is to create an engaging presentation in XML format.
 ## CORE REQUIREMENTS
@@ -237,6 +256,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const body = await req.json();
+    const validationResult = slidesRequestSchema.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        {
+          error: "Invalid request payload",
+          details: validationResult.error.format(),
+        },
+        { status: 400 },
+      );
+    }
+
     const {
       title,
       prompt: userPrompt,
@@ -244,14 +275,7 @@ export async function POST(req: Request) {
       language,
       tone,
       searchResults,
-    } = (await req.json()) as SlidesRequest;
-
-    if (!title || !outline || !Array.isArray(outline) || !language) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 },
-      );
-    }
+    } = validationResult.data;
 
     // Format search results
     let searchResultsText = "No research data available.";
@@ -289,7 +313,15 @@ export async function POST(req: Request) {
       day: "numeric",
     });
 
-    const openai = createOpenAI();
+    const cookieStore = await cookies();
+    const apiKey = cookieStore.get("openai_api_key")?.value || process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "OpenAI API key is not configured. Please add your key in Settings." },
+        { status: 500 },
+      );
+    }
+    const openai = createOpenAI({ apiKey });
 
     // Format the prompt with template variables
     const formattedPrompt = slidesTemplate

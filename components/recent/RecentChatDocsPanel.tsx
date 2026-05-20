@@ -10,7 +10,7 @@ import {
   Trash2,
 } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -42,17 +42,27 @@ export function RecentChatDocsPanel() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
+    if (typeof window === "undefined") return;
     setLoading(true);
     try {
-      const r = await fetch("/api/chat/docs?limit=25", { cache: "no-store" });
-      if (!r.ok) return setDocs([]);
+      const origin = window.location.origin;
+      const r = await fetch(`${origin}/api/chat/docs?limit=25`, {
+        cache: "no-store",
+      });
+      if (!r.ok) {
+        setDocs([]);
+        return;
+      }
       const d = await r.json();
       setDocs(d);
+    } catch (error) {
+      console.error("Failed to fetch recent chat docs:", error);
+      setDocs([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     load();
@@ -66,19 +76,31 @@ export function RecentChatDocsPanel() {
     });
 
   const rename = async (id: string, currentTitle: string) => {
+    if (typeof window === "undefined") return;
     const title = prompt("Enter new title", currentTitle || "");
     if (!title) return;
-    await fetch(`/api/chat/docs/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title }),
-    });
-    await load();
+    try {
+      const origin = window.location.origin;
+      await fetch(`${origin}/api/chat/docs/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      });
+      await load();
+    } catch (error) {
+      console.error("Failed to rename note:", error);
+    }
   };
 
   const del = async (id: string) => {
-    await fetch(`/api/chat/docs/${id}`, { method: "DELETE" });
-    await load();
+    if (typeof window === "undefined") return;
+    try {
+      const origin = window.location.origin;
+      await fetch(`${origin}/api/chat/docs/${id}`, { method: "DELETE" });
+      await load();
+    } catch (error) {
+      console.error("Failed to delete note:", error);
+    }
   };
 
   if (loading) {
@@ -150,7 +172,7 @@ export function RecentChatDocsPanel() {
               <SheetTitle>All Notes</SheetTitle>
             </SheetHeader>
             <div className="mt-4 max-h-[70vh] overflow-y-auto">
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {docs.map((d) => (
                   <Card
                     key={d.id}
@@ -238,7 +260,7 @@ export function RecentChatDocsPanel() {
         </Sheet>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4">
         {docs.slice(0, 3).map((d) => (
           <Card
             key={d.id}

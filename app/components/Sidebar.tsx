@@ -1,10 +1,20 @@
 "use client";
 
-import Image from "next/image";
+import {
+  BarChart2,
+  BookOpen,
+  Brain,
+  Calendar,
+  MessageSquare,
+  Presentation,
+  Timer,
+  Settings,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentProps } from "react";
 import SideBarDropdown from "@/components/auth/Dropdown";
+import { MentorLogoLong } from "@/components/globals/MentorLogo";
 
 type SidebarProps = ComponentProps<"nav"> & {
   itemsClassName?: string;
@@ -17,14 +27,15 @@ export default function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname() ?? "/";
 
-  const links: Array<{ href: string; label: string }> = [
-    { href: "/chatbot", label: "Chatbot" },
-    { href: "/quiz", label: "Quiz" },
-    { href: "/flashcard", label: "Flashcard" },
-    { href: "/presentation", label: "Presentation" },
-    { href: "/pomodoro", label: "Pomodoro" },
-    { href: "/calendar", label: "Calendar" },
-    { href: "/analytics", label: "Analytics" },
+  const links = [
+    { href: "/chatbot", label: "Chatbot", icon: MessageSquare },
+    { href: "/quiz", label: "Quiz", icon: Brain },
+    { href: "/flashcard", label: "Flashcard", icon: BookOpen },
+    { href: "/presentation", label: "Presentation", icon: Presentation },
+    { href: "/pomodoro", label: "Pomodoro", icon: Timer },
+    { href: "/calendar", label: "Calendar", icon: Calendar },
+    { href: "/analytics", label: "Analytics", icon: BarChart2 },
+    { href: "/settings", label: "Settings", icon: Settings },
   ];
 
   return (
@@ -34,43 +45,43 @@ export default function Sidebar({
       {...rest}
     >
       <div className="h-full flex flex-col">
-        <div className="px-6 py-5 border-b border-border/40">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <Image
-              src="/white-long-logo.svg"
-              alt="Mentor AI"
-              width={140}
-              height={24}
-              priority
-              className="dark:invert-0 invert transition-all duration-300"
-            />
+        <div className="px-6 py-6 border-b border-border/40">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 transition-transform active:scale-95"
+          >
+            <MentorLogoLong />
           </Link>
         </div>
         <div
-          className={`flex-1 overflow-y-auto px-2 py-4 ${itemsClassName ?? ""}`}
+          className={`flex-1 overflow-y-auto px-3 py-6 ${itemsClassName ?? ""}`}
         >
-          <ul className="space-y-1">
+          <ul className="space-y-1.5">
             {links.map((link) => {
               const isActive = pathname === link.href;
+              const Icon = link.icon;
               return (
                 <li key={link.href}>
                   <Link
                     href={link.href}
                     aria-current={isActive ? "page" : undefined}
-                    className={`block px-4 py-2.5 text-sm rounded-lg transition-all duration-200 ${
+                    className={`flex items-center gap-3 px-4 py-3 text-sm rounded-xl transition-all duration-200 ${
                       isActive
-                        ? "bg-primary text-primary-foreground font-medium shadow-sm shadow-primary/10"
-                        : "text-muted-foreground hover:bg-accent hover:text-foreground font-normal"
+                        ? "bg-primary text-primary-foreground font-semibold shadow-md shadow-primary/20 scale-[1.02]"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground font-medium"
                     }`}
                   >
-                    {link.label}
+                    <Icon
+                      className={`size-4.5 shrink-0 transition-transform ${isActive ? "scale-110" : "opacity-80 group-hover:scale-105"}`}
+                    />
+                    <span>{link.label}</span>
                   </Link>
                 </li>
               );
             })}
           </ul>
         </div>
-        <div className="mt-auto border-t border-border/40 p-4">
+        <div className="mt-auto border-t border-border/40 p-4 bg-background/40">
           <SideBarDropdown shouldViewFullName align="start" side="top" />
         </div>
       </div>

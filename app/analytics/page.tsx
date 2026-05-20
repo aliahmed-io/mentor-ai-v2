@@ -1,3 +1,4 @@
+import { TrendingUp } from "lucide-react";
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
 import AnalyticsClient from "./AnalyticsClient";
@@ -206,13 +207,21 @@ export default async function AnalyticsPage() {
   const sinceLabel = startDate.toLocaleDateString();
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Your Analytics</h1>
-        <p className="text-sm text-muted-foreground">
-          Study time, creation activity, and score trends
-        </p>
-      </div>
+    <div className="space-y-10 max-w-6xl mx-auto px-4 py-6">
+      <header className="flex flex-col gap-2 pb-6 border-b border-border/80">
+        <div>
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary-foreground/90 mb-3 select-none">
+            <TrendingUp className="size-3 text-primary" /> Mindful Progress
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-serif font-extrabold tracking-tight text-foreground">
+            Your Analytics
+          </h1>
+          <p className="text-sm md:text-base text-muted-foreground mt-2 font-light max-w-2xl leading-relaxed">
+            Monitor your focus intervals, quiz scores, recall milestones, and
+            daily study metrics in real-time.
+          </p>
+        </div>
+      </header>
       <AnalyticsClient
         studyTimeByDay={studyTimeByDay}
         flashcardsByDay={flashcardsByDay}

@@ -2369,12 +2369,55 @@ export class PlateJSToPPTXConverter {
     }) as TTableRowElement[];
     if (tableRows.length === 0) return 0;
 
-    const estimatedHeight = Math.max(tableRows.length * 0.4, 1.0);
-    if (measureOnly) return estimatedHeight;
+    // Calculate maximum columns across all rows to determine colWidth
+    let maxCols = 1;
+    for (const r of tableRows) {
+      const cells = r.children.filter((c) => {
+        const el = c as TElement;
+        return (
+          el &&
+          typeof el === "object" &&
+          "type" in el &&
+          (el.type === "td" || el.type === "th")
+        );
+      });
+      maxCols = Math.max(maxCols, cells.length);
+    }
+    const colWidth = width / maxCols;
+
+    // Dynamically calculate row heights cell-by-cell
+    let totalTableHeight = 0;
+    const rowHeights: number[] = [];
+    for (const r of tableRows) {
+      const cells = r.children.filter((c) => {
+        const el = c as TElement;
+        return (
+          el &&
+          typeof el === "object" &&
+          "type" in el &&
+          (el.type === "td" || el.type === "th")
+        );
+      }) as TTableCellElement[];
+
+      let maxCellHeight = 0.35; // Absolute minimum row height in inches
+      for (const c of cells) {
+        const cellText = this.extractText(c);
+        // Estimate text wrapping height with 10pt font size
+        const cellHeight = this.estimateTextHeight(cellText, colWidth, 10);
+        if (cellHeight > maxCellHeight) {
+          maxCellHeight = cellHeight;
+        }
+      }
+      rowHeights.push(maxCellHeight);
+      totalTableHeight += maxCellHeight;
+    }
+
+    if (measureOnly) return totalTableHeight;
 
     const tableData: PptxGenJS.TableCell[][] = [];
 
-    for (const r of tableRows) {
+    for (let rIdx = 0; rIdx < tableRows.length; rIdx++) {
+      const r = tableRows[rIdx]!;
       const rowCells: PptxGenJS.TableCell[] = [];
       const cells = r.children.filter((c) => {
         const el = c as TElement;
@@ -2419,10 +2462,11 @@ export class PlateJSToPPTXConverter {
       x: x,
       y: y,
       w: width,
-      h: estimatedHeight,
+      h: totalTableHeight,
+      rowH: rowHeights,
     });
 
-    return estimatedHeight;
+    return totalTableHeight;
   }
 
   private async addChart(

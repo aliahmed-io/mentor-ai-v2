@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Wand2 } from "lucide-react";
+import { ArrowLeft, Presentation } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { getPresentation } from "@/app/_actions/presentation/presentationActions";
@@ -257,7 +257,7 @@ export default function PresentationGenerateWithIdPage() {
           onClick={handleGenerate}
           disabled={isGeneratingPresentation}
         >
-          <Wand2 className="h-5 w-5" />
+          <Presentation className="h-5 w-5" />
           {isGeneratingPresentation ? "Generating..." : "Generate Presentation"}
         </Button>
       </div>

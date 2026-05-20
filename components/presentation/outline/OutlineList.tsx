@@ -61,26 +61,20 @@ export function OutlineList() {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      setItems((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        const newItems = arrayMove(items, oldIndex, newIndex);
-        // Update the outline in the store
-        setOutline(newItems.map((item) => item.title));
-        return newItems;
-      });
+      const oldIndex = items.findIndex((item) => item.id === active.id);
+      const newIndex = items.findIndex((item) => item.id === over.id);
+      const newItems = arrayMove(items, oldIndex, newIndex);
+      setItems(newItems);
+      setOutline(newItems.map((item) => item.title));
     }
   }
 
   const handleTitleChange = (id: string, newTitle: string) => {
-    setItems((items) => {
-      const newItems = items.map((item) =>
-        item.id === id ? { ...item, title: newTitle } : item,
-      );
-      // Update the outline in the store
-      setOutline(newItems.map((item) => item.title));
-      return newItems;
-    });
+    const newItems = items.map((item) =>
+      item.id === id ? { ...item, title: newTitle } : item,
+    );
+    setItems(newItems);
+    setOutline(newItems.map((item) => item.title));
   };
 
   const handleAddCard = () => {
@@ -97,12 +91,9 @@ export function OutlineList() {
   };
 
   const handleDeleteCard = (id: string) => {
-    setItems((items) => {
-      const newItems = items.filter((item) => item.id !== id);
-      // Update the outline in the store
-      setOutline(newItems.map((item) => item.title));
-      return newItems;
-    });
+    const newItems = items.filter((item) => item.id !== id);
+    setItems(newItems);
+    setOutline(newItems.map((item) => item.title));
   };
 
   const content = useMemo(() => {
