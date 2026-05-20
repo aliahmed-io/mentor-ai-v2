@@ -16,6 +16,8 @@ export async function exportPresentation(
     text: string;
     heading: string;
     muted: string;
+    headingFont?: string;
+    bodyFont?: string;
   }>,
 ) {
   try {

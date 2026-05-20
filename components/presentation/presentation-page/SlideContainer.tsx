@@ -41,6 +41,7 @@ export function SlideContainer({
   slidesCount,
 }: SlideContainerProps) {
   const isPresenting = usePresentationState((s) => s.isPresenting);
+  const viewMode = usePresentationState((s) => s.viewMode);
   const currentSlideIndex = usePresentationState((s) => s.currentSlideIndex);
   const setCurrentSlideIndex = usePresentationState(
     (s) => s.setCurrentSlideIndex,
@@ -99,21 +100,20 @@ export function SlideContainer({
     >
       <div
         className={cn(
-          "relative w-full",
+          "relative w-full transition-all duration-300",
+          !isPresenting && viewMode === "slides" && "aspect-video overflow-hidden border rounded-lg shadow-md max-w-5xl mx-auto",
+          !isPresenting && viewMode === "web" && "w-full mx-auto",
           !isPresenting &&
             (slideWidth ?? currentSlide?.width ?? "M") === "S" &&
-            "max-w-4xl",
-          !isPresenting &&
-            (slideWidth ?? currentSlide?.width ?? "M") === "M" &&
-            "max-w-5xl",
+            "[&_.presentation-slide]:text-sm",
           !isPresenting &&
             (slideWidth ?? currentSlide?.width ?? "M") === "L" &&
-            "max-w-6xl",
+            "[&_.presentation-slide]:text-lg",
           isPresenting && "h-full w-full",
           className,
         )}
       >
-        {!isPresenting && (
+        {!isPresenting && viewMode === "slides" && (
           <div className="absolute left-4 top-2 z-[100] flex opacity-0 transition-opacity duration-200 group-hover/card-container:opacity-100">
             <Button
               variant="ghost"
@@ -160,7 +160,7 @@ export function SlideContainer({
         {children}
       </div>
 
-      {!isPresenting && !isReadOnly && (
+      {!isPresenting && !isReadOnly && viewMode === "slides" && (
         <div className="absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-200 group-hover/card-container:opacity-100">
           <Button
             variant="outline"
@@ -173,7 +173,7 @@ export function SlideContainer({
         </div>
       )}
 
-      {!isPresenting && !isReadOnly && (
+      {!isPresenting && !isReadOnly && viewMode === "slides" && (
         <div className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2 translate-y-1/2 opacity-0 transition-opacity duration-200 group-hover/card-container:opacity-100">
           <Button
             variant="outline"

@@ -58,7 +58,7 @@ const PresentationEditorStaticView = React.memo(
     return (
       <div
         className={cn(
-          "flex min-h-[500px] w-full",
+          "flex h-full w-full",
           "scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/30 overflow-hidden p-0 scrollbar-thin scrollbar-track-transparent",
           "relative text-foreground",
           "focus-within:ring-2 focus-within:ring-primary focus-within:ring-opacity-50",
@@ -83,6 +83,7 @@ const PresentationEditorStaticView = React.memo(
         }}
         data-is-presenting={isPresenting ? "true" : "false"}
         data-slide-content="true"
+        data-use-slide-bg={initialContent?.bgColor ? "true" : undefined}
       >
         <EditorStatic
           className={cn(

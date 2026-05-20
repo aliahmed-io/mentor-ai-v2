@@ -1,17 +1,30 @@
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { formatSearchResults } from "@/lib/presentation/generate-prompts";
+import { generateSingleSlide } from "@/lib/presentation/generate-slide";
+import {
+  resolvePresentationModel,
+  type TextModelTier,
+} from "@/lib/presentation/generate-model";
+import {
+  getLayoutForSlide,
+  getRequiredComponent,
+  type RichComponent,
+} from "@/lib/presentation/layout-recipes";
 import { auth } from "@/server/auth";
 
 const slidesRequestSchema = z.object({
+  mode: z.enum(["deck", "slide"]).optional().default("slide"),
   title: z.string().min(1, "Title is required"),
   prompt: z.string().optional().default("No specific prompt provided"),
-  outline: z
-    .array(z.string())
-    .min(1, "Outline must contain at least one topic"),
+  outline: z.array(z.string()).optional(),
+  outlineItem: z.string().optional(),
+  slideIndex: z.number().int().min(0).optional(),
+  totalSlides: z.number().int().min(1).optional(),
+  requiredComponent: z.string().optional(),
+  layout: z.string().optional(),
   language: z.string().min(1, "Language is required"),
   tone: z.string().optional().default("professional"),
   searchResults: z
@@ -22,7 +35,10 @@ const slidesRequestSchema = z.object({
       }),
     )
     .optional(),
-  textModel: z.enum(["gemini", "openai"]).optional().default("gemini"),
+  textModel: z
+    .enum(["gemini", "openai", "quality"])
+    .optional()
+    .default("gemini"),
 });
 
 // Use AI SDK types for proper type safety
@@ -37,219 +53,199 @@ interface SlidesRequest {
   textModel?: "gemini" | "openai";
 }
 const slidesTemplate = `
-You are an expert presentation designer.Your task is to create an engaging presentation in XML format.
+You are an expert presentation designer. Your task is to create a premium, engaging presentation in XML format.
+The output MUST look visually dense, high-quality, and highly professional, resembling outputs from premium tools like Gamma or Tome.
+
 ## CORE REQUIREMENTS
 
-1. FORMAT: Use <SECTION> tags for each slide
-2. CONTENT: DO NOT copy outline verbatim - expand with examples, data, and context
-3. VARIETY: Each slide must use a DIFFERENT layout component
-4. VISUALS: Include detailed image queries (10+ words) on every slide
+1. FORMAT: Output valid XML wrapped inside <PRESENTATION>...</PRESENTATION>.
+2. STRUCTURE: Each slide must be defined by a <SECTION layout="left" | "right" | "vertical"> tag.
+3. VISUAL RICHNESS: Every slide MUST include at least ONE rich layout component (e.g. <BULLETS>, <ICONS>, <CHART>, <TABLE>, <TIMELINE>, etc.) in addition to the slide heading and intro paragraph. Do NOT output slides with only a heading and a paragraph.
+4. DETAILED IMAGES: Every slide MUST include a highly descriptive <IMG query="..." /> tag. The query must be 10-15+ words, specifying context, style, lighting, and composition (e.g. "aerial drone shot of modern sustainable smart city, solar panel roofs, vertical gardens, golden hour light, high realism"). No generic terms like "technology" or "business".
+5. LAYOUT VARIETY:
+   - Alternate the layout attribute of <SECTION> (left, right, vertical) so consecutive slides do not use the same layouts.
+   - Do NOT repeat the same rich component (e.g., <BULLETS> or <ICONS>) on consecutive slides. Ensure a healthy mix.
 
 ## PRESENTATION DETAILS
 - Title: {TITLE}
 - User's Original Request: {PROMPT}
 - Current Date: {CURRENT_DATE}
-- Outline (for reference only): {OUTLINE_FORMATTED}
+- Outline (for reference): {OUTLINE_FORMATTED}
 - Language: {LANGUAGE}
-- Tone: {TONE}
+- Style/Tone: {TONE}
 - Total Slides: {TOTAL_SLIDES}
 
 ## RESEARCH CONTEXT
 {SEARCH_RESULTS}
 
-## PRESENTATION STRUCTURE
-\`\`\`xml
-<PRESENTATION>
+## STYLE & TONE GUIDELINES (Based on Style: {TONE})
+Use the selected style ({TONE}) to shape both the layout selection and written tone:
+- **professional**: Focus on analytical, structured data. Use a formal, objective tone. Layout preferences: <CHART>, <TABLE>, <COMPARE>, <ARROW-VERTICAL>, <COLUMNS>.
+- **creative**: Focus on storytelling, vision, and processes. Use a dynamic, inspiring tone. Layout preferences: <ICONS>, <CYCLE>, <TIMELINE>, <PYRAMID>, <BEFORE-AFTER>.
+- **minimal**: Focus on clarity, whitespace, and conciseness. Keep descriptions punchy. Layout preferences: <BULLETS>, <BOXES>, <COMPARE>.
+- **bold**: Focus on conviction, high impact, and strong assertions. Use direct, powerful language. Layout preferences: <STAIRCASE>, <PYRAMID>, <PROS-CONS>, <ARROWS>.
+- **elegant**: Focus on luxury, refinement, and flow. Use sophisticated, high-level vocabulary. Layout preferences: <TIMELINE>, <COLUMNS>, <BEFORE-AFTER>, <TABLE>.
 
-<!--Every slide must follow this structure (layout determines where the image appears) -->
-<SECTION layout="left" | "right" | "vertical">
-  <!-- Required: include ONE layout component per slide -->
-  <!-- Required: include at least one detailed image query -->
-</SECTION>
+## SLIDE RECIPES (LAYOUT PATTERNS)
+To ensure the deck is balanced, follow this slide flow recipe:
+- **Slide 1 (Introduction/Title)**: Use <SECTION layout="vertical">. Include <H1>Title</H1>, <P>Subheading/Overview</P>, and <IMG> query depicting the core theme. Optionally use a <BOXES> or <COLUMNS> for intro stats/agenda.
+- **Slide 2 (Context/Problem)**: Use layout="left" or "right". Include <H2>Problem/Opportunity</H2>, <P>Introduction</P>, followed by a <COMPARE> or <BEFORE-AFTER> or <PROS-CONS> to contrast states.
+- **Slide 3 (Core Concept/Solution)**: Use layout="vertical" or "left". Include <H2>Core Solution</H2>, <P>Introduction</P>, followed by a dense layout like <BULLETS> or <ICONS> (3-4 points, each with H3 and P).
+- **Slide 4 (Process/Workflow/Timeline)**: Use layout="right" or "vertical". Include <H2>How It Works</H2>, <P>Phase details</P>, followed by <CYCLE>, <TIMELINE>, <ARROW-VERTICAL>, or <STAIRCASE>.
+- **Slide 5 (Data/Evidence)**: Use layout="left" or "right". Include <H2>Key Metrics & Data</H2>, <P>Analysis description</P>, followed by a <CHART> (with 4+ data points) or a structured <TABLE>.
+- **Slide 6+ (Deep Dive/Wrap-up/Summary)**: Use layout="vertical". Include <H2>Conclusion & Future Outlook</H2>, <P>Summary narrative</P>, followed by a <BOXES> or <PYRAMID> or <ARROWS> summarizing next steps.
 
-<!-- Other Slides in the SECTION tag-->
+## AVAILABLE LAYOUT COMPONENTS (XML SCHEMA)
 
-</PRESENTATION>
-\`\`\`
+Use these EXACT XML tags for slide content. Do not invent tags or change their attributes.
 
-## SECTION LAYOUTS
-Vary the layout attribute in each SECTION tag to control image placement:
-- layout="left" - Root image appears on the left side
-- layout="right" - Root image appears on the right side
-- layout="vertical" - Root image appears at the top
-
-Use all three layouts throughout the presentation for visual variety.
-
-## AVAILABLE LAYOUTS
-Choose ONE different layout for each slide (use these exact XML tags so our parser recognizes them):
-
-1. COLUMNS: For comparisons
+1. COLUMNS: For comparisons or side-by-side concepts
 \`\`\`xml
 <COLUMNS>
-  <DIV><H3>First Concept</H3><P>Description</P></DIV>
-  <DIV><H3>Second Concept</H3><P>Description</P></DIV>
+  <DIV><H3>Concept A</H3><P>Detailed description of concept A including key metrics or traits.</P></DIV>
+  <DIV><H3>Concept B</H3><P>Detailed description of concept B including key metrics or traits.</P></DIV>
 </COLUMNS>
 \`\`\`
 
-2. BULLETS: For key points
+2. BULLETS: For dense bullet points (each bullet item MUST have an H3 and a P)
 \`\`\`xml
 <BULLETS>
-  <DIV><H3>Main Point 1 </H3><P>Description</P></DIV>
-  <DIV><H3>Main Point 2 </H3><P>Second point with details</P></DIV>
+  <DIV><H3>First Focus Area</H3><P>Actionable description and context about this specific area.</P></DIV>
+  <DIV><H3>Second Focus Area</H3><P>Actionable description and context about this specific area.</P></DIV>
+  <DIV><H3>Third Focus Area</H3><P>Actionable description and context about this specific area.</P></DIV>
 </BULLETS>
 \`\`\`
 
-3. ICONS: For concepts with symbols
+3. ICONS: For lists featuring visual symbols
 \`\`\`xml
 <ICONS>
-  <DIV><ICON query="rocket" /><H3>Innovation</H3><P>Description</P></DIV>
-  <DIV><ICON query="shield" /><H3>Security</H3><P>Description</P></DIV>
+  <DIV><ICON query="rocket" /><H3>Acceleration</H3><P>Detailed description of rapid growth or deployment.</P></DIV>
+  <DIV><ICON query="shield" /><H3>Robust Security</H3><P>Detailed description of defense-in-depth security measures.</P></DIV>
+  <DIV><ICON query="cpu" /><H3>AI Integration</H3><P>Detailed description of custom model deployments.</P></DIV>
 </ICONS>
 \`\`\`
+Available standard query strings for ICON query: rocket, shield, cpu, activity, alert-circle, award, bar-chart-2, book, briefcase, calendar, check-circle, cloud, code, database, eye, file-text, globe, heart, help-circle, image, info, key, layers, lock, mail, map-pin, message-square, music, paperclip, phone, play, plus, power, search, settings, share-2, shopping-cart, star, target, trash-2, trending-up, user, users, video, wifi, zap.
 
-4. CYCLE: For processes and workflows
+4. CYCLE: For circular workflows or ongoing processes
 \`\`\`xml
 <CYCLE>
-  <DIV><H3>Research</H3><P>Initial exploration phase</P></DIV>
-  <DIV><H3>Design</H3><P>Solution creation phase</P></DIV>
-  <DIV><H3>Implement</H3><P>Execution phase</P></DIV>
-  <DIV><H3>Evaluate</H3><P>Assessment phase</P></DIV>
+  <DIV><H3>1. Research</H3><P>Analyze target audience, competitor landscape, and requirements.</P></DIV>
+  <DIV><H3>2. Design</H3><P>Iterate on UI/UX mockups, design tokens, and accessibility standards.</P></DIV>
+  <DIV><H3>3. Build</H3><P>Implement components using responsive frameworks and strict type safety.</P></DIV>
+  <DIV><H3>4. Optimize</H3><P>Monitor performance metrics, loading speeds, and user engagement.</P></DIV>
 </CYCLE>
 \`\`\`
 
-5. ARROWS: For cause-effect or flows
+5. ARROWS: For horizontal cause-effect/sequential steps
 \`\`\`xml
 <ARROWS>
-  <DIV><H3>Challenge</H3><P>Current market problem</P></DIV>
-  <DIV><H3>Solution</H3><P>Our innovative approach</P></DIV>
-  <DIV><H3>Result</H3><P>Measurable outcomes</P></DIV>
+  <DIV><H3>Step 1: Input</H3><P>Collect telemetry and user interaction datasets.</P></DIV>
+  <DIV><H3>Step 2: Process</H3><P>Aggregate logs, sanitize inputs, and run inference.</P></DIV>
+  <DIV><H3>Step 3: Outcome</H3><P>Serve customized recommendations dynamically.</P></DIV>
 </ARROWS>
 \`\`\`
 
-5b. ARROW-VERTICAL: For vertical step-by-step flows (preferred for linear phases)
+6. ARROW-VERTICAL: For step-by-step linear phases
 \`\`\`xml
 <ARROW-VERTICAL>
-  <DIV><H3>Discover</H3><P>Research & requirements.</P></DIV>
-  <DIV><H3>Design</H3><P>UX & architecture.</P></DIV>
-  <DIV><H3>Deliver</H3><P>Build, test, deploy.</P></DIV>
+  <DIV><H3>Phase A: Discovery</H3><P>Conduct user interviews and technical feasibility audit.</P></DIV>
+  <DIV><H3>Phase B: Prototyping</H3><P>Create interactive wires and test core hypotheses.</P></DIV>
+  <DIV><H3>Phase C: Launch</H3><P>Deploy to production under monitoring and alerts.</P></DIV>
 </ARROW-VERTICAL>
 \`\`\`
 
-6. TIMELINE: For chronological progression
+7. TIMELINE: For chronological sequences or milestones
 \`\`\`xml
 <TIMELINE>
-  <DIV><H3>2022</H3><P>Market research completed</P></DIV>
-  <DIV><H3>2023</H3><P>Product development phase</P></DIV>
-  <DIV><H3>2024</H3><P>Global market expansion</P></DIV>
+  <DIV><H3>Q1 2026</H3><P>Foundation setup, state machine design, and DB schema creation.</P></DIV>
+  <DIV><H3>Q2 2026</H3><P>Beta release, security audit, and accessibility compliance testing.</P></DIV>
+  <DIV><H3>Q3 2026</H3><P>Global launch, translation pipeline integration, and SEO optimization.</P></DIV>
 </TIMELINE>
 \`\`\`
 
-7. PYRAMID: For hierarchical importance
+8. PYRAMID: For hierarchical data, priorities, or structures
 \`\`\`xml
 <PYRAMID>
-  <DIV><H3>Vision</H3><P>Our aspirational goal</P></DIV>
-  <DIV><H3>Strategy</H3><P>Key approaches to achieve vision</P></DIV>
-  <DIV><H3>Tactics</H3><P>Specific implementation steps</P></DIV>
+  <DIV><H3>Top: Vision</H3><P>Empower every learner with hyper-personalized AI tutors.</P></DIV>
+  <DIV><H3>Middle: Strategy</H3><P>Deploy real-time analysis tools and interactive quizzes.</P></DIV>
+  <DIV><H3>Base: Technology</H3><P>Leverage next-gen frameworks, edge functions, and robust DB tables.</P></DIV>
 </PYRAMID>
 \`\`\`
 
-8. STAIRCASE: For progressive advancement
+9. STAIRCASE: For progressive levels or maturity stages
 \`\`\`xml
 <STAIRCASE>
-  <DIV><H3>Basic</H3><P>Foundational capabilities</P></DIV>
-  <DIV><H3>Advanced</H3><P>Enhanced features and benefits</P></DIV>
-  <DIV><H3>Expert</H3><P>Premium capabilities and results</P></DIV>
+  <DIV><H3>Level 1: Ad-Hoc</H3><P>Manual processes, high error rates, and fragmented operations.</P></DIV>
+  <DIV><H3>Level 2: Standardized</H3><P>Documented workflows, shared libraries, and basic CI verification.</P></DIV>
+  <DIV><H3>Level 3: Optimized</H3><P>Predictive scaling, automated recovery, and continuous improvements.</P></DIV>
 </STAIRCASE>
 \`\`\`
 
-
-9. IMAGES: Most slides needs at least one
-\`\`\`xml
-<!-- Good image queries (detailed, specific): -->
-<IMG query="futuristic smart city with renewable energy infrastructure and autonomous vehicles in morning light" />
-<IMG query="close-up of microchip with circuit board patterns in blue and gold tones" />
-<IMG query="diverse team of professionals collaborating in modern office with data visualizations" />
-
-<!-- NOT just: "city", "microchip", "team meeting" -->
-\`\`\`
-
-10. BOXES: For simple information tiles
+10. BOXES: For structured grid tiles of information
 \`\`\`xml
 <BOXES>
-  <DIV><H3>Speed</H3> <P>Faster delivery cycles.</P></DIV>
-  <DIV><H3>Quality</H3> <P>Automated testing & reviews.</P></DIV>
-  <DIV><H3>Security</H3> <P>Shift-left security practices.</P></DIV>
+  <DIV><H3>Scale</H3><P>Easily support 100k+ concurrent websocket requests.</P></DIV>
+  <DIV><H3>Security</H3><P>End-to-end encryption and compliance certifications.</P></DIV>
+  <DIV><H3>Performance</H3><P>Sub-100ms response times for AI inferences.</P></DIV>
 </BOXES>
 \`\`\`
 
-11. COMPARE: For side-by-side comparison
+11. COMPARE: For side-by-side comparisons (use <LI> items for lists)
 \`\`\`xml
 <COMPARE>
-  <DIV><H3>Solution A</H3> <LI>Features 1</LI> <LI>Features 2</LI></DIV>
-  <DIV><H3>Solution B</H3> <LI>Features 3</LI> <LI>Features 4</LI></DIV>
+  <DIV><H3>Traditional SaaS</H3><LI>High license cost</LI><LI>Slow custom integrations</LI><LI>Fragile layout rendering</LI></DIV>
+  <DIV><H3>Mentor-AI</H3><LI>Predictable pay-as-you-use</LI><LI>Instant API connections</LI><LI>Robust, responsive layout blocks</LI></DIV>
 </COMPARE>
 \`\`\`
 
-12. BEFORE-AFTER: For transformation snapshots
+12. BEFORE-AFTER: For highlighting transformation results
 \`\`\`xml
 <BEFORE-AFTER>
-  <DIV><H3>Before</H3> <P>Manual processes, scattered data.</P></DIV>
-  <DIV><H3>After</H3> <P>Automated workflows, unified insights.</P></DIV>
+  <DIV><H3>Before Deployment</H3><P>Scattered data silos, manually configured triggers, and 2-hour build delays.</P></DIV>
+  <DIV><H3>After Deployment</H3><P>Unified database interface, automated pipelines, and instant sub-second hot updates.</P></DIV>
 </BEFORE-AFTER>
 \`\`\`
 
-13. PROS-CONS: For trade-offs
+13. PROS-CONS: For analyzing trade-offs (use <LI> items inside <PROS> and <CONS>)
 \`\`\`xml
 <PROS-CONS>
-  <PROS><H3>Pros</H3> <LI>Pros 1</LI> <LI>Pros 2</LI>  </PROS>
-  <CONS><H3>Cons</H3> <LI>Cons 1</LI> <LI>Cons 2</LI></CONS>
+  <PROS><H3>Advantages</H3><LI>Rapid prototyping</LI><LI>Direct UI components access</LI></PROS>
+  <CONS><H3>Limitations</H3><LI>Requires initial learning curve</LI><LI>Requires modern browser support</LI></CONS>
 </PROS-CONS>
 \`\`\`
 
-14. TABLE: For tabular data. Preferred over other layouts for tabular data. It can also be used to do comparisons.
+14. TABLE: For highly structured tabular data
 \`\`\`xml
 <TABLE>
-  <TR><TH>Header 1</TH><TH>Header 2</TH></TR>
-  <TR><TD>Data 1</TD><TD>Data 2</TD></TR>
+  <TR><TH>Metric</TH><TH>Vite App</TH><TH>Next.js App</TH></TR>
+  <TR><TD>TTFB</TD><TD>180ms</TD><TD>45ms</TD></TR>
+  <TR><TD>LCP</TD><TD>2.2s</TD><TD>1.1s</TD></TR>
 </TABLE>
 \`\`\`
 
-15. CHARTS: Use compact DATA rows (no TABLEs). The AI must emit \`<DATA>\` items inside \`<CHART>\`.
+15. CHARTS: For plotting trends (bar, pie, line, area, radar). Scatter uses X and Y.
 \`\`\`xml
-<!-- Label/Value charts: bar, pie, line, area, radar -->
-<CHART charttype="bar|pie|line|area|radar">
-  <DATA><LABEL>Q1</LABEL><VALUE>24</VALUE></DATA>
-  <DATA><LABEL>Q2</LABEL><VALUE>36</VALUE></DATA>
-</CHART>
-
-<!-- Scatter charts: provide numeric X and Y per DATA point -->
-<CHART charttype="scatter">
-  <DATA><X>1</X><Y>2</Y></DATA>
-  <DATA><X>3</X><Y>5</Y></DATA>
+<CHART charttype="bar">
+  <DATA><LABEL>Q1 Sales</LABEL><VALUE>150</VALUE></DATA>
+  <DATA><LABEL>Q2 Sales</LABEL><VALUE>280</VALUE></DATA>
+  <DATA><LABEL>Q3 Sales</LABEL><VALUE>420</VALUE></DATA>
+  <DATA><LABEL>Q4 Sales</LABEL><VALUE>610</VALUE></DATA>
 </CHART>
 \`\`\`
 
+## CRITICAL OUTPUT CONSTRAINTS
+1. Output EXACTLY {TOTAL_SLIDES} sections (slides). Do not output more or less.
+2. Every slide section MUST be wrapped in:
+   <SECTION layout="left" | "right" | "vertical">
+     <H2>Slide Title</H2>
+     <P>Introductory sentence expanding on the topic...</P>
+     [Insert ONE appropriate rich layout component here]
+     <IMG query="detailed description..." />
+   </SECTION>
+3. The content must be detailed, complete, and fully fleshed out. Never write placeholders, "TODO", or generic text.
+4. Output ONLY valid XML code within the \`\`\`xml block. Do not include extra conversational text outside the XML.
 
-## CONTENT EXPANSION STRATEGY
-For each outline point:
-- Add supporting data/statistics
-- Include real-world examples
-- Reference industry trends
-- Add thought-provoking questions
-
-## CRITICAL RULES
-1. Generate exactly {TOTAL_SLIDES} slides. NOT MORE NOT LESS ! EXACTLY {TOTAL_SLIDES}
-2. NEVER repeat layouts in consecutive slides
-3. DO NOT copy outline verbatim - expand and enhance
-4. Include at least one detailed image query in most of the slides
-5. Use appropriate heading hierarchy
-6. Vary the SECTION layout attribute (left/right/vertical) throughout the presentation
-   - Use each layout (left, right, vertical) at least twice
-   - Don't use the same layout more than twice in a row
-
-7. Use only the XML tags shown above. Do not invent new tags or attributes.
-
-Now create a complete XML presentation with {TOTAL_SLIDES} slides that significantly expands on the outline.
+Now create a complete, stunning XML presentation with EXACTLY {TOTAL_SLIDES} slides.
 `;
 
 export async function POST(req: Request) {
@@ -272,50 +268,20 @@ export async function POST(req: Request) {
     }
 
     const {
+      mode,
       title,
       prompt: userPrompt,
       outline,
+      outlineItem,
+      slideIndex,
+      totalSlides,
+      requiredComponent: requiredComponentRaw,
+      layout: layoutOverride,
       language,
       tone,
       searchResults,
       textModel,
     } = validationResult.data;
-
-    // Format search results
-    let searchResultsText = "No research data available.";
-    if (searchResults && searchResults.length > 0) {
-      const searchData = searchResults
-        .map((searchItem, index: number) => {
-          const query = searchItem.query || `Search ${index + 1}`;
-          const results = Array.isArray(searchItem.results)
-            ? searchItem.results
-            : [];
-
-          if (results.length === 0) return "";
-
-          const formattedResults = results
-            .map((result: unknown) => {
-              const resultObj = result as Record<string, unknown>;
-              return `- ${resultObj.title || "No title"}\n  ${resultObj.content || "No content"}\n  ${resultObj.url || "No URL"}`;
-            })
-            .join("\n");
-
-          return `**Search Query ${index + 1}:** ${query}\n**Results:**\n${formattedResults}\n---`;
-        })
-        .filter(Boolean)
-        .join("\n\n");
-
-      if (searchData) {
-        searchResultsText = `The following research was conducted during outline generation:\n\n${searchData}`;
-      }
-    }
-
-    const currentDate = new Date().toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
 
     const cookieStore = await cookies();
     const geminiKey =
@@ -323,22 +289,12 @@ export async function POST(req: Request) {
     const openaiKey =
       cookieStore.get("openai_api_key")?.value || process.env.OPENAI_API_KEY;
 
-    let model;
-    if (textModel === "openai" && openaiKey) {
-      const openai = createOpenAI({ apiKey: openaiKey });
-      model = openai("gpt-4o-mini");
-    } else if (textModel === "gemini" && geminiKey) {
-      const google = createGoogleGenerativeAI({ apiKey: geminiKey });
-      model = google("gemini-2.5-flash");
-    } else if (geminiKey) {
-      // Fallback: Gemini Key is present
-      const google = createGoogleGenerativeAI({ apiKey: geminiKey });
-      model = google("gemini-2.5-flash");
-    } else if (openaiKey) {
-      // Fallback: OpenAI Key is present
-      const openai = createOpenAI({ apiKey: openaiKey });
-      model = openai("gpt-4o-mini");
-    } else {
+    const model = resolvePresentationModel(textModel as TextModelTier, {
+      geminiKey,
+      openaiKey,
+    });
+
+    if (!model) {
       return NextResponse.json(
         {
           error:
@@ -348,7 +304,65 @@ export async function POST(req: Request) {
       );
     }
 
-    // Format the prompt with template variables
+    // Per-slide generation (default)
+    if (mode === "slide") {
+      const effectiveOutline = outline ?? [];
+      const index = slideIndex ?? 0;
+      const item =
+        outlineItem ??
+        effectiveOutline[index] ??
+        `Slide ${index + 1}`;
+      const total = totalSlides ?? (effectiveOutline.length || 1);
+      const required = (requiredComponentRaw ??
+        getRequiredComponent(tone, index)) as RichComponent;
+      const layout = layoutOverride ?? getLayoutForSlide(index);
+
+      try {
+        const result = await generateSingleSlide({
+          model,
+          title,
+          prompt: userPrompt || "No specific prompt provided",
+          outlineItem: item,
+          slideIndex: index,
+          totalSlides: total,
+          language,
+          tone,
+          searchResults,
+          requiredComponent: required,
+          layout,
+        });
+
+        return NextResponse.json(result);
+      } catch (error) {
+        console.error("Single slide generation failed:", error);
+        return NextResponse.json(
+          {
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to generate slide",
+          },
+          { status: 500 },
+        );
+      }
+    }
+
+    // Legacy full-deck streaming
+    if (!outline?.length) {
+      return NextResponse.json(
+        { error: "Outline is required for deck mode" },
+        { status: 400 },
+      );
+    }
+
+    const searchResultsText = formatSearchResults(searchResults);
+    const currentDate = new Date().toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
     const formattedPrompt = slidesTemplate
       .replace(/{TITLE}/g, title)
       .replace(/{PROMPT}/g, userPrompt || "No specific prompt provided")

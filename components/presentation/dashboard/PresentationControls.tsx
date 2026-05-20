@@ -7,6 +7,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  clampSlideCount,
+  MAX_PRESENTATION_SLIDES,
+  MIN_PRESENTATION_SLIDES,
+} from "@/lib/presentation/constants";
 import { usePresentationState } from "@/states/presentation-state";
 
 export function PresentationControls({
@@ -57,18 +62,14 @@ export function PresentationControls({
           )}
           <Input
             type="number"
-            min={5}
-            max={12}
+            min={MIN_PRESENTATION_SLIDES}
+            max={MAX_PRESENTATION_SLIDES}
             step={1}
             value={numSlides}
             onChange={(e) => {
-              const raw = Number(e.target.value);
-              const clamped = Number.isFinite(raw)
-                ? Math.max(5, Math.min(12, raw))
-                : 5;
-              setNumSlides(clamped);
+              setNumSlides(clampSlideCount(Number(e.target.value)));
             }}
-            placeholder="5-12"
+            placeholder={`${MIN_PRESENTATION_SLIDES}-${MAX_PRESENTATION_SLIDES}`}
             className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
         </div>

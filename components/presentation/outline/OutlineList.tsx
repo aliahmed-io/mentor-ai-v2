@@ -117,11 +117,12 @@ export function OutlineList() {
     const loadedCount = items.length;
     const remainingCount = Math.max(0, totalSlides - loadedCount);
 
-    // Show skeleton placeholders when web search is enabled and outline is empty (before generation starts)
     const showSkeletonPlaceholders =
       webSearchEnabled && items.length === 0 && !isGeneratingOutline;
-    // Show loading skeletons only when actually generating outline
-    const showLoadingSkeletons = isGeneratingOutline && remainingCount > 0;
+    const showLoadingSkeletons =
+      isGeneratingOutline && items.length === 0 && remainingCount > 0;
+    const showEmptyState =
+      !isGeneratingOutline && items.length === 0 && !showSkeletonPlaceholders;
 
     return (
       <DndContext
@@ -143,14 +144,19 @@ export function OutlineList() {
             ))}
           </div>
         </SortableContext>
-        {/* Show skeleton placeholders when web search enabled but no outline yet */}
         {showSkeletonPlaceholders && <Skeleton className="h-96 w-full" />}
 
-        {/* Show loading skeletons only when actually generating */}
         {showLoadingSkeletons &&
-          Array.from({ length: remainingCount }).map((_, index) => (
+          Array.from({ length: Math.min(remainingCount, 6) }).map((_, index) => (
             <Skeleton key={`loading-${index}`} className="h-16 w-full" />
           ))}
+
+        {showEmptyState && (
+          <p className="rounded-md border border-dashed border-muted-foreground/30 bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground">
+            No outline yet. Click &quot;Regenerate Outline&quot; above to generate
+            slide topics from your prompt.
+          </p>
+        )}
       </DndContext>
     );
   }, [

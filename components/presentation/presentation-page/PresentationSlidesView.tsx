@@ -5,6 +5,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import * as motion from "framer-motion/client";
 import { PlateController } from "platejs/react";
 import { useEffect } from "react";
 import { SlideContainer } from "@/components/presentation/presentation-page/SlideContainer";
@@ -26,6 +27,7 @@ export const PresentationSlidesView = ({
 }: PresentationSlidesViewProps) => {
   const currentSlideIndex = usePresentationState((s) => s.currentSlideIndex);
   const isPresenting = usePresentationState((s) => s.isPresenting);
+  const viewMode = usePresentationState((s) => s.viewMode);
   const nextSlide = usePresentationState((s) => s.nextSlide);
   const previousSlide = usePresentationState((s) => s.previousSlide);
   const setShouldShowExitHeader = usePresentationState(
@@ -94,27 +96,37 @@ export const PresentationSlidesView = ({
         <PlateController>
           <GlobalUndoRedoHandler />
 
-          {items.map((slide, index) => (
-            <div
-              key={slide.id}
-              className={`slide-wrapper slide-wrapper-${index} w-full`}
-            >
+          <div className={cn(
+            "slides-view-container mx-auto",
+            viewMode === "web" && !isPresenting ? "flex flex-col gap-0 max-w-4xl py-12" : ""
+          )}>
+            {items.map((slide, index) => (
+              <div
+                key={slide.id}
+                className={cn(
+                  `slide-wrapper slide-wrapper-${index} w-full`,
+                  viewMode === "web" && !isPresenting && "border-b border-muted/20 last:border-0"
+                )}
+              >
               <SlideContainer
                 index={index}
                 id={slide.id}
                 slideWidth={slide.width}
                 slidesCount={items.length}
               >
-                <div
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: Math.min(index * 0.1, 1), duration: 0.5, ease: "easeOut" }}
                   className={cn(
                     `slide-container-${index}`,
-                    isPresenting && "h-screen w-screen",
+                    isPresenting ? "h-screen w-screen" : "h-full w-full",
                   )}
                 >
                   <PresentationEditor
                     initialContent={slide}
                     className={cn(
-                      "min-h-[300px] rounded-md border",
+                      "h-full w-full border-none",
                       isPresenting && "h-screen w-screen",
                     )}
                     id={slide.id}
@@ -123,10 +135,11 @@ export const PresentationSlidesView = ({
                     isGenerating={isGeneratingPresentation}
                     readOnly={isPresenting}
                   />
-                </div>
+                </motion.div>
               </SlideContainer>
             </div>
           ))}
+          </div>
         </PlateController>
       </SortableContext>
     </DndContext>

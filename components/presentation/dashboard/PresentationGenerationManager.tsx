@@ -1,26 +1,25 @@
 "use client";
 
-import { useChat, useCompletion } from "@ai-sdk/react";
+import { useChat } from "@ai-sdk/react";
 import debounce from "lodash.debounce";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
 import { generateImageAction } from "@/app/_actions/image/generate";
 import { getImageFromUnsplash } from "@/app/_actions/image/unsplash";
 import { updatePresentation } from "@/app/_actions/presentation/presentationActions";
+import { bakeThemeIntoSlides } from "@/lib/presentation/apply-theme-to-slides";
+import {
+  getLayoutForSlide,
+  getRequiredComponent,
+} from "@/lib/presentation/layout-recipes";
+import {
+  getChatMessageText,
+  parseOutlineFromMessageText,
+} from "@/lib/presentation/outline-parser";
 import { extractThinking } from "@/lib/thinking-extractor";
 import { usePresentationState } from "@/states/presentation-state";
+import type { PlateSlide } from "../utils/parser";
 import { SlideParser } from "../utils/parser";
-
-function stripXmlCodeBlock(input: string): string {
-  let result = input.trim();
-  if (result.startsWith("```xml")) {
-    result = result.slice(6).trimStart();
-  }
-  if (result.endsWith("```")) {
-    result = result.slice(0, -3).trimEnd();
-  }
-  return result;
-}
 
 export function PresentationGenerationManager() {
   const {
@@ -40,7 +39,6 @@ export function PresentationGenerationManager() {
     setSearchResults,
     setSlides,
     setOutlineThinking,
-    setPresentationThinking,
     setIsGeneratingPresentation,
     setCurrentPresentation,
     currentPresentationId,
@@ -59,10 +57,7 @@ export function PresentationGenerationManager() {
     popImageFromQueue,
   } = usePresentationState();
 
-  // Create a ref for the streaming parser to persist between renders
-  const streamingParserRef = useRef<SlideParser>(new SlideParser());
-  // Add refs to track the animation frame IDs
-  const slidesRafIdRef = useRef<number | null>(null);
+  const slideGenerationAbortRef = useRef<AbortController | null>(null);
   const outlineRafIdRef = useRef<number | null>(null);
   const outlineBufferRef = useRef<string[] | null>(null);
   const searchResultsBufferRef = useRef<Array<{
@@ -82,62 +77,47 @@ export function PresentationGenerationManager() {
   const isQueueWorkerBusy = useRef<boolean>(false);
   const queuedSlideIds = useRef<Set<string>>(new Set());
 
-  // Function to update slides using requestAnimationFrame (Pure state-updater in UDG)
-  const updateSlidesWithRAF = (): void => {
-    // Extract thinking for presentation and parse only the remaining content
-    const presentationThinkingExtract = extractThinking(presentationCompletion);
-    if (presentationThinkingExtract.hasThinking) {
-      setPresentationThinking(presentationThinkingExtract.thinking);
+  const mergeRootImagesIntoSlides = useCallback(
+    (allSlides: PlateSlide[]): PlateSlide[] =>
+      allSlides.map((slide) => {
+        const gen = rootImageGeneration[slide.id];
+        if (gen?.status === "success" && gen.url && slide.rootImage) {
+          return {
+            ...slide,
+            rootImage: { ...slide.rootImage, url: gen.url },
+          };
+        }
+        return slide;
+      }),
+    [rootImageGeneration],
+  );
+
+  const applyOutlineFromText = (rawText: string): void => {
+    const thinkingExtract = extractThinking(rawText);
+    if (thinkingExtract.hasThinking) {
+      setOutlineThinking(thinkingExtract.thinking);
     }
-    const presentationContentToParse = presentationThinkingExtract.hasThinking
-      ? presentationThinkingExtract.content
-      : presentationCompletion;
 
-    const processedPresentationCompletion = stripXmlCodeBlock(
-      presentationContentToParse,
-    );
-    streamingParserRef.current.reset();
-    streamingParserRef.current.parseChunk(processedPresentationCompletion);
-    streamingParserRef.current.finalize();
-    const allSlides = streamingParserRef.current.getAllSlides();
+    const textForParse = thinkingExtract.hasThinking
+      ? thinkingExtract.content
+      : rawText;
 
-    // Merge any completed root image URLs from state into streamed slides
-    const mergedSlides = allSlides.map((slide) => {
-      const gen = rootImageGeneration[slide.id];
-      if (gen?.status === "success" && gen.url && slide.rootImage) {
-        return {
-          ...slide,
-          rootImage: {
-            ...slide.rootImage,
-            url: gen.url,
-          },
-        };
-      }
-      return slide;
-    });
+    const { title, outlineItems } = parseOutlineFromMessageText(textForParse);
 
-    setSlides(mergedSlides);
-    slidesRafIdRef.current = null;
-  };
-
-  // Function to extract title from content
-  const extractTitle = (
-    content: string,
-  ): { title: string | null; cleanContent: string } => {
-    const titleMatch = content.match(/<TITLE>(.*?)<\/TITLE>/i);
-    if (titleMatch?.[1]) {
-      const title = titleMatch[1].trim();
-      const cleanContent = content.replace(/<TITLE>.*?<\/TITLE>/i, "").trim();
-      return { title, cleanContent };
+    if (title && !titleExtractedRef.current) {
+      setCurrentPresentation(currentPresentationId, title);
+      titleExtractedRef.current = true;
     }
-    return { title: null, cleanContent: content };
+
+    if (outlineItems.length > 0) {
+      outlineBufferRef.current = outlineItems;
+    }
   };
 
   // Function to process messages and extract data (optimized - only process last message)
   const processMessages = (messages: typeof outlineMessages): void => {
-    if (messages.length <= 1) return;
+    if (messages.length === 0) return;
 
-    // Get the last message - this is where all the current data is
     const lastMessage = messages[messages.length - 1];
     if (!lastMessage) return;
 
@@ -184,47 +164,10 @@ export function PresentationGenerationManager() {
       }
     }
 
-    // Extract outline from the last assistant message
-    if (lastMessage.role === "assistant" && lastMessage.content) {
-      // Extract <think> content from assistant message and keep only the remainder for parsing
-      const thinkingExtract = extractThinking(lastMessage.content);
-      if (thinkingExtract.hasThinking) {
-        setOutlineThinking(thinkingExtract.thinking);
-      }
-
-      let cleanContent = thinkingExtract.hasThinking
-        ? thinkingExtract.content
-        : lastMessage.content;
-
-      // Only extract title if we haven't done it yet
-      if (!titleExtractedRef.current) {
-        const { title, cleanContent: extractedCleanContent } =
-          extractTitle(cleanContent);
-
-        cleanContent = extractedCleanContent;
-
-        // Set the title if found and mark as extracted
-        if (title) {
-          setCurrentPresentation(currentPresentationId, title);
-          titleExtractedRef.current = true;
-        } else {
-          // Title not found yet, don't process outline
-          return;
-        }
-      } else {
-        // Title already extracted, just remove it from content if it exists
-        cleanContent = cleanContent.replace(/<TITLE>.*?<\/TITLE>/i, "").trim();
-      }
-
-      // Parse the outline into sections
-      const sections = cleanContent.split(/^# /gm).filter(Boolean);
-      const outlineItems: string[] =
-        sections.length > 0
-          ? sections.map((section) => `# ${section}`.trim())
-          : [];
-
-      if (outlineItems.length > 0) {
-        outlineBufferRef.current = outlineItems;
+    if (lastMessage.role === "assistant") {
+      const messageText = getChatMessageText(lastMessage);
+      if (messageText.length > 0) {
+        applyOutlineFromText(messageText);
       }
     }
   };
@@ -297,9 +240,23 @@ export function PresentationGenerationManager() {
     }
   };
 
-  const handleFinishOutline = useCallback(() => {
-    onFinishOutlineRef.current();
-  }, []);
+  const handleFinishOutline = useCallback(
+    (message: { content?: unknown; parts?: Array<{ type?: string; text?: string }> }) => {
+      const messageText = getChatMessageText(message);
+      if (messageText.length > 0) {
+        applyOutlineFromText(messageText);
+        if (outlineRafIdRef.current === null) {
+          outlineRafIdRef.current = requestAnimationFrame(() =>
+            updateOutlineWithRAFRef.current(),
+          );
+        } else {
+          updateOutlineWithRAFRef.current();
+        }
+      }
+      onFinishOutlineRef.current();
+    },
+    [],
+  );
 
   const handleErrorOutline = useCallback((error: Error) => {
     onErrorOutlineRef.current(error);
@@ -325,11 +282,6 @@ export function PresentationGenerationManager() {
     onError: handleErrorOutline,
   });
 
-  // Stable refs for inline callbacks — prevents dependency array size changes
-  // while always calling the latest version of each function
-  const updateSlidesWithRAFRef = useRef(updateSlidesWithRAF);
-  updateSlidesWithRAFRef.current = updateSlidesWithRAF;
-
   const processMessagesRef = useRef(processMessages);
   processMessagesRef.current = processMessages;
 
@@ -339,7 +291,7 @@ export function PresentationGenerationManager() {
   // Lightweight useEffect that only schedules RAF updates
   useEffect(() => {
     // Only update if we have new messages
-    if (outlineMessages.length > 1) {
+    if (outlineMessages.length >= 1) {
       lastProcessedMessagesLength.current = outlineMessages.length;
 
       // Process messages and store in buffers (non-blocking)
@@ -421,96 +373,8 @@ export function PresentationGenerationManager() {
     setShouldStartOutlineGeneration,
   ]);
 
-  const onFinishPresentationRef = useRef<
-    (_prompt: string, _completion: string) => Promise<void>
-  >(async () => {});
-  onFinishPresentationRef.current = async (_prompt, _completion) => {
-    setIsGeneratingPresentation(false);
-    setShouldStartPresentationGeneration(false);
-    presentationGenerationStartedRef.current = false;
-
-    // Persist final slides/content to DB to ensure /presentation/[id] hydrates correctly
-    try {
-      const state = usePresentationState.getState();
-      if (state.currentPresentationId && state.slides.length > 0) {
-        await updatePresentation({
-          id: state.currentPresentationId,
-          content: { slides: state.slides, config: state.config },
-          title: state.currentPresentationTitle ?? undefined,
-          outline: state.outline,
-          imageSource: state.imageSource,
-          presentationStyle: state.presentationStyle,
-          language: state.language,
-          thumbnailUrl: state.thumbnailUrl,
-        });
-      }
-    } catch (e) {
-      // Avoid interrupting UX if persistence fails
-      console.error("Persist final slides failed:", e);
-    }
-  };
-
-  const onErrorPresentationRef = useRef<(error: Error) => void>(() => {});
-  onErrorPresentationRef.current = (error) => {
-    toast.error(`Failed to generate presentation: ${error.message}`);
-    resetGeneration();
-    streamingParserRef.current.reset();
-    presentationGenerationStartedRef.current = false;
-
-    // Cancel any pending animation frame
-    if (slidesRafIdRef.current !== null) {
-      cancelAnimationFrame(slidesRafIdRef.current);
-      slidesRafIdRef.current = null;
-    }
-  };
-
-  const handleFinishPresentation = useCallback(
-    (prompt: string, completion: string) => {
-      void onFinishPresentationRef.current(prompt, completion);
-    },
-    [],
-  );
-
-  const handleErrorPresentation = useCallback((error: Error) => {
-    onErrorPresentationRef.current(error);
-  }, []);
-
-  const { completion: presentationCompletion, complete: generatePresentation } =
-    useCompletion({
-      api: "/api/presentation/generate",
-      onFinish: handleFinishPresentation,
-      onError: handleErrorPresentation,
-    });
-
-  useEffect(() => {
-    if (presentationCompletion) {
-      try {
-        // Only schedule a new frame if one isn't already pending
-        if (slidesRafIdRef.current === null) {
-          slidesRafIdRef.current = requestAnimationFrame(() =>
-            updateSlidesWithRAFRef.current(),
-          );
-        }
-      } catch (error) {
-        console.error("Error processing presentation XML:", error);
-        toast.error("Error processing presentation content");
-      }
-    }
-  }, [presentationCompletion]);
-
-  useEffect(() => {
-    if (!shouldStartPresentationGeneration) return;
-
-    // Wait for outline to be hydrated — don't clear the flag so this re-runs
-    // when outline gets populated from the DB fetch
-    if (!outline || outline.length === 0) return;
-
-    if (presentationGenerationStartedRef.current) return;
-    presentationGenerationStartedRef.current = true;
-
-    // Clear flag immediately to prevent duplicate trigger loops when generatePresentation reference updates
-    setShouldStartPresentationGeneration(false);
-
+  const generateSlidesSequentially = useCallback(async () => {
+    const state = usePresentationState.getState();
     const {
       presentationInput: activeInput,
       language: activeLang,
@@ -518,30 +382,138 @@ export function PresentationGenerationManager() {
       currentPresentationTitle: activeTitle,
       searchResults: stateSearchResults,
       textModel: activeTextModel,
+      outline: activeOutline,
       setThumbnailUrl,
-    } = usePresentationState.getState();
+    } = state;
 
-    // Reset the parser and tracking refs before starting a new generation
-    streamingParserRef.current.reset();
+    if (!activeOutline?.length) return;
+
+    slideGenerationAbortRef.current?.abort();
+    slideGenerationAbortRef.current = new AbortController();
+    const signal = slideGenerationAbortRef.current.signal;
+
     queuedSlideIds.current.clear();
     setIsGeneratingPresentation(true);
     setThumbnailUrl(undefined);
-    void generatePresentation(activeInput ?? "", {
-      body: {
-        title: activeTitle ?? activeInput ?? "",
-        prompt: activeInput ?? "",
-        outline,
-        searchResults: stateSearchResults,
-        language: activeLang,
-        tone: activeStyle,
-        textModel: activeTextModel,
-      },
-    });
+    setSlides([]);
+
+    const accumulatedSlides: PlateSlide[] = [];
+
+    try {
+      for (let i = 0; i < activeOutline.length; i++) {
+        if (signal.aborted) break;
+
+        const requiredComponent = getRequiredComponent(activeStyle, i);
+        const layout = getLayoutForSlide(i);
+
+        const response = await fetch("/api/presentation/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mode: "slide",
+            title: activeTitle ?? activeInput ?? "",
+            prompt: activeInput ?? "",
+            outline: activeOutline,
+            outlineItem: activeOutline[i],
+            slideIndex: i,
+            totalSlides: activeOutline.length,
+            requiredComponent,
+            layout,
+            searchResults: stateSearchResults,
+            language: activeLang,
+            tone: activeStyle,
+            textModel: activeTextModel,
+          }),
+          signal,
+        });
+
+        if (!response.ok) {
+          const err = (await response.json()) as { error?: string };
+          throw new Error(err.error ?? `Slide ${i + 1} generation failed`);
+        }
+
+        const { xml } = (await response.json()) as { xml: string };
+        const wrapped = xml.includes("<PRESENTATION")
+          ? xml
+          : `<PRESENTATION>${xml}</PRESENTATION>`;
+
+        const parser = new SlideParser();
+        parser.parseChunk(wrapped);
+        parser.finalize();
+        const parsed = parser.getAllSlides();
+        const newSlide = parsed[parsed.length - 1] ?? parsed[0];
+        if (newSlide) {
+          accumulatedSlides.push(newSlide);
+          const merged = mergeRootImagesIntoSlides([...accumulatedSlides]);
+          const {
+            theme: activeTheme,
+            customThemeData,
+            presentationColorMode,
+            config,
+          } = usePresentationState.getState();
+          const typography = config.typography as
+            | { heading?: string; body?: string }
+            | undefined;
+          setSlides(
+            bakeThemeIntoSlides(
+              merged,
+              typeof activeTheme === "string" ? activeTheme : "mystique",
+              presentationColorMode,
+              customThemeData,
+              typography,
+            ),
+          );
+        }
+      }
+
+      const finalState = usePresentationState.getState();
+      if (
+        finalState.currentPresentationId &&
+        finalState.slides.length > 0
+      ) {
+        await updatePresentation({
+          id: finalState.currentPresentationId,
+          content: { slides: finalState.slides, config: finalState.config },
+          title: finalState.currentPresentationTitle ?? undefined,
+          outline: finalState.outline,
+          imageSource: finalState.imageSource,
+          presentationStyle: finalState.presentationStyle,
+          language: finalState.language,
+          thumbnailUrl: finalState.thumbnailUrl,
+        });
+      }
+    } catch (error) {
+      if (signal.aborted) return;
+      const message =
+        error instanceof Error ? error.message : "Generation failed";
+      toast.error(`Failed to generate presentation: ${message}`);
+      resetGeneration();
+    } finally {
+      setIsGeneratingPresentation(false);
+      setShouldStartPresentationGeneration(false);
+      presentationGenerationStartedRef.current = false;
+    }
+  }, [
+    mergeRootImagesIntoSlides,
+    resetGeneration,
+    setIsGeneratingPresentation,
+    setShouldStartPresentationGeneration,
+    setSlides,
+  ]);
+
+  useEffect(() => {
+    if (!shouldStartPresentationGeneration) return;
+    if (!outline || outline.length === 0) return;
+    if (presentationGenerationStartedRef.current) return;
+
+    presentationGenerationStartedRef.current = true;
+    setShouldStartPresentationGeneration(false);
+    void generateSlidesSequentially();
   }, [
     shouldStartPresentationGeneration,
     outline,
-    generatePresentation,
-    setIsGeneratingPresentation,
+    generateSlidesSequentially,
+    setShouldStartPresentationGeneration,
   ]);
 
   // Debounced incremental persistence while streaming text
@@ -764,14 +736,9 @@ export function PresentationGenerationManager() {
     setSlides,
   ]);
 
-  // Clean up RAF on unmount
   useEffect(() => {
     return () => {
-      if (slidesRafIdRef.current !== null) {
-        cancelAnimationFrame(slidesRafIdRef.current);
-        slidesRafIdRef.current = null;
-      }
-
+      slideGenerationAbortRef.current?.abort();
       if (outlineRafIdRef.current !== null) {
         cancelAnimationFrame(outlineRafIdRef.current);
         outlineRafIdRef.current = null;

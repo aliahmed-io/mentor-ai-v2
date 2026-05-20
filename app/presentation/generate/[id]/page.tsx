@@ -45,6 +45,11 @@ import {
   type Themes,
   themes,
 } from "@/lib/presentation/themes";
+import {
+  clampSlideCount,
+  MAX_PRESENTATION_SLIDES,
+  MIN_PRESENTATION_SLIDES,
+} from "@/lib/presentation/constants";
 import { cn } from "@/lib/utils";
 import { usePresentationState } from "@/states/presentation-state";
 
@@ -289,11 +294,11 @@ export default function PresentationGenerateWithIdPage() {
 
   // Stepper handlers
   const handleDecrementSlides = () => {
-    setNumSlides(Math.max(5, numSlides - 1));
+    setNumSlides(clampSlideCount(numSlides - 1));
   };
 
   const handleIncrementSlides = () => {
-    setNumSlides(Math.min(12, numSlides + 1));
+    setNumSlides(clampSlideCount(numSlides + 1));
   };
 
   if (isLoadingPresentation) {
@@ -505,16 +510,18 @@ export default function PresentationGenerateWithIdPage() {
                     size="icon"
                     className="h-8 w-8 rounded-lg"
                     onClick={handleDecrementSlides}
-                    disabled={numSlides <= 5}
+                    disabled={numSlides <= MIN_PRESENTATION_SLIDES}
                   >
                     -
                   </Button>
                   <input
                     type="range"
-                    min={5}
-                    max={12}
+                    min={MIN_PRESENTATION_SLIDES}
+                    max={MAX_PRESENTATION_SLIDES}
                     value={numSlides}
-                    onChange={(e) => setNumSlides(Number(e.target.value))}
+                    onChange={(e) =>
+                      setNumSlides(clampSlideCount(Number(e.target.value)))
+                    }
                     className="w-full accent-primary h-1.5 rounded-lg bg-muted cursor-pointer"
                   />
                   <Button
@@ -523,7 +530,7 @@ export default function PresentationGenerateWithIdPage() {
                     size="icon"
                     className="h-8 w-8 rounded-lg"
                     onClick={handleIncrementSlides}
-                    disabled={numSlides >= 12}
+                    disabled={numSlides >= MAX_PRESENTATION_SLIDES}
                   >
                     +
                   </Button>

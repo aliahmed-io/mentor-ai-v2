@@ -10,8 +10,16 @@ import {
   PanelLeft,
   PanelRight,
   PanelTop,
+  RefreshCw,
   Trash2,
+  Sparkles,
 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import {
+  mergeRegeneratedSlide,
+  regenerateSlideFromApi,
+} from "@/lib/presentation/regenerate-slide-client";
 import { Button } from "@/components/ui/button";
 import ColorPicker from "@/components/ui/color-picker";
 import {
@@ -19,6 +27,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { usePresentationState } from "@/states/presentation-state";
 import type { LayoutType } from "../utils/parser";
@@ -30,7 +39,23 @@ interface SlideEditPopoverProps {
 type ContentAlignment = "start" | "center" | "end";
 
 export function SlideEditPopover({ index }: SlideEditPopoverProps) {
-  const { slides, setSlides } = usePresentationState();
+  const {
+    slides,
+    setSlides,
+    outline,
+    presentationInput,
+    currentPresentationTitle,
+    language,
+    presentationStyle,
+    textModel,
+    searchResults,
+    theme,
+    customThemeData,
+    presentationColorMode,
+    config,
+  } = usePresentationState();
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [customPrompt, setCustomPrompt] = useState("");
   const updateSlide = (
     updates: Partial<{
       layoutType: LayoutType;
@@ -72,6 +97,54 @@ export function SlideEditPopover({ index }: SlideEditPopoverProps) {
 
   const handleImageDelete = () => {
     updateSlide({ rootImage: { ...currentSlide?.rootImage!, url: undefined } });
+  };
+
+  const handleRegenerateLayout = async (overridePrompt?: string) => {
+    const outlineItem = outline[index];
+    if (!outlineItem) {
+      toast.error("No outline topic for this slide");
+      return;
+    }
+    setIsRegenerating(true);
+    try {
+      const promptToUse = overridePrompt?.trim()
+        ? `[USER EDIT INSTRUCTION: ${overridePrompt.trim()}] Original context: ${presentationInput}`
+        : presentationInput;
+        
+      const newSlide = await regenerateSlideFromApi({
+        slideIndex: index,
+        outlineItem,
+        title: currentPresentationTitle ?? presentationInput ?? "Presentation",
+        prompt: promptToUse,
+        outline,
+        language,
+        tone: presentationStyle,
+        textModel,
+        searchResults,
+      });
+      if (!newSlide) throw new Error("No slide returned");
+      const typography = config.typography as
+        | { heading?: string; body?: string }
+        | undefined;
+      setSlides(
+        mergeRegeneratedSlide(
+          slides,
+          index,
+          newSlide,
+          typeof theme === "string" ? theme : "mystique",
+          presentationColorMode,
+          customThemeData,
+          typography,
+        ),
+      );
+      toast.success("Slide layout regenerated");
+    } catch (e) {
+      toast.error(
+        e instanceof Error ? e.message : "Failed to regenerate slide",
+      );
+    } finally {
+      setIsRegenerating(false);
+    }
   };
 
   return (
@@ -218,6 +291,45 @@ export function SlideEditPopover({ index }: SlideEditPopoverProps) {
                 <ImageIcon className="h-4 w-4"></ImageIcon>
               </Button>
             </div>
+          </div>
+
+          <div className="pt-2 border-t border-border space-y-3">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-blue-400" />
+                <span className="text-sm font-medium text-zinc-200">AI Copilot</span>
+              </div>
+              <Textarea 
+                placeholder="e.g., Turn this into a timeline..."
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+                className="text-xs h-16 resize-none bg-zinc-900 border-zinc-800"
+              />
+              <Button
+                type="button"
+                variant="default"
+                size="sm"
+                className="w-full gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={isRegenerating || !customPrompt.trim()}
+                onClick={() => void handleRegenerateLayout(customPrompt)}
+              >
+                {isRegenerating ? "Applying..." : "Apply Edit"}
+              </Button>
+            </div>
+            
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full gap-2 border-zinc-800"
+              disabled={isRegenerating}
+              onClick={() => void handleRegenerateLayout()}
+            >
+              <RefreshCw
+                className={cn("h-4 w-4", isRegenerating && "animate-spin")}
+              />
+              {isRegenerating ? "Regenerating…" : "Regenerate layout"}
+            </Button>
           </div>
 
           {/* Card Width */}

@@ -18,7 +18,10 @@ interface PresentationState {
   isGridView: boolean;
   isSheetOpen: boolean;
   numSlides: number;
-  textModel: "gemini" | "openai";
+  textModel: "gemini" | "openai" | "quality";
+
+  viewMode: "slides" | "web";
+  setViewMode: (mode: "slides" | "web") => void;
 
   theme: Themes | string;
   customThemeData: ThemeProperties | null;
@@ -30,6 +33,8 @@ interface PresentationState {
   imageSource: "ai" | "stock";
   stockImageProvider: "unsplash";
   presentationStyle: string;
+  presentationColorMode: "light" | "dark";
+  setPresentationColorMode: (mode: "light" | "dark") => void;
   savingStatus: "idle" | "saving" | "saved";
   isPresenting: boolean;
   currentSlideIndex: number;
@@ -91,7 +96,7 @@ interface PresentationState {
   thumbnailUrl?: string;
   setThumbnailUrl: (url: string | undefined) => void;
   setLanguage: (lang: string) => void;
-  setTextModel: (model: "gemini" | "openai") => void;
+  setTextModel: (model: "gemini" | "openai" | "quality") => void;
   setPageStyle: (style: string) => void;
   setShowTemplates: (show: boolean) => void;
   setPresentationInput: (input: string) => void;
@@ -154,12 +159,14 @@ export const usePresentationState = create<PresentationState>((set) => ({
   outline: [],
   searchResults: [],
   webSearchEnabled: false,
+  viewMode: "slides",
   theme: "mystique",
   customThemeData: null,
   imageModel: "black-forest-labs/FLUX.1-schnell-Free",
   imageSource: "stock",
   stockImageProvider: "unsplash",
   presentationStyle: "professional",
+  presentationColorMode: "dark",
   slides: [], // Now holds the new slide object structure
   outlineThinking: "",
   presentationThinking: "",
@@ -252,6 +259,7 @@ export const usePresentationState = create<PresentationState>((set) => ({
     set({ currentPresentationId: id, currentPresentationTitle: title }),
   setIsGridView: (isGrid) => set({ isGridView: isGrid }),
   setIsSheetOpen: (isOpen) => set({ isSheetOpen: isOpen }),
+  setViewMode: (mode) => set({ viewMode: mode }),
   setNumSlides: (num) => set({ numSlides: num }),
   setLanguage: (lang) => set({ language: lang }),
   setTextModel: (model) => set({ textModel: model }),
@@ -272,6 +280,7 @@ export const usePresentationState = create<PresentationState>((set) => ({
   setImageModel: (model) => set({ imageModel: model }),
   setImageSource: (source) => set({ imageSource: source }),
   setStockImageProvider: (provider) => set({ stockImageProvider: provider }),
+  setPresentationColorMode: (mode) => set({ presentationColorMode: mode }),
   setPresentationStyle: (style) => set({ presentationStyle: style }),
   setSavingStatus: (status) => set({ savingStatus: status }),
   setIsPresenting: (isPresenting) => set({ isPresenting }),

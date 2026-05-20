@@ -373,19 +373,32 @@ export class SlideParser {
           nextSectionIdx,
         );
 
-        // Check if it has actual content
-        if (
-          partialSection.includes("<H1>") ||
-          partialSection.includes("<H2>") ||
-          partialSection.includes("<H3>") ||
-          partialSection.includes("<PYRAMID>") ||
-          partialSection.includes("<ARROWS>") ||
+        const hasRichComponent =
+          partialSection.includes("<BULLETS>") ||
+          partialSection.includes("<ICONS>") ||
+          partialSection.includes("<CHART") ||
+          partialSection.includes("<TABLE>") ||
           partialSection.includes("<TIMELINE>") ||
-          partialSection.includes("<P>") ||
-          partialSection.includes("<ICON>") ||
-          partialSection.includes("<IMG")
-        ) {
-          // Add a closing tag and process it
+          partialSection.includes("<CYCLE>") ||
+          partialSection.includes("<COMPARE>") ||
+          partialSection.includes("<COLUMNS>") ||
+          partialSection.includes("<BOXES>") ||
+          partialSection.includes("<BEFORE-AFTER>") ||
+          partialSection.includes("<PROS-CONS>") ||
+          partialSection.includes("<PYRAMID>") ||
+          partialSection.includes("<STAIRCASE>") ||
+          partialSection.includes("<ARROWS>") ||
+          partialSection.includes("<ARROW-VERTICAL>");
+
+        const hasMinimalContent =
+          (partialSection.includes("<H1>") ||
+            partialSection.includes("<H2>") ||
+            partialSection.includes("<H3>")) &&
+          partialSection.includes("<P>") &&
+          partialSection.includes("<IMG");
+
+        // Only force-close when rich component is present, or heading+P+IMG are all complete
+        if (hasRichComponent || hasMinimalContent) {
           this.completedSections.push(`${partialSection}</SECTION>`);
         }
 

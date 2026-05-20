@@ -60,7 +60,14 @@ import type {
   TTimelineGroupElement,
   TTimelineItemElement,
 } from "../editor/plugins/timeline-plugin";
-import { type Frame, layoutVerticalFlow } from "./layoutEngine";
+import {
+  type Frame,
+  computeContentArea,
+  computeRootImageFrame,
+  layoutVerticalFlow,
+  SLIDE_HEIGHT_IN,
+  SLIDE_WIDTH_IN,
+} from "./layoutEngine";
 import type { PlateNode, PlateSlide } from "./parser";
 import type {
   HeadingElement,
@@ -106,6 +113,8 @@ interface ThemeColors {
   text: string;
   heading: string;
   muted: string;
+  headingFont?: string;
+  bodyFont?: string;
 }
 
 interface PresentationData {
@@ -120,9 +129,8 @@ export class PlateJSToPPTXConverter {
   private pptx: PptxGenJS;
   private currentSlide: PptxGenJS.Slide | null = null;
 
-  // Layout constants
-  private readonly SLIDE_WIDTH = 10;
-  private readonly SLIDE_HEIGHT = 5.625;
+  private readonly SLIDE_WIDTH = SLIDE_WIDTH_IN;
+  private readonly SLIDE_HEIGHT = SLIDE_HEIGHT_IN;
   private readonly MARGIN = 0.5;
 
   // Theme defaults (mirror globals.css earthy workspace palette)
@@ -152,6 +160,12 @@ export class PlateJSToPPTXConverter {
 
   private applyTheme(theme: Partial<ThemeColors>) {
     this.THEME = { ...this.THEME, ...theme };
+    if (theme.headingFont || theme.bodyFont) {
+      this.pptx.theme = {
+        headFontFace: theme.headingFont ?? "Inter",
+        bodyFontFace: theme.bodyFont ?? "Inter",
+      };
+    }
   }
 
   private hexToRgb(hex: string): { r: number; g: number; b: number } | null {
@@ -211,6 +225,10 @@ export class PlateJSToPPTXConverter {
   private async processSlide(slide: PlateSlide) {
     this.currentSlide = this.pptx.addSlide();
 
+    // Set slide background color to match the theme/custom background
+    const bgFill = (slide.bgColor || this.THEME.background).replace("#", "");
+    this.currentSlide.background = { fill: bgFill };
+
     // Add root image first (no margins/padding as requested)
     if (slide.rootImage) {
       await this.addRootImage(slide.rootImage, slide.layoutType);
@@ -238,48 +256,8 @@ export class PlateJSToPPTXConverter {
     }
   }
 
-  private calculateContentArea(slide: PlateSlide): {
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-  } {
-    const baseArea = {
-      x: this.MARGIN,
-      y: this.MARGIN,
-      w: this.SLIDE_WIDTH - this.MARGIN * 2,
-      h: this.SLIDE_HEIGHT - this.MARGIN * 2,
-    };
-
-    if (!slide.rootImage || !slide.layoutType) {
-      return baseArea;
-    }
-
-    switch (slide.layoutType) {
-      case "left":
-        return {
-          x: baseArea.x + baseArea.w * 0.45,
-          y: baseArea.y,
-          w: baseArea.w * 0.55,
-          h: baseArea.h,
-        };
-      case "right":
-        return {
-          x: baseArea.x,
-          y: baseArea.y,
-          w: baseArea.w * 0.55,
-          h: baseArea.h,
-        };
-      case "vertical":
-        return {
-          x: baseArea.x,
-          y: baseArea.y + baseArea.h * 0.4,
-          w: baseArea.w,
-          h: baseArea.h * 0.6,
-        };
-      default:
-        return baseArea;
-    }
+  private calculateContentArea(slide: PlateSlide) {
+    return computeContentArea(slide);
   }
 
   private async addRootImage(rootImage: RootImage, layoutType?: string) {
@@ -287,41 +265,15 @@ export class PlateJSToPPTXConverter {
     if (!rootImage.url) return;
 
     const imagePath = rootImage.url as string;
+    const frame = computeRootImageFrame(layoutType);
 
     let imageOptions: PptxGenJS.ImageProps = {
       path: imagePath,
-      x: 0, // No margins as requested
-      y: 0, // No padding as requested
-      w: this.SLIDE_WIDTH,
-      h: this.SLIDE_HEIGHT,
+      x: frame.x,
+      y: frame.y,
+      w: frame.w,
+      h: frame.h,
     };
-
-    // Adjust image position based on layout
-    switch (layoutType) {
-      case "left":
-        imageOptions = {
-          ...imageOptions,
-          w: this.SLIDE_WIDTH * 0.45,
-          h: this.SLIDE_HEIGHT,
-        };
-        break;
-      case "right":
-        imageOptions = {
-          ...imageOptions,
-          x: this.SLIDE_WIDTH * 0.55,
-          w: this.SLIDE_WIDTH * 0.45,
-          h: this.SLIDE_HEIGHT,
-        };
-        break;
-      case "vertical":
-        imageOptions = {
-          ...imageOptions,
-          y: 0,
-          w: this.SLIDE_WIDTH,
-          h: this.SLIDE_HEIGHT * 0.4,
-        };
-        break;
-    }
 
     // Apply sizing based on objectFit setting
     // Default behavior: object-fit "cover" with centered object-position if no cropSettings

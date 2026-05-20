@@ -14,6 +14,7 @@ import { getCustomThemeById } from "@/app/_actions/presentation/theme-actions";
 import type { PlateSlide } from "@/components/presentation/utils/parser";
 import { Button } from "@/components/ui/button";
 import {
+  applyTypographyOverride,
   setThemeVariables,
   type ThemeProperties,
   type Themes,
@@ -171,10 +172,22 @@ export default function PresentationPage() {
         }
       }
 
-      // Background override (optional persisted field)
-      if (presentationContent?.config?.backgroundOverride !== undefined) {
-        const { setConfig } = usePresentationState.getState();
+      if (presentationContent?.config) {
+        const { setConfig, setPresentationColorMode } =
+          usePresentationState.getState();
         setConfig(presentationContent.config as Record<string, unknown>);
+        const savedMode = presentationContent.config.presentationColorMode as
+          | "light"
+          | "dark"
+          | undefined;
+        if (savedMode === "light" || savedMode === "dark") {
+          setPresentationColorMode(savedMode);
+        }
+      }
+
+      if (presentationData.presentation?.presentationStyle) {
+        const { setPresentationStyle } = usePresentationState.getState();
+        setPresentationStyle(presentationData.presentation.presentationStyle);
       }
 
       // Set outline
@@ -269,23 +282,33 @@ export default function PresentationPage() {
     debouncedThemeUpdate(id, theme as string);
   }, [theme, id, debouncedThemeUpdate, isLoading]);
 
-  // Set theme variables when theme changes
+  const presentationColorMode = usePresentationState(
+    (s) => s.presentationColorMode,
+  );
+  const config = usePresentationState((s) => s.config);
+  const typography = config.typography as
+    | { heading?: string; body?: string }
+    | undefined;
+
   useEffect(() => {
-    if (theme && resolvedTheme) {
-      const state = usePresentationState.getState();
-      // Check if we have custom theme data
-      if (state.customThemeData) {
-        setThemeVariables(state.customThemeData, resolvedTheme === "dark");
-      }
-      // Otherwise try to use a predefined theme
-      else if (typeof theme === "string" && theme in themes) {
-        const currentTheme = themes[theme as keyof typeof themes];
-        if (currentTheme) {
-          setThemeVariables(currentTheme, resolvedTheme === "dark");
-        }
+    if (!theme) return;
+    const state = usePresentationState.getState();
+    const isDark = state.presentationColorMode === "dark";
+    if (state.customThemeData) {
+      setThemeVariables(
+        applyTypographyOverride(state.customThemeData, typography),
+        isDark,
+      );
+    } else if (typeof theme === "string" && theme in themes) {
+      const currentTheme = themes[theme as keyof typeof themes];
+      if (currentTheme) {
+        setThemeVariables(
+          applyTypographyOverride(currentTheme, typography),
+          isDark,
+        );
       }
     }
-  }, [theme, resolvedTheme]);
+  }, [theme, presentationColorMode, typography]);
 
   // Get the current theme data
   const currentThemeData = (() => {

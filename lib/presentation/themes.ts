@@ -9,7 +9,7 @@ export type ThemeName =
   | "sunset"
   | "forest";
 
-interface ThemeColors {
+export interface ThemeColors {
   primary: string;
   secondary: string;
   accent: string;
@@ -50,6 +50,54 @@ export interface ThemeProperties {
 }
 
 export type Themes = keyof typeof themes;
+
+export type PresentationColorMode = "light" | "dark";
+
+export const PRESENTATION_FONT_OPTIONS = [
+  "Inter",
+  "Montserrat",
+  "Raleway",
+  "Merriweather",
+  "Source Sans Pro",
+  "DM Sans",
+  "DM Serif Display",
+  "Bitter",
+  "JetBrains Mono",
+  "Playfair Display",
+  "Roboto",
+  "Open Sans",
+] as const;
+
+export function applyTypographyOverride(
+  theme: ThemeProperties,
+  typography?: { heading?: string; body?: string },
+): ThemeProperties {
+  if (!typography?.heading && !typography?.body) return theme;
+  return {
+    ...theme,
+    fonts: {
+      heading: typography.heading ?? theme.fonts.heading,
+      body: typography.body ?? theme.fonts.body,
+    },
+  };
+}
+
+export function getThemeSnapshot(
+  themeKey: string,
+  customThemeData: ThemeProperties | null,
+  colorMode: PresentationColorMode,
+  typography?: { heading?: string; body?: string },
+): ThemeProperties & { activeColors: ThemeColors } {
+  const base =
+    customThemeData ??
+    (themeKey in themes
+      ? themes[themeKey as ThemeName]
+      : themes.mystique);
+  const withFonts = applyTypographyOverride(base, typography);
+  const activeColors =
+    colorMode === "dark" ? withFonts.colors.dark : withFonts.colors.light;
+  return { ...withFonts, activeColors };
+}
 
 export const themes: Record<ThemeName, ThemeProperties> = {
   daktilo: {
@@ -232,7 +280,7 @@ export const themes: Record<ThemeName, ThemeProperties> = {
         primary: "#7C3AED",
         secondary: "#5B21B6",
         accent: "#8B5CF6",
-        background: "#FFFFFF",
+        background: "#F5F3FF",
         text: "#1F2937",
         heading: "#111827",
         muted: "#6B7280",
@@ -318,7 +366,7 @@ export const themes: Record<ThemeName, ThemeProperties> = {
         primary: "#DC2626",
         secondary: "#991B1B",
         accent: "#F87171",
-        background: "#FFFFFF",
+        background: "#FFF1F2",
         text: "#1F2937",
         heading: "#111827",
         muted: "#6B7280",

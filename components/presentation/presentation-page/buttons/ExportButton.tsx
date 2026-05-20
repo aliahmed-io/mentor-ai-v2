@@ -4,6 +4,7 @@
 import { Download } from "lucide-react";
 import { useState } from "react";
 import { exportPresentation } from "@/app/_actions/presentation/exportPresentationActions";
+import { getThemeSnapshot } from "@/lib/presentation/themes";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,7 +16,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { themes } from "@/lib/presentation/themes";
 import { usePresentationState } from "@/states/presentation-state";
 
 interface ExportPPTButtonProps {
@@ -32,39 +32,38 @@ export function ExportButton({
   const { toast } = useToast();
   const theme = usePresentationState((s) => s.theme);
   const customThemeData = usePresentationState((s) => s.customThemeData);
+  const presentationColorMode = usePresentationState(
+    (s) => s.presentationColorMode,
+  );
+  const config = usePresentationState((s) => s.config);
+  const typography = config.typography as
+    | { heading?: string; body?: string }
+    | undefined;
 
   const handleExport = async () => {
     try {
       setIsExporting(true);
 
-      // Build theme colors to pass to server (always use LIGHT palette for PPT)
       const themeColors = (() => {
-        if (customThemeData) {
-          const colors = customThemeData.colors.light;
-          return {
-            primary: colors.primary.replace("#", ""),
-            secondary: colors.secondary.replace("#", ""),
-            accent: colors.accent.replace("#", ""),
-            background: colors.background.replace("#", ""),
-            text: colors.text.replace("#", ""),
-            heading: colors.heading.replace("#", ""),
-            muted: colors.muted.replace("#", ""),
-          };
-        }
-        if (typeof theme === "string" && theme in themes) {
-          const t = themes[theme as keyof typeof themes];
-          const colors = t.colors.light;
-          return {
-            primary: colors.primary.replace("#", ""),
-            secondary: colors.secondary.replace("#", ""),
-            accent: colors.accent.replace("#", ""),
-            background: colors.background.replace("#", ""),
-            text: colors.text.replace("#", ""),
-            heading: colors.heading.replace("#", ""),
-            muted: colors.muted.replace("#", ""),
-          };
-        }
-        return undefined;
+        const snapshot = getThemeSnapshot(
+          typeof theme === "string" ? theme : "mystique",
+          customThemeData,
+          presentationColorMode,
+          typography,
+        );
+        const colors = snapshot.activeColors;
+        const strip = (c: string) => c.replace("#", "");
+        return {
+          primary: strip(colors.primary),
+          secondary: strip(colors.secondary),
+          accent: strip(colors.accent),
+          background: strip(colors.background),
+          text: strip(colors.text),
+          heading: strip(colors.heading),
+          muted: strip(colors.muted),
+          headingFont: snapshot.fonts.heading,
+          bodyFont: snapshot.fonts.body,
+        };
       })();
 
       const result = await exportPresentation(
@@ -155,6 +154,17 @@ export function ExportButton({
           </Button>
           <Button type="button" onClick={handleExport} disabled={isExporting}>
             {isExporting ? "Exporting..." : "Export to PowerPoint"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isExporting}
+            onClick={() => {
+              setIsExportDialogOpen(false);
+              window.print();
+            }}
+          >
+            Export PDF (Print)
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,6 +1,6 @@
 "use client";
 import * as motion from "framer-motion/client";
-import { ArrowLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronRight, Monitor, Layout } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -28,6 +28,8 @@ export default function PresentationHeader({ title }: PresentationHeaderProps) {
   const currentPresentationId = usePresentationState(
     (s) => s.currentPresentationId,
   );
+  const viewMode = usePresentationState((s) => s.viewMode);
+  const setViewMode = usePresentationState((s) => s.setViewMode);
   const [presentationTitle, setPresentationTitle] =
     useState<string>("Presentation");
   const pathname = usePathname();
@@ -103,6 +105,18 @@ export default function PresentationHeader({ title }: PresentationHeaderProps) {
         {!isPresenting && (
           <div className="flex items-center gap-2">
             <SaveStatus />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setViewMode(viewMode === "slides" ? "web" : "slides")}
+              className="text-muted-foreground hover:text-foreground transition-all duration-200 hover:scale-[1.02]"
+            >
+              {viewMode === "slides" ? (
+                <><Layout className="mr-1 h-4 w-4" /> Web View</>
+              ) : (
+                <><Monitor className="mr-1 h-4 w-4" /> Slide View</>
+              )}
+            </Button>
             <ExportButton presentationId={currentPresentationId ?? ""} />
             <PresentButton />
           </div>

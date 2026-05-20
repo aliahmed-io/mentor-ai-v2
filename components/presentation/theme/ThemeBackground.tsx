@@ -1,6 +1,6 @@
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import {
+  applyTypographyOverride,
   setThemeVariables,
   type ThemeProperties,
   themes,
@@ -16,9 +16,14 @@ interface ThemeBackgroundProps {
 export function ThemeBackground({ className, children }: ThemeBackgroundProps) {
   const presentationTheme = usePresentationState((s) => s.theme);
   const customThemeData = usePresentationState((s) => s.customThemeData);
+  const presentationColorMode = usePresentationState(
+    (s) => s.presentationColorMode,
+  );
   const config = usePresentationState((s) => s.config);
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
+  const typography = config.typography as
+    | { heading?: string; body?: string }
+    | undefined;
+  const isDark = presentationColorMode === "dark";
   const [mounted, setMounted] = useState(false);
 
   // Handle hydration mismatch by only rendering the gradient after mount
@@ -30,21 +35,21 @@ export function ThemeBackground({ className, children }: ThemeBackgroundProps) {
   useEffect(() => {
     if (mounted && presentationTheme) {
       // Check if we're using a custom theme or a predefined theme
+      let themeProps: ThemeProperties | undefined;
       if (customThemeData) {
-        // Use custom theme data
-        setThemeVariables(customThemeData, isDark);
+        themeProps = applyTypographyOverride(customThemeData, typography);
       } else if (
         typeof presentationTheme === "string" &&
         presentationTheme in themes
       ) {
-        // Use predefined theme
-        setThemeVariables(
+        themeProps = applyTypographyOverride(
           themes[presentationTheme as keyof typeof themes],
-          isDark,
+          typography,
         );
       }
+      if (themeProps) setThemeVariables(themeProps, isDark);
     }
-  }, [presentationTheme, customThemeData, isDark, mounted]);
+  }, [presentationTheme, customThemeData, isDark, mounted, typography]);
 
   // Get the current theme colors
   let currentTheme: ThemeProperties | undefined;

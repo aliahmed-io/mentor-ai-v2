@@ -32,6 +32,8 @@ export const useDebouncedSave = (options: UseDebouncedSaveOptions = {}) => {
           outline,
           imageSource,
           presentationStyle,
+          presentationColorMode,
+          theme,
           language,
           config,
           thumbnailUrl,
@@ -46,12 +48,13 @@ export const useDebouncedSave = (options: UseDebouncedSaveOptions = {}) => {
             id: currentPresentationId,
             content: {
               slides,
-              config,
+              config: { ...config, presentationColorMode },
             },
             title: currentPresentationTitle ?? "",
             outline,
             imageSource,
             presentationStyle,
+            theme: typeof theme === "string" ? theme : undefined,
             language,
             thumbnailUrl,
           });
@@ -90,6 +93,8 @@ export const useDebouncedSave = (options: UseDebouncedSaveOptions = {}) => {
       outline,
       imageSource,
       presentationStyle,
+      presentationColorMode,
+      theme,
       language,
       config,
       thumbnailUrl,
@@ -105,13 +110,14 @@ export const useDebouncedSave = (options: UseDebouncedSaveOptions = {}) => {
         id: currentPresentationId,
         content: {
           slides,
-          config,
+          config: { ...config, presentationColorMode },
         },
         title: currentPresentationTitle ?? "",
         outline,
         language,
         imageSource,
         presentationStyle,
+        theme: typeof theme === "string" ? theme : undefined,
         thumbnailUrl,
       });
 
