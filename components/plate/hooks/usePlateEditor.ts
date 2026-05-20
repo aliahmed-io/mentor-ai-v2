@@ -74,20 +74,26 @@ export function usePlateEditor<
           .getApi(MarkdownPlugin)
           .markdown.deserialize(options?.initialMarkdown ?? "");
 
+  const optionsRef = React.useRef(options);
+  optionsRef.current = options;
+
+  const valueRef = React.useRef(value);
+  valueRef.current = value;
+
   return React.useMemo((): any => {
-    if (options.enabled === false) return null;
+    if (optionsRef.current.enabled === false) return null;
 
     const editor = createPlateEditor({
-      ...options,
-      value: value,
+      ...optionsRef.current,
+      value: valueRef.current,
       onReady: (ctx) => {
         if (ctx.isAsync && isMountedRef.current) {
           forceRender({});
         }
-        options.onReady?.(ctx);
+        optionsRef.current.onReady?.(ctx);
       },
     });
 
     return editor;
-  }, [options.id, options.enabled, ...deps, options, value]);
+  }, [options.id, options.enabled, ...deps]);
 }

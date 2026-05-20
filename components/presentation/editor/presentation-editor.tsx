@@ -69,19 +69,17 @@ const PresentationEditor = React.memo(
 
     useEffect(() => {
       if (initialContent) {
-        requestAnimationFrame(() => {
-          editor.tf.setValue(initialContent.content);
-        });
+        const currentContent = editor.children;
+        if (
+          JSON.stringify(initialContent.content) !==
+          JSON.stringify(currentContent)
+        ) {
+          requestAnimationFrame(() => {
+            editor.tf.setValue(initialContent.content);
+          });
+        }
       }
-    }, [editor.tf.setValue, initialContent]);
-
-    useEffect(() => {
-      if (isGenerating) {
-        requestAnimationFrame(() => {
-          editor.tf.setValue(initialContent?.content);
-        });
-      }
-    }, [initialContent, isGenerating, editor.tf.setValue]);
+    }, [editor, initialContent]);
 
     const handleSlideChange = useCallback(
       (value: Value, slideIndex: number) => {
