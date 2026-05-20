@@ -1,47 +1,72 @@
-import {
-  type TColumnElement,
-  type TColumnGroupElement,
-  type TElement,
+import type {
+  TColumnElement,
+  TColumnGroupElement,
+  TElement,
+  TTableCellElement,
+  TTableElement,
+  TTableRowElement,
 } from "platejs";
 import PptxGenJS from "pptxgenjs";
-import {
-  type TArrowListElement,
-  type TArrowListItemElement,
+import type {
+  TArrowListElement,
+  TArrowListItemElement,
 } from "../editor/plugins/arrow-plugin";
-import {
-  type TBulletGroupElement,
-  type TBulletItemElement,
+import type {
+  TBeforeAfterGroupElement,
+  TBeforeAfterSideElement,
+} from "../editor/plugins/before-after-plugin";
+import type {
+  TBoxGroupElement,
+  TBoxItemElement,
+} from "../editor/plugins/box-plugin";
+import type {
+  TBulletGroupElement,
+  TBulletItemElement,
 } from "../editor/plugins/bullet-plugin";
-import {
-  type TCycleGroupElement,
-  type TCycleItemElement,
+import type {
+  TCompareGroupElement,
+  TCompareSideElement,
+} from "../editor/plugins/compare-plugin";
+import type {
+  TCycleGroupElement,
+  TCycleItemElement,
 } from "../editor/plugins/cycle-plugin";
-import {
-  type TIconListElement,
-  type TIconListItemElement,
+import type {
+  TIconListElement,
+  TIconListItemElement,
 } from "../editor/plugins/icon-list-plugin";
-import {
-  type TVisualizationListElement,
-  type TVisualizationListItemElement,
+import type {
+  TVisualizationListElement,
+  TVisualizationListItemElement,
 } from "../editor/plugins/legacy/visualization-list-plugin";
-import {
-  type TPyramidGroupElement,
-  type TPyramidItemElement,
+import type {
+  TConsItemElement,
+  TProsConsGroupElement,
+  TProsItemElement,
+} from "../editor/plugins/pros-cons-plugin";
+import type {
+  TPyramidGroupElement,
+  TPyramidItemElement,
 } from "../editor/plugins/pyramid-plugin";
-import {
-  type TStairGroupElement,
-  type TStairItemElement,
+import type {
+  TSequenceArrowGroupElement,
+  TSequenceArrowItemElement,
+} from "../editor/plugins/sequence-arrow-plugin";
+import type {
+  TStairGroupElement,
+  TStairItemElement,
 } from "../editor/plugins/staircase-plugin";
-import {
-  type TTimelineGroupElement,
-  type TTimelineItemElement,
+import type {
+  TTimelineGroupElement,
+  TTimelineItemElement,
 } from "../editor/plugins/timeline-plugin";
-import { type PlateNode, type PlateSlide } from "./parser";
-import { layoutVerticalFlow, type Frame } from "./layoutEngine";
-import {
-  type HeadingElement,
-  type ImageElement,
-  type ParagraphElement,
+import { type Frame, layoutVerticalFlow } from "./layoutEngine";
+import type { PlateNode, PlateSlide } from "./parser";
+import type {
+  HeadingElement,
+  ImageElement,
+  ParagraphElement,
+  TChartElement,
 } from "./types";
 
 // Type guards for text nodes
@@ -87,6 +112,10 @@ interface PresentationData {
   slides: PlateSlide[];
 }
 
+interface CustomChartElement extends TElement {
+  data?: Array<{ label?: string; value?: number; x?: number; y?: number }>;
+}
+
 export class PlateJSToPPTXConverter {
   private pptx: PptxGenJS;
   private currentSlide: PptxGenJS.Slide | null = null;
@@ -96,38 +125,15 @@ export class PlateJSToPPTXConverter {
   private readonly SLIDE_HEIGHT = 5.625;
   private readonly MARGIN = 0.5;
 
-  // Theme defaults (mirror src/styles/presentation.css light variables)
+  // Theme defaults (mirror globals.css earthy workspace palette)
   private THEME: ThemeColors = {
-    primary: "3B82F6",
-    secondary: "1F2937",
-    accent: "60A5FA",
-    background: "FFFFFF",
-    text: "1F2937",
-    heading: "111827",
-    muted: "6B7280",
-  };
-
-  // SVG definitions from the PlateJS components
-  private readonly SVG_DEFINITIONS = {
-    arrow: {
-      path: "M0,90L45,108L90,90L90,0L45,18L0,0Z",
-      viewBox: "0 0 90 108",
-      width: 90,
-      height: 108,
-    },
-    cycle: {
-      paths: [
-        "M23.25569,25.04785,28.119,36.65509A25.64562,25.64562,0,0,1,49.3597,24.379l7.62158-10.01624L49.384,4.37842A45.65079,45.65079,0,0,0,10.81752,26.63416Z",
-        "M89.82619,27.75232,84.98225,39.31543,72.50014,37.72351a25.59208,25.59208,0,0,1,.01,24.536l4.86279,11.60571,12.43573-1.58667a45.49257,45.49257,0,0,0,.01758-44.52624Z",
-        "M58.23714,14.36279,50.61586,24.37842A25.64474,25.64474,0,0,1,71.86818,36.635l12.48517,1.59253L89.199,26.66272A45.65056,45.65056,0,0,0,50.64009,4.379Z",
-        "M76.744,74.95312,71.88106,63.34521A25.64518,25.64518,0,0,1,50.64033,75.62146L43.01839,85.6377,50.616,95.62207a45.65067,45.65067,0,0,0,38.5661-22.25525Z",
-        "M15.01839,60.68555,27.50026,62.2774a25.59173,25.59173,0,0,1-.01013-24.53686l-4.86335-11.6048L10.19136,27.72192a45.49238,45.49238,0,0,0-.01764,44.52582Z",
-        "M41.76253,85.6377l7.62164-10.01563A25.6444,25.6444,0,0,1,28.13258,63.36646l-12.48529-1.593L10.801,73.33752a45.65051,45.65051,0,0,0,38.5589,22.28394Z",
-      ],
-      viewBox: "0 0 100 125",
-      width: 100,
-      height: 125,
-    },
+    primary: "4D6B56", // Sage Green
+    secondary: "EADFC9", // Warm Cream/Beige
+    accent: "729B7F", // Vibrant Sage
+    background: "FAF8F5", // Cream Background
+    text: "232B28", // Deep Forest Charcoal
+    heading: "232B28", // Dark Forest Green Headings
+    muted: "8FA098", // Muted Sage Gray
   };
 
   constructor(theme?: Partial<ThemeColors>) {
@@ -167,7 +173,11 @@ export class PlateJSToPPTXConverter {
   // Heuristic: average character width ≈ 0.5 × fontHeight; fontHeight(in) = fontSize/72
   // So charWidth(in) ≈ 0.5 * (fontSize/72) = fontSize * 0.00694
   // We account for word wrapping by greedily filling lines by char count
-  private estimateTextHeight(text: string, widthIn: number, fontSizePt: number): number {
+  private estimateTextHeight(
+    text: string,
+    widthIn: number,
+    fontSizePt: number,
+  ): number {
     const minHeight = Math.max(fontSizePt / 72, 0.3);
     const charWidthIn = Math.max(fontSizePt * 0.00694, 0.05); // clamp
     const charsPerLine = Math.max(Math.floor(widthIn / charWidthIn), 8);
@@ -365,40 +375,6 @@ export class PlateJSToPPTXConverter {
     }
   }
 
-  private async processElements(
-    elements: PlateNode[],
-    area: { x: number; y: number; w: number; h: number },
-    alignment?: "start" | "center" | "end",
-  ) {
-    // Measure total height first to position the block (slide-level alignment)
-    const totalHeight = await this.measureElements(elements, area.w);
-
-    // Determine starting Y based on slide alignment (center entire block)
-    let startY = area.y;
-    if (alignment === "center") {
-      startY = area.y + Math.max(0, (area.h - totalHeight) / 2);
-    } else if (alignment === "end") {
-      startY = area.y + Math.max(0, area.h - totalHeight);
-    }
-
-    let currentY = startY;
-    for (const element of elements) {
-      const remaining = area.y + area.h - currentY;
-      if (remaining <= 0) break;
-      const elementHeight = await this.processElement(
-        element,
-        area.x,
-        currentY,
-        area.w,
-        false,
-        remaining,
-      );
-      currentY += elementHeight;
-
-      if (currentY >= area.y + area.h) break;
-    }
-  }
-
   private async processElement(
     element: PlateNode,
     x: number,
@@ -567,6 +543,74 @@ export class PlateJSToPPTXConverter {
           measureOnly,
           maxHeight,
         );
+      case "boxes":
+        return await this.addBoxes(
+          element as TBoxGroupElement,
+          x,
+          y,
+          width,
+          measureOnly,
+          maxHeight,
+        );
+      case "compare":
+        return await this.addCompare(
+          element as TCompareGroupElement,
+          x,
+          y,
+          width,
+          measureOnly,
+          maxHeight,
+        );
+      case "before-after":
+        return await this.addBeforeAfter(
+          element as TBeforeAfterGroupElement,
+          x,
+          y,
+          width,
+          measureOnly,
+          maxHeight,
+        );
+      case "pros-cons":
+        return await this.addProsCons(
+          element as TProsConsGroupElement,
+          x,
+          y,
+          width,
+          measureOnly,
+          maxHeight,
+        );
+      case "arrow-vertical":
+        return await this.addArrowVertical(
+          element as TSequenceArrowGroupElement,
+          x,
+          y,
+          width,
+          measureOnly,
+          maxHeight,
+        );
+      case "table":
+        return await this.addTable(
+          element as TTableElement,
+          x,
+          y,
+          width,
+          measureOnly,
+          maxHeight,
+        );
+      case "chart-bar":
+      case "chart-pie":
+      case "chart-line":
+      case "chart-area":
+      case "chart-radar":
+      case "chart-scatter":
+        return await this.addChart(
+          element as TChartElement,
+          x,
+          y,
+          width,
+          measureOnly,
+          maxHeight,
+        );
       default:
         // Handle unknown elements as paragraphs
         return this.addParagraph(
@@ -589,9 +633,13 @@ export class PlateJSToPPTXConverter {
     maxHeight?: number,
   ): number {
     const runs = this.extractTextRuns(element);
-    const plain = runs.length > 0 ? runs.map(r => r.text).join(" ") : this.extractText(element);
+    const plain =
+      runs.length > 0
+        ? runs.map((r) => r.text).join(" ")
+        : this.extractText(element);
     let height = Math.max(this.estimateTextHeight(plain, width, fontSize), 0.8);
-    if (typeof maxHeight === "number") height = Math.min(height, Math.max(0.4, maxHeight));
+    if (typeof maxHeight === "number")
+      height = Math.min(height, Math.max(0.4, maxHeight));
     if (measureOnly) return height;
 
     const textOptions = this.getTextOptions(element, fontSize);
@@ -641,8 +689,12 @@ export class PlateJSToPPTXConverter {
     const text = this.extractText(element);
     if (!text.trim()) return 0.2;
     const textOptions = this.getTextOptions(element, 14);
-    let paraHeight = Math.max(this.estimateTextHeight(text, width, textOptions.fontSize ?? 14), 0.6);
-    if (typeof maxHeight === "number") paraHeight = Math.min(paraHeight, Math.max(0.4, maxHeight));
+    let paraHeight = Math.max(
+      this.estimateTextHeight(text, width, textOptions.fontSize ?? 14),
+      0.6,
+    );
+    if (typeof maxHeight === "number")
+      paraHeight = Math.min(paraHeight, Math.max(0.4, maxHeight));
     if (measureOnly) return paraHeight;
 
     const runs = this.extractTextRuns(element);
@@ -695,16 +747,24 @@ export class PlateJSToPPTXConverter {
       (child) => (child as TBulletItemElement).type === "bullet",
     ) as TBulletItemElement[];
 
-    const columns = Math.min(3, Math.max(1, bullets.length <= 2 ? bullets.length : 3));
+    const columns = Math.min(
+      3,
+      Math.max(1, bullets.length <= 2 ? bullets.length : 3),
+    );
     const columnWidth = width / columns;
     const gapY = 0.25;
-    const yBottom = typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
+    const yBottom =
+      typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
     const colHeights = Array(columns).fill(y);
 
     for (let i = 0; i < bullets.length; i++) {
       const bullet = bullets[i]!;
       const bulletText = this.extractText(bullet);
-      const textHeight = this.estimateTextHeight(bulletText, columnWidth - 0.6, 12);
+      const textHeight = this.estimateTextHeight(
+        bulletText,
+        columnWidth - 0.6,
+        12,
+      );
       // pick the column with the smallest current height (waterfall layout)
       const columnIndex = colHeights.indexOf(Math.min(...colHeights));
       const bulletX = x + columnIndex * columnWidth;
@@ -746,7 +806,8 @@ export class PlateJSToPPTXConverter {
           autoFit: true,
           wrap: true,
         };
-        if (bulletRuns.length > 0) this.currentSlide?.addText(bulletRuns, contentProps);
+        if (bulletRuns.length > 0)
+          this.currentSlide?.addText(bulletRuns, contentProps);
         else this.currentSlide?.addText(bulletText, contentProps);
       }
 
@@ -772,7 +833,8 @@ export class PlateJSToPPTXConverter {
     let currentX = x;
     let maxColHeight = 0;
 
-    const yBottom = typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
+    const yBottom =
+      typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
     for (const column of columns) {
       const columnElement = column as TColumnElement;
       const columnWidth =
@@ -782,7 +844,10 @@ export class PlateJSToPPTXConverter {
       let columnY = y;
 
       for (const child of columnElement.children) {
-        const remaining = Math.min(yBottom - columnY, maxHeight ?? Number.POSITIVE_INFINITY);
+        const remaining = Math.min(
+          yBottom - columnY,
+          maxHeight ?? Number.POSITIVE_INFINITY,
+        );
         if (remaining <= 0) break;
         const childHeight = await this.processElement(
           child as PlateNode,
@@ -863,7 +928,8 @@ export class PlateJSToPPTXConverter {
     );
 
     let currentY = y;
-    const yBottom = typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
+    const yBottom =
+      typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i] as
@@ -871,9 +937,15 @@ export class PlateJSToPPTXConverter {
         | TVisualizationListItemElement;
 
       if (!measureOnly) {
-        // Create and add arrow SVG
-        const arrowSvg = this.createArrowSVG(this.THEME.primary);
-        await this.addSVGToSlide(arrowSvg, x + 0.5, currentY, 1, 0.6);
+        // Draw native right arrow
+        this.currentSlide?.addShape(this.pptx.ShapeType.rightArrow, {
+          x: x + 0.5,
+          y: currentY + 0.05,
+          w: 1,
+          h: 0.5,
+          fill: { color: this.THEME.primary },
+          line: { color: "FFFFFF", width: 1 },
+        });
 
         // Add content
         const itemText = this.extractText(item);
@@ -890,7 +962,11 @@ export class PlateJSToPPTXConverter {
         });
       }
 
-      const textH2 = this.estimateTextHeight(this.extractText(item), width - 2.3, 12);
+      const textH2 = this.estimateTextHeight(
+        this.extractText(item),
+        width - 2.3,
+        12,
+      );
       currentY += textH2 + 0.2;
       if (currentY > yBottom) break;
     }
@@ -923,46 +999,32 @@ export class PlateJSToPPTXConverter {
       const levelX = startX + (baseWidth - levelWidth) / 2;
       const levelY = y + i * 0.8;
 
-      // Create pyramid level shape using clip path algorithm from PyramidItem
-      const increment = (baseWidth * 0.8) / (2 * items.length);
-      let clipPath: string;
-
-      if (i === 0) {
-        // First layer is a triangle
-        clipPath = `polygon(50% 0%, ${50 - increment}% 100%, ${50 + increment}% 100%)`;
-      } else {
-        // For other layers
-        const prevXOffset = increment * i;
-        const currentXOffset = increment * (i + 1);
-        const prevBottomLeft = 50 - prevXOffset;
-        const prevBottomRight = 50 + prevXOffset;
-        const currentBottomLeft = 50 - currentXOffset;
-        const currentBottomRight = 50 + currentXOffset;
-        clipPath = `polygon(${prevBottomLeft}% 0%, ${prevBottomRight}% 0%, ${currentBottomRight}% 100%, ${currentBottomLeft}% 100%)`;
-      }
-
       if (!measureOnly) {
-        // Create SVG for pyramid level
-        const pyramidSvg = this.createPyramidLevelSVG(
-          levelWidth * 72,
-          0.6 * 72,
-          this.THEME.primary,
-          clipPath,
-          (i + 1).toString(),
-        );
-        await this.addSVGToSlide(pyramidSvg, levelX, levelY, levelWidth, 0.6);
+        // Draw native shape: triangle at the top apex, trapezoid for layers below
+        const shapeType =
+          i === 0
+            ? this.pptx.ShapeType.triangle
+            : this.pptx.ShapeType.trapezoid;
+        this.currentSlide?.addShape(shapeType, {
+          x: levelX,
+          y: levelY,
+          w: levelWidth,
+          h: 0.6,
+          fill: { color: this.THEME.primary },
+          line: { color: "FFFFFF", width: 1.5 },
+        });
 
-        // Add content text
+        // Add content text centered on the shape
         const itemText = this.extractText(item);
         this.currentSlide?.addText(itemText, {
-          x: levelX + 0.7,
+          x: levelX + 0.2,
           y: levelY,
-          w: levelWidth - 0.8,
+          w: levelWidth - 0.4,
           h: 0.6,
           fontSize: 12,
           color: "FFFFFF",
           valign: "middle",
-          align: "left",
+          align: "center",
         });
       }
     }
@@ -1019,21 +1081,11 @@ export class PlateJSToPPTXConverter {
     measureOnly = false,
     maxHeight?: number,
   ): Promise<number> {
-    const yBottom = typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
+    const yBottom =
+      typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
     if (sidedness === "single") {
       const lineX = x + 0.3;
       let currentY = y;
-
-      if (!measureOnly) {
-        // Draw vertical line
-        this.currentSlide?.addShape(this.pptx.ShapeType.line, {
-          x: lineX,
-          y: y,
-          w: 0,
-          h: items.length * 1.2,
-          line: { width: 3, color: this.THEME.primary },
-        });
-      }
 
       for (let i = 0; i < items.length; i++) {
         const item = items[i]!;
@@ -1086,25 +1138,28 @@ export class PlateJSToPPTXConverter {
           });
         }
 
-        currentY += this.estimateTextHeight(this.extractText(item), width - 1.4, 11) + 0.6;
+        currentY +=
+          this.estimateTextHeight(this.extractText(item), width - 1.4, 11) +
+          0.6;
         if (currentY > yBottom) break;
+      }
+
+      if (!measureOnly) {
+        // Draw vertical line exactly matching the rendered height of the timeline
+        const lineH = Math.max(0.1, currentY - y - 0.6); // subtract last padding offset
+        this.currentSlide?.addShape(this.pptx.ShapeType.line, {
+          x: lineX,
+          y: y + 0.15,
+          w: 0,
+          h: lineH,
+          line: { width: 3, color: this.THEME.primary },
+        });
       }
 
       return currentY - y + 0.3;
     } else {
       // Double-sided vertical timeline
       let currentY = y;
-
-      if (!measureOnly) {
-        // Draw vertical line
-        this.currentSlide?.addShape(this.pptx.ShapeType.line, {
-          x: x + width / 2,
-          y: y,
-          w: 0,
-          h: items.length * 1.2,
-          line: { width: 2, color: this.THEME.primary },
-        });
-      }
 
       for (let i = 0; i < items.length; i++) {
         const item = items[i]!;
@@ -1155,6 +1210,18 @@ export class PlateJSToPPTXConverter {
         if (currentY > yBottom) break;
       }
 
+      if (!measureOnly) {
+        // Draw vertical line exactly matching the rendered height of the timeline
+        const lineH = Math.max(0.1, currentY - y - 1.2); // subtract last item offset
+        this.currentSlide?.addShape(this.pptx.ShapeType.line, {
+          x: x + width / 2,
+          y: y + 0.15,
+          w: 0,
+          h: lineH,
+          line: { width: 2, color: this.THEME.primary },
+        });
+      }
+
       return currentY - y + 0.3;
     }
   }
@@ -1168,25 +1235,21 @@ export class PlateJSToPPTXConverter {
     measureOnly = false,
     maxHeight?: number,
   ): Promise<number> {
-    const yBottom = typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
+    const yBottom =
+      typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
     if (sidedness === "single") {
       const lineY = y + 0.8;
       const itemWidth = width / items.length;
-
-      if (!measureOnly) {
-        // Draw horizontal line
-        this.currentSlide?.addShape(this.pptx.ShapeType.line, {
-          x: x,
-          y: lineY,
-          w: width,
-          h: 0,
-          line: { width: 3, color: this.THEME.primary },
-        });
-      }
+      let renderedCount = 0;
 
       for (let i = 0; i < items.length; i++) {
         const item = items[i]!;
         const itemX = x + i * itemWidth + itemWidth / 2;
+
+        const itemText = this.extractText(item);
+        const textH = this.estimateTextHeight(itemText, itemWidth * 0.7, 10);
+        if (lineY + 0.55 + textH > yBottom) break;
+        renderedCount = i + 1;
 
         if (!measureOnly) {
           // Add timeline circle
@@ -1198,23 +1261,18 @@ export class PlateJSToPPTXConverter {
             fill: { color: this.THEME.primary },
             line: { width: 2, color: "FFFFFF" },
           });
-        }
 
-        const itemText = this.extractText(item);
-        const textH = this.estimateTextHeight(itemText, itemWidth * 0.7, 10);
-        if (!measureOnly) {
+          // Add content card
           this.currentSlide?.addShape(this.pptx.ShapeType.rect, {
-          x: itemX - itemWidth * 0.4,
-          y: lineY + 0.5,
-          w: itemWidth * 0.8,
-          h: textH + 0.2,
-          fill: { color: this.THEME.background },
-          line: { width: 1, color: this.THEME.primary },
+            x: itemX - itemWidth * 0.4,
+            y: lineY + 0.5,
+            w: itemWidth * 0.8,
+            h: textH + 0.2,
+            fill: { color: this.THEME.background },
+            line: { width: 1, color: this.THEME.primary },
           });
-        }
 
-        // Add content text
-        if (!measureOnly) {
+          // Add content text
           this.currentSlide?.addText(itemText, {
             x: itemX - itemWidth * 0.35,
             y: lineY + 0.55,
@@ -1227,7 +1285,18 @@ export class PlateJSToPPTXConverter {
             wrap: true,
           });
         }
-        if (lineY + 0.55 + textH > yBottom) break;
+      }
+
+      if (!measureOnly && renderedCount > 0) {
+        // Draw horizontal line exactly covering the rendered timeline width
+        const totalLineWidth = Math.max(0.5, (renderedCount - 0.5) * itemWidth);
+        this.currentSlide?.addShape(this.pptx.ShapeType.line, {
+          x: x + itemWidth / 2,
+          y: lineY,
+          w: totalLineWidth,
+          h: 0,
+          line: { width: 3, color: this.THEME.primary },
+        });
       }
 
       return 2.5;
@@ -1235,24 +1304,22 @@ export class PlateJSToPPTXConverter {
       // Double-sided horizontal timeline
       const lineY = y + 1.5;
       const itemWidth = width / items.length;
-
-      if (!measureOnly) {
-        // Draw horizontal line
-        this.currentSlide?.addShape(this.pptx.ShapeType.line, {
-          x: x,
-          y: lineY,
-          w: width,
-          h: 0,
-          line: { width: 2, color: this.THEME.primary },
-        });
-      }
+      let renderedCount = 0;
 
       for (let i = 0; i < items.length; i++) {
         const item = items[i]!;
-        const itemX = x + i * itemWidth + itemWidth / 2;
         const isAbove = i % 2 === 0;
 
+        const itemText = this.extractText(item);
+        const textH = this.estimateTextHeight(itemText, itemWidth * 0.7, 10);
+        const boxY = isAbove ? lineY - (textH + 0.6) : lineY + 0.5;
+
+        if ((isAbove ? boxY : boxY + textH) > yBottom) break;
+        renderedCount = i + 1;
+
         if (!measureOnly) {
+          const itemX = x + i * itemWidth + itemWidth / 2;
+
           // Add timeline circle
           this.currentSlide?.addShape(this.pptx.ShapeType.ellipse, {
             x: itemX - 0.2,
@@ -1262,27 +1329,21 @@ export class PlateJSToPPTXConverter {
             fill: { color: this.THEME.primary },
             line: { width: 4, color: "FFFFFF" },
           });
-        }
 
-        // Add number
-        this.currentSlide?.addText((i + 1).toString(), {
-          x: itemX - 0.2,
-          y: lineY - 0.2,
-          w: 0.4,
-          h: 0.4,
-          fontSize: 10,
-          bold: true,
-          color: "FFFFFF",
-          align: "center",
-          valign: "middle",
-        });
+          // Add number
+          this.currentSlide?.addText((i + 1).toString(), {
+            x: itemX - 0.2,
+            y: lineY - 0.2,
+            w: 0.4,
+            h: 0.4,
+            fontSize: 10,
+            bold: true,
+            color: "FFFFFF",
+            align: "center",
+            valign: "middle",
+          });
 
-        // Add content box above/below alternating
-        const itemText = this.extractText(item);
-        const textH = this.estimateTextHeight(itemText, itemWidth * 0.7, 10);
-        const boxY = isAbove ? lineY - (textH + 0.6) : lineY + 0.5;
-
-        if (!measureOnly) {
+          // Add content box above/below alternating
           this.currentSlide?.addShape(this.pptx.ShapeType.rect, {
             x: itemX - itemWidth * 0.4,
             y: boxY,
@@ -1291,10 +1352,8 @@ export class PlateJSToPPTXConverter {
             fill: { color: this.THEME.background },
             line: { width: 1, color: this.THEME.primary },
           });
-        }
 
-        // Add content text
-        if (!measureOnly) {
+          // Add content text
           this.currentSlide?.addText(itemText, {
             x: itemX - itemWidth * 0.35,
             y: boxY + 0.05,
@@ -1307,7 +1366,18 @@ export class PlateJSToPPTXConverter {
             wrap: true,
           });
         }
-        if ((isAbove ? boxY : boxY + textH) > yBottom) break;
+      }
+
+      if (!measureOnly && renderedCount > 0) {
+        // Draw horizontal line exactly covering the rendered timeline width
+        const totalLineWidth = Math.max(0.5, (renderedCount - 1) * itemWidth);
+        this.currentSlide?.addShape(this.pptx.ShapeType.line, {
+          x: x + itemWidth / 2,
+          y: lineY,
+          w: totalLineWidth,
+          h: 0,
+          line: { width: 2, color: this.THEME.primary },
+        });
       }
 
       return 3.5;
@@ -1331,18 +1401,29 @@ export class PlateJSToPPTXConverter {
     const centerX = x + width / 2;
     const centerY = y + 1.5;
     const radius = Math.min(width / 3, 1.2);
-    const yBottom = typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
+    const yBottom =
+      typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
 
     if (!measureOnly) {
-      // Add center cycle wheel SVG
-      const cycleWheelSvg = this.createCycleWheelSVG(this.THEME.primary);
-      await this.addSVGToSlide(
-        cycleWheelSvg,
-        centerX - 0.4,
-        centerY - 0.4,
-        0.8,
-        0.8,
-      );
+      // Draw outer connecting ring
+      this.currentSlide?.addShape(this.pptx.ShapeType.ellipse, {
+        x: centerX - radius,
+        y: centerY - radius,
+        w: radius * 2,
+        h: radius * 2,
+        fill: { color: "none" },
+        line: { color: this.THEME.accent, width: 3 },
+      });
+
+      // Draw center cycle wheel circle shape
+      this.currentSlide?.addShape(this.pptx.ShapeType.ellipse, {
+        x: centerX - 0.4,
+        y: centerY - 0.4,
+        w: 0.8,
+        h: 0.8,
+        fill: { color: this.THEME.primary },
+        line: { color: "FFFFFF", width: 1.5 },
+      });
     }
 
     // Position items around circle
@@ -1534,7 +1615,8 @@ export class PlateJSToPPTXConverter {
   ): Promise<number> {
     const imageUrl: string | undefined = (element as Partial<ImageElement>).url;
     let height = 2; // Default image height
-    if (typeof maxHeight === "number") height = Math.min(height, Math.max(0.5, maxHeight));
+    if (typeof maxHeight === "number")
+      height = Math.min(height, Math.max(0.5, maxHeight));
 
     if (!measureOnly && imageUrl && this.currentSlide) {
       try {
@@ -1597,76 +1679,6 @@ export class PlateJSToPPTXConverter {
     }
 
     return height + 0.2;
-  }
-
-  // SVG Creation Methods
-  private createArrowSVG(fillColor: string): string {
-    const { path, viewBox } = this.SVG_DEFINITIONS.arrow;
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}">
-      <path d="${path}" fill="#${fillColor}" />
-    </svg>`;
-  }
-
-  private createCycleWheelSVG(fillColor: string): string {
-    const { paths, viewBox } = this.SVG_DEFINITIONS.cycle;
-    const pathElements = paths
-      .map((path) => `<path d="${path}" fill="#${fillColor}" />`)
-      .join("");
-
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}">
-      ${pathElements}
-    </svg>`;
-  }
-
-  private createPyramidLevelSVG(
-    width: number,
-    height: number,
-    fillColor: string,
-    clipPath: string,
-    number: string,
-  ): string {
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-      <defs>
-        <clipPath id="pyramidClip">
-          <path d="M0,0 L${width},0 L${width},${height} L0,${height} Z" style="clip-path: ${clipPath};" />
-        </clipPath>
-      </defs>
-      <rect width="100%" height="100%" fill="#${fillColor}" clip-path="url(#pyramidClip)" />
-      <text x="20" y="${height / 2 + 5}" fill="white" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="bold">${number}</text>
-    </svg>`;
-  }
-
-  private async addSVGToSlide(
-    svgContent: string,
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-  ) {
-    if (!this.currentSlide) return;
-
-    try {
-      // Convert SVG to data URL
-      const svgDataUrl = `data:image/svg+xml;base64,${btoa(svgContent)}`;
-
-      this.currentSlide.addImage({
-        data: svgDataUrl,
-        x,
-        y,
-        w,
-        h,
-      });
-    } catch (error) {
-      console.warn("Failed to add SVG:", error);
-      // Fallback to basic shape if SVG fails
-      this.currentSlide?.addShape(this.pptx.ShapeType.rect, {
-        x,
-        y,
-        w,
-        h,
-        fill: { color: this.THEME.primary },
-      });
-    }
   }
 
   // Helper Methods
@@ -1823,16 +1835,657 @@ export class PlateJSToPPTXConverter {
     return null;
   }
 
-  private async measureElements(
-    elements: PlateNode[],
+  private async addBoxes(
+    element: TBoxGroupElement,
+    x: number,
+    y: number,
     width: number,
+    measureOnly = false,
+    _maxHeight?: number,
   ): Promise<number> {
-    let total = 0;
-    for (const element of elements) {
-      const h = await this.processElement(element, 0, 0, width, true);
-      total += h;
+    const items = element.children.filter((child) => {
+      const el = child as TElement;
+      return (
+        el && typeof el === "object" && "type" in el && el.type === "box-item"
+      );
+    }) as TBoxItemElement[];
+    if (items.length === 0) return 0;
+
+    const gap = 0.2;
+    const N = items.length;
+    const boxWidth = (width - gap * (N - 1)) / N;
+
+    // We do a measurement pass to find the tallest content height
+    let maxContentHeight = 1.0;
+    for (let i = 0; i < N; i++) {
+      const item = items[i]!;
+      let itemH = 0;
+      for (const child of item.children) {
+        const h = await this.processElement(
+          child as PlateNode,
+          x,
+          y,
+          boxWidth - 0.3,
+          true,
+        );
+        itemH += h;
+      }
+      maxContentHeight = Math.max(maxContentHeight, itemH);
     }
-    return total;
+    const boxHeight = maxContentHeight + 0.3; // add padding
+
+    if (!measureOnly) {
+      for (let i = 0; i < N; i++) {
+        const item = items[i]!;
+        const boxX = x + i * (boxWidth + gap);
+
+        // Draw native roundRect card
+        this.currentSlide?.addShape(this.pptx.ShapeType.roundRect, {
+          x: boxX,
+          y: y,
+          w: boxWidth,
+          h: boxHeight,
+          fill: {
+            color:
+              this.THEME.background === "FFFFFF"
+                ? "F5F8F6"
+                : this.THEME.background,
+          },
+          line: { color: this.THEME.accent, width: 1.5 },
+        });
+
+        // Render children inside card with padding
+        let childY = y + 0.15;
+        for (const child of item.children) {
+          const childH = await this.processElement(
+            child as PlateNode,
+            boxX + 0.15,
+            childY,
+            boxWidth - 0.3,
+            false,
+            boxHeight - 0.3,
+          );
+          childY += childH;
+        }
+      }
+    }
+
+    return boxHeight;
+  }
+
+  private async addCompare(
+    element: TCompareGroupElement,
+    x: number,
+    y: number,
+    width: number,
+    measureOnly = false,
+    _maxHeight?: number,
+  ): Promise<number> {
+    const items = element.children.filter((child) => {
+      const el = child as TElement;
+      return (
+        el &&
+        typeof el === "object" &&
+        "type" in el &&
+        el.type === "compare-side"
+      );
+    }) as TCompareSideElement[];
+    if (items.length === 0) return 0;
+
+    const gap = 0.25;
+    const N = items.length;
+    const sideWidth = (width - gap * (N - 1)) / N;
+
+    // Measurement pass
+    let maxContentHeight = 1.0;
+    for (let i = 0; i < N; i++) {
+      const item = items[i]!;
+      let itemH = 0;
+      for (const child of item.children) {
+        const h = await this.processElement(
+          child as PlateNode,
+          x,
+          y,
+          sideWidth - 0.3,
+          true,
+        );
+        itemH += h;
+      }
+      maxContentHeight = Math.max(maxContentHeight, itemH);
+    }
+    const sideHeight = maxContentHeight + 0.3;
+
+    if (!measureOnly) {
+      for (let i = 0; i < N; i++) {
+        const item = items[i]!;
+        const sideX = x + i * (sideWidth + gap);
+
+        // Draw nice compare card
+        this.currentSlide?.addShape(this.pptx.ShapeType.roundRect, {
+          x: sideX,
+          y: y,
+          w: sideWidth,
+          h: sideHeight,
+          fill: {
+            color:
+              this.THEME.background === "FFFFFF"
+                ? "FAF9F6"
+                : this.THEME.background,
+          },
+          line: { color: this.THEME.primary, width: 1.5 },
+        });
+
+        // Render children inside compare card
+        let childY = y + 0.15;
+        for (const child of item.children) {
+          const childH = await this.processElement(
+            child as PlateNode,
+            sideX + 0.15,
+            childY,
+            sideWidth - 0.3,
+            false,
+            sideHeight - 0.3,
+          );
+          childY += childH;
+        }
+      }
+    }
+
+    return sideHeight;
+  }
+
+  private async addBeforeAfter(
+    element: TBeforeAfterGroupElement,
+    x: number,
+    y: number,
+    width: number,
+    measureOnly = false,
+    _maxHeight?: number,
+  ): Promise<number> {
+    const items = element.children.filter((child) => {
+      const el = child as TElement;
+      return (
+        el &&
+        typeof el === "object" &&
+        "type" in el &&
+        el.type === "before-after-side"
+      );
+    }) as TBeforeAfterSideElement[];
+    if (items.length < 2) return 0;
+
+    const beforeItem = items[0]!;
+    const afterItem = items[1]!;
+
+    const cardWidth = (width - 0.8) / 2;
+
+    // Measure heights of both sides
+    let beforeHeight = 0;
+    for (const child of beforeItem.children) {
+      beforeHeight += await this.processElement(
+        child as PlateNode,
+        x,
+        y,
+        cardWidth - 0.3,
+        true,
+      );
+    }
+    let afterHeight = 0;
+    for (const child of afterItem.children) {
+      afterHeight += await this.processElement(
+        child as PlateNode,
+        x,
+        y,
+        cardWidth - 0.3,
+        true,
+      );
+    }
+
+    const maxContentHeight = Math.max(beforeHeight, afterHeight);
+    const cardHeight = maxContentHeight + 0.6; // add margin for title + padding
+
+    if (!measureOnly) {
+      const beforeX = x;
+      const arrowX = x + cardWidth + 0.15;
+      const afterX = x + cardWidth + 0.65;
+
+      // BEFORE Card
+      this.currentSlide?.addShape(this.pptx.ShapeType.roundRect, {
+        x: beforeX,
+        y: y,
+        w: cardWidth,
+        h: cardHeight,
+        fill: {
+          color:
+            this.THEME.background === "FFFFFF"
+              ? "F9F8F6"
+              : this.THEME.background,
+        },
+        line: { color: this.THEME.accent, width: 1.5 },
+      });
+      // Title
+      this.currentSlide?.addText("BEFORE", {
+        x: beforeX + 0.15,
+        y: y + 0.1,
+        w: cardWidth - 0.3,
+        h: 0.3,
+        fontSize: 11,
+        bold: true,
+        color: this.THEME.accent,
+        align: "left",
+      });
+      // Render BEFORE children
+      let childY = y + 0.45;
+      for (const child of beforeItem.children) {
+        childY += await this.processElement(
+          child as PlateNode,
+          beforeX + 0.15,
+          childY,
+          cardWidth - 0.3,
+          false,
+          cardHeight - 0.5,
+        );
+      }
+
+      // Connecting Arrow
+      this.currentSlide?.addShape(this.pptx.ShapeType.rightArrow, {
+        x: arrowX,
+        y: y + cardHeight / 2 - 0.15,
+        w: 0.35,
+        h: 0.3,
+        fill: { color: this.THEME.primary },
+      });
+
+      // AFTER Card
+      this.currentSlide?.addShape(this.pptx.ShapeType.roundRect, {
+        x: afterX,
+        y: y,
+        w: cardWidth,
+        h: cardHeight,
+        fill: {
+          color:
+            this.THEME.background === "FFFFFF"
+              ? "F9F8F6"
+              : this.THEME.background,
+        },
+        line: { color: this.THEME.primary, width: 1.5 },
+      });
+      // Title
+      this.currentSlide?.addText("AFTER", {
+        x: afterX + 0.15,
+        y: y + 0.1,
+        w: cardWidth - 0.3,
+        h: 0.3,
+        fontSize: 11,
+        bold: true,
+        color: this.THEME.primary,
+        align: "left",
+      });
+      // Render AFTER children
+      childY = y + 0.45;
+      for (const child of afterItem.children) {
+        childY += await this.processElement(
+          child as PlateNode,
+          afterX + 0.15,
+          childY,
+          cardWidth - 0.3,
+          false,
+          cardHeight - 0.5,
+        );
+      }
+    }
+
+    return cardHeight;
+  }
+
+  private async addProsCons(
+    element: TProsConsGroupElement,
+    x: number,
+    y: number,
+    width: number,
+    measureOnly = false,
+    _maxHeight?: number,
+  ): Promise<number> {
+    const prosItem = element.children.find((child) => {
+      const el = child as TElement;
+      return (
+        el && typeof el === "object" && "type" in el && el.type === "pros-item"
+      );
+    }) as TProsItemElement | undefined;
+
+    const consItem = element.children.find((child) => {
+      const el = child as TElement;
+      return (
+        el && typeof el === "object" && "type" in el && el.type === "cons-item"
+      );
+    }) as TConsItemElement | undefined;
+
+    const cardWidth = (width - 0.2) / 2;
+
+    let prosHeight = 0;
+    if (prosItem) {
+      for (const child of prosItem.children) {
+        prosHeight += await this.processElement(
+          child as PlateNode,
+          x,
+          y,
+          cardWidth - 0.3,
+          true,
+        );
+      }
+    }
+    let consHeight = 0;
+    if (consItem) {
+      for (const child of consItem.children) {
+        consHeight += await this.processElement(
+          child as PlateNode,
+          x,
+          y,
+          cardWidth - 0.3,
+          true,
+        );
+      }
+    }
+
+    const maxContentHeight = Math.max(prosHeight, consHeight);
+    const cardHeight = maxContentHeight + 0.6; // add margin for header + padding
+
+    if (!measureOnly) {
+      const prosX = x;
+      const consX = x + cardWidth + 0.2;
+
+      // PROS Card (soft green background)
+      this.currentSlide?.addShape(this.pptx.ShapeType.roundRect, {
+        x: prosX,
+        y: y,
+        w: cardWidth,
+        h: cardHeight,
+        fill: {
+          color: this.THEME.background === "FFFFFF" ? "E8F2EA" : "1E2B21",
+        },
+        line: { color: "729B7F", width: 1.5 },
+      });
+      this.currentSlide?.addText("PROS", {
+        x: prosX + 0.15,
+        y: y + 0.1,
+        w: cardWidth - 0.3,
+        h: 0.3,
+        fontSize: 12,
+        bold: true,
+        color: "4D6B56",
+        align: "left",
+      });
+      if (prosItem) {
+        let childY = y + 0.45;
+        for (const child of prosItem.children) {
+          childY += await this.processElement(
+            child as PlateNode,
+            prosX + 0.15,
+            childY,
+            cardWidth - 0.3,
+            false,
+            cardHeight - 0.5,
+          );
+        }
+      }
+
+      // CONS Card (soft red/coral background)
+      this.currentSlide?.addShape(this.pptx.ShapeType.roundRect, {
+        x: consX,
+        y: y,
+        w: cardWidth,
+        h: cardHeight,
+        fill: {
+          color: this.THEME.background === "FFFFFF" ? "FBEBEB" : "2D1D1D",
+        },
+        line: { color: "B23B3B", width: 1.5 },
+      });
+      this.currentSlide?.addText("CONS", {
+        x: consX + 0.15,
+        y: y + 0.1,
+        w: cardWidth - 0.3,
+        h: 0.3,
+        fontSize: 12,
+        bold: true,
+        color: "B23B3B",
+        align: "left",
+      });
+      if (consItem) {
+        let childY = y + 0.45;
+        for (const child of consItem.children) {
+          childY += await this.processElement(
+            child as PlateNode,
+            consX + 0.15,
+            childY,
+            cardWidth - 0.3,
+            false,
+            cardHeight - 0.5,
+          );
+        }
+      }
+    }
+
+    return cardHeight;
+  }
+
+  private async addArrowVertical(
+    element: TSequenceArrowGroupElement,
+    x: number,
+    y: number,
+    width: number,
+    measureOnly = false,
+    maxHeight?: number,
+  ): Promise<number> {
+    const items = element.children.filter((child) => {
+      const el = child as TElement;
+      return (
+        el &&
+        typeof el === "object" &&
+        "type" in el &&
+        el.type === "arrow-vertical-item"
+      );
+    }) as TSequenceArrowItemElement[];
+    if (items.length === 0) return 0;
+
+    let currentY = y;
+    const yBottom =
+      typeof maxHeight === "number" ? y + maxHeight : Number.POSITIVE_INFINITY;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]!;
+
+      // Measure box content height
+      let contentH = 0;
+      for (const child of item.children) {
+        contentH += await this.processElement(
+          child as PlateNode,
+          x,
+          y,
+          width - 0.4,
+          true,
+        );
+      }
+      const boxHeight = contentH + 0.3;
+
+      if (!measureOnly) {
+        // Draw card background
+        this.currentSlide?.addShape(this.pptx.ShapeType.roundRect, {
+          x: x,
+          y: currentY,
+          w: width,
+          h: boxHeight,
+          fill: {
+            color:
+              this.THEME.background === "FFFFFF"
+                ? "F9F8F6"
+                : this.THEME.background,
+          },
+          line: { color: this.THEME.primary, width: 1.5 },
+        });
+
+        // Render children inside box
+        let childY = currentY + 0.15;
+        for (const child of item.children) {
+          childY += await this.processElement(
+            child as PlateNode,
+            x + 0.2,
+            childY,
+            width - 0.4,
+            false,
+            boxHeight - 0.3,
+          );
+        }
+
+        // If not last, draw a beautiful connecting down arrow
+        if (i < items.length - 1) {
+          const arrowY = currentY + boxHeight + 0.05;
+          this.currentSlide?.addShape(this.pptx.ShapeType.downArrow, {
+            x: x + width / 2 - 0.15,
+            y: arrowY,
+            w: 0.3,
+            h: 0.25,
+            fill: { color: this.THEME.accent },
+          });
+        }
+      }
+
+      currentY += boxHeight + 0.35; // include box height + spacing for arrow
+      if (currentY > yBottom) break;
+    }
+
+    return currentY - y - 0.1; // subtract last arrow offset
+  }
+
+  private async addTable(
+    element: TTableElement,
+    x: number,
+    y: number,
+    width: number,
+    measureOnly = false,
+    _maxHeight?: number,
+  ): Promise<number> {
+    const tableRows = element.children.filter((child) => {
+      const el = child as TElement;
+      return el && typeof el === "object" && "type" in el && el.type === "tr";
+    }) as TTableRowElement[];
+    if (tableRows.length === 0) return 0;
+
+    const estimatedHeight = Math.max(tableRows.length * 0.4, 1.0);
+    if (measureOnly) return estimatedHeight;
+
+    const tableData: PptxGenJS.TableCell[][] = [];
+
+    for (const r of tableRows) {
+      const rowCells: PptxGenJS.TableCell[] = [];
+      const cells = r.children.filter((c) => {
+        const el = c as TElement;
+        return (
+          el &&
+          typeof el === "object" &&
+          "type" in el &&
+          (el.type === "td" || el.type === "th")
+        );
+      }) as TTableCellElement[];
+      for (const c of cells) {
+        const cellText = this.extractText(c);
+        const isHeader = (c as any).type === "th";
+        rowCells.push({
+          text: cellText,
+          options: {
+            fill: {
+              color: isHeader
+                ? this.THEME.primary
+                : this.THEME.background === "FFFFFF"
+                  ? "F9F8F6"
+                  : this.THEME.background,
+            },
+            color: isHeader ? "FFFFFF" : this.THEME.text,
+            bold: isHeader,
+            fontSize: 10,
+            align: "center",
+            valign: "middle",
+            margin: [4, 6, 4, 6], // Elegant cell padding
+            border: {
+              type: "solid",
+              color: this.THEME.muted || "CCCCCC",
+              pt: 1,
+            },
+          },
+        });
+      }
+      tableData.push(rowCells);
+    }
+
+    this.currentSlide?.addTable(tableData, {
+      x: x,
+      y: y,
+      w: width,
+      h: estimatedHeight,
+    });
+
+    return estimatedHeight;
+  }
+
+  private async addChart(
+    element: TChartElement,
+    x: number,
+    y: number,
+    width: number,
+    measureOnly = false,
+    maxHeight?: number,
+  ): Promise<number> {
+    let chartHeight = 2.8;
+    if (typeof maxHeight === "number")
+      chartHeight = Math.min(chartHeight, Math.max(1.5, maxHeight));
+    if (measureOnly) return chartHeight;
+
+    const customChart = element as unknown as CustomChartElement;
+    const data = customChart.data || [];
+    const elementType = element.type;
+
+    let chartTypeSelected = this.pptx.ChartType.bar;
+    if (elementType === "chart-pie")
+      chartTypeSelected = this.pptx.ChartType.pie;
+    else if (elementType === "chart-line")
+      chartTypeSelected = this.pptx.ChartType.line;
+    else if (elementType === "chart-area")
+      chartTypeSelected = this.pptx.ChartType.area;
+    else if (elementType === "chart-radar")
+      chartTypeSelected = this.pptx.ChartType.radar;
+    else if (elementType === "chart-scatter")
+      chartTypeSelected = this.pptx.ChartType.scatter;
+
+    let chartData: any[] = [];
+    if (elementType === "chart-scatter") {
+      chartData = [
+        {
+          name: "X Values",
+          values: data.map((d) => d.x || 0),
+        },
+        {
+          name: "Y Values",
+          values: data.map((d) => d.y || 0),
+        },
+      ];
+    } else {
+      chartData = [
+        {
+          name: "Series 1",
+          labels: data.map((d) => d.label || ""),
+          values: data.map((d) => d.value || 0),
+        },
+      ];
+    }
+
+    this.currentSlide?.addChart(chartTypeSelected, chartData, {
+      x: x,
+      y: y,
+      w: width,
+      h: chartHeight,
+      showLegend: true,
+      showTitle: false,
+    });
+
+    return chartHeight;
   }
 
   private getCycleColor(index: number): string {

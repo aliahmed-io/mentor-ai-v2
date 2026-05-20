@@ -1,8 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { PlateElement, type PlateElementProps } from "platejs/react";
-import { type TIconElement } from "../plugins/icon-plugin";
+import { cn } from "@/lib/utils";
+import type { TIconElement } from "../plugins/icon-plugin";
 
 // IconItem component for individual items in the icons list
 export const IconListElement = (props: PlateElementProps<TIconElement>) => {

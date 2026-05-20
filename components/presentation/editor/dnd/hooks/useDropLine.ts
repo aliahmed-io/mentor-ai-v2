@@ -1,7 +1,6 @@
+import type { DropLineDirection } from "@platejs/dnd";
 import { useElement, usePluginOptions } from "platejs/react";
-
 import { MultiDndPlugin } from "@/components/plate/plugins/dnd-kit";
-import { type DropLineDirection } from "@platejs/dnd";
 
 export const useDropLine = ({
   id: idProp,

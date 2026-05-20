@@ -1,8 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { NodeApi, PathApi } from "platejs";
 import { PlateElement, type PlateElementProps } from "platejs/react";
+import { cn } from "@/lib/utils";
 
 export const CompareSide = (props: PlateElementProps) => {
   const index = props.path.at(-1) ?? 0;

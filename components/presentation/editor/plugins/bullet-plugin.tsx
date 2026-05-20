@@ -1,4 +1,4 @@
-import { type TElement } from "platejs";
+import type { TElement } from "platejs";
 import { createTPlatePlugin } from "platejs/react";
 import { BulletsElement } from "../custom-elements/bullet";
 import { BulletItem } from "../custom-elements/bullet-item";

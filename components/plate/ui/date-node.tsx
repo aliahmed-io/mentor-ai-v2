@@ -1,9 +1,11 @@
 "use client";
 
-import { type TDateElement } from "platejs";
-import { type PlateElementProps } from "platejs/react";
-
-import { PlateElement, useReadOnly } from "platejs/react";
+import type { TDateElement } from "platejs";
+import {
+  PlateElement,
+  type PlateElementProps,
+  useReadOnly,
+} from "platejs/react";
 
 import { Calendar } from "@/components/plate/ui/calendar";
 import {

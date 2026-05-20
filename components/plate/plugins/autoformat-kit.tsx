@@ -1,13 +1,12 @@
 "use client";
 
-import { type AutoformatRule } from "@platejs/autoformat";
-
 import {
+  AutoformatPlugin,
+  type AutoformatRule,
   autoformatArrow,
   autoformatLegal,
   autoformatLegalHtml,
   autoformatMath,
-  AutoformatPlugin,
   autoformatPunctuation,
   autoformatSmartQuotes,
 } from "@platejs/autoformat";

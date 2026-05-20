@@ -1,13 +1,11 @@
-import { Skeleton } from "@/components/ui/skeleton";
-import { usePresentationState } from "@/states/presentation-state";
 import {
   closestCenter,
   DndContext,
+  type DragEndEvent,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
-  type DragEndEvent,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -17,6 +15,8 @@ import {
 } from "@dnd-kit/sortable";
 import { Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { usePresentationState } from "@/states/presentation-state";
 import { OutlineItem } from "./OutlineItem";
 
 interface OutlineItemType {

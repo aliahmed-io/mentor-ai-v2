@@ -1,4 +1,4 @@
-import { type PlateNode } from "./parser";
+import type { PlateNode } from "./parser";
 
 export type Rect = { x: number; y: number; w: number; h: number };
 
@@ -46,5 +46,3 @@ export async function layoutVerticalFlow(
 
   return frames;
 }
-
-

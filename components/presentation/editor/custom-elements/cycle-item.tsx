@@ -1,13 +1,13 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { NodeApi, PathApi, type TElement } from "platejs";
 import {
-  PlateElement,
   type PlateEditor,
+  PlateElement,
   type StyledPlateElementProps,
 } from "platejs/react";
-import { type TCycleItemElement } from "../plugins/cycle-plugin";
+import { cn } from "@/lib/utils";
+import type { TCycleItemElement } from "../plugins/cycle-plugin";
 
 // CycleItem component for individual items in the cycle
 export const CycleItem = (

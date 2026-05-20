@@ -1,14 +1,11 @@
-'use client';
+"use client";
 
-import { QuizProvider } from '@/contexts/QuizContext';
-import Quiz from '@/components/quiz/Quiz';
-import { useEffect, useState } from 'react';
- 
-import { RecentQuizzesPanel } from '@/components/recent/RecentQuizzesPanel';
+import Quiz from "@/components/quiz/Quiz";
+
+import { RecentQuizzesPanel } from "@/components/recent/RecentQuizzesPanel";
+import { QuizProvider } from "@/contexts/QuizContext";
 
 export default function Home() {
-  
-
   return (
     <div className="space-y-6">
       <div>

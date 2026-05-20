@@ -1,12 +1,9 @@
-import { type PlateEditor } from "platejs/react";
-import { type DropTargetMonitor } from "react-dnd";
-
+import type { DragItemNode } from "@platejs/dnd";
 import { NodeApi, PathApi } from "platejs";
-
-import { type DragItemNode } from "@platejs/dnd";
-import { type UseDropNodeOptions } from "../hooks/useDropNode";
-
+import type { PlateEditor } from "platejs/react";
+import type { DropTargetMonitor } from "react-dnd";
 import { MultiDndPlugin } from "@/components/plate/plugins/dnd-kit";
+import type { UseDropNodeOptions } from "../hooks/useDropNode";
 import { getDropPath } from "../utils/getDropPath";
 
 /**

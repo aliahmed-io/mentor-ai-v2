@@ -1,14 +1,13 @@
 /* eslint-disable react/display-name */
-import type * as React from "react";
-
-import {
-  type RenderStaticNodeWrapper,
-  type SlateRenderElementProps,
-  type TListElement,
-} from "platejs";
 
 import { isOrderedList } from "@platejs/list";
 import { CheckIcon } from "lucide-react";
+import type {
+  RenderStaticNodeWrapper,
+  SlateRenderElementProps,
+  TListElement,
+} from "platejs";
+import type * as React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -42,10 +41,7 @@ function List(props: SlateRenderElementProps) {
 
   if (isParagraphWithListStyle) {
     return (
-      <div
-        className="relative m-0 p-0"
-        style={{ listStyleType }}
-      >
+      <div className="relative m-0 p-0" style={{ listStyleType }}>
         {Marker && <Marker {...props} />}
         {Li ? <Li {...props} /> : <div>{props.children}</div>}
       </div>

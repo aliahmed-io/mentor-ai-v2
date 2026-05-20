@@ -1,4 +1,4 @@
-import { type TElement } from "platejs";
+import type { TElement } from "platejs";
 import { createTPlatePlugin } from "platejs/react";
 import BoxGroup from "../custom-elements/box";
 import { BoxItem } from "../custom-elements/box-item";

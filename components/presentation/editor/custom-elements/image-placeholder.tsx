@@ -1,7 +1,9 @@
 "use client";
 
+import { ImageIcon, Loader2, Upload, Wand2 } from "lucide-react";
 import type React from "react";
-
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 import { useUploadFile } from "@/components/plate/hooks/use-upload-file";
 import { ImageSourceSelector } from "@/components/presentation/theme/ImageSourceSelector";
 import { Button } from "@/components/ui/button";
@@ -14,9 +16,6 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { usePresentationState } from "@/states/presentation-state";
-import { ImageIcon, Loader2, Sparkles, Upload } from "lucide-react";
-import { useRef, useState } from "react";
-import { toast } from "sonner";
 
 export interface ImagePlaceholderProps {
   onGenerate?: (prompt: string) => void;
@@ -143,7 +142,7 @@ export default function ImagePlaceholder({
                 className="h-10 px-6 font-medium shadow-sm hover:shadow-md transition-shadow"
                 disabled={isStatic}
               >
-                <Sparkles className="h-4 w-4 mr-2" />
+                <Wand2 className="h-4 w-4 mr-2" />
                 Generate
               </Button>
             </PopoverTrigger>
@@ -152,7 +151,7 @@ export default function ImagePlaceholder({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Sparkles className="w-4 h-4 text-primary" />
+                      <Wand2 className="w-4 h-4 text-primary" />
                     </div>
                     <div>
                       <h4 className="font-semibold text-sm text-foreground">
@@ -204,7 +203,7 @@ export default function ImagePlaceholder({
                     onClick={handleGenerateClick}
                     disabled={isStatic || !prompt.trim()}
                   >
-                    <Sparkles className="h-4 w-4 mr-2" />
+                    <Wand2 className="h-4 w-4 mr-2" />
                     Generate Image
                   </Button>
                 </div>

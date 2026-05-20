@@ -1,11 +1,11 @@
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, Search } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
-import { type Font } from "../types";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Font } from "../types";
 import { usePaginatedFonts } from "../utils/usePaginatedFonts";
 import { FontListItem } from "./FontListItem";
 

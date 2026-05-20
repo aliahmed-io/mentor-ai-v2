@@ -1,7 +1,7 @@
 "use client";
 
 import { FontPicker } from "@/components/ui/font-picker";
-import { type ThemeProperties } from "@/lib/presentation/themes";
+import type { ThemeProperties } from "@/lib/presentation/themes";
 
 // Component to load fonts for custom themes
 export function CustomThemeFontLoader({

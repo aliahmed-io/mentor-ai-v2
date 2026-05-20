@@ -1,12 +1,5 @@
 "use client";
 
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "@/components/ui/chart";
-import { cn } from "@/lib/utils";
 import { SlateElement, type SlateElementProps } from "platejs";
 import {
   Legend,
@@ -16,6 +9,13 @@ import {
   Radar,
   RadarChart,
 } from "recharts";
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { cn } from "@/lib/utils";
 
 type AnyRecord = Record<string, unknown>;
 

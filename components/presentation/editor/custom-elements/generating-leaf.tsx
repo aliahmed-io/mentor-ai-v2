@@ -1,7 +1,7 @@
 "use client";
 
-import { usePresentationState } from "@/states/presentation-state";
 import { PlateLeaf, type PlateLeafProps } from "platejs/react";
+import { usePresentationState } from "@/states/presentation-state";
 
 export const GeneratingLeaf = ({ children, ref, ...props }: PlateLeafProps) => {
   const { leaf } = props;

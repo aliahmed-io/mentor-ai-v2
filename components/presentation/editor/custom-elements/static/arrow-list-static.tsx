@@ -1,5 +1,5 @@
 import { SlateElement, type SlateElementProps } from "platejs";
-import { type TArrowListElement } from "../../plugins/arrow-plugin";
+import type { TArrowListElement } from "../../plugins/arrow-plugin";
 
 export default function ArrowListStatic(
   props: SlateElementProps<TArrowListElement>,

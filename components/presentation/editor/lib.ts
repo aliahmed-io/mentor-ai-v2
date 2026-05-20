@@ -1,10 +1,10 @@
 "use client";
 
-import { type MyEditor } from "@/components/plate/editor-kit";
 import { BlockSelectionPlugin } from "@platejs/selection/react";
-import { type TElement } from "@platejs/slate";
+import type { TElement } from "@platejs/slate";
 import { KEYS } from "platejs";
-import { type PlateEditor } from "platejs/react";
+import type { PlateEditor } from "platejs/react";
+import type { MyEditor } from "@/components/plate/editor-kit";
 import { getCycleItemGridClass } from "./custom-elements/cycle-item";
 
 export const BULLET_ITEM = "bullet";
@@ -288,18 +288,31 @@ export function getAvailableConversionOptions(currentElementType: string) {
  */
 export function handleLayoutChange(editor: MyEditor, type: string): void {
   const selectionIds = editor.getOption(BlockSelectionPlugin, "selectedIds");
-  const node = editor.api.nodes({ id: Array.from(selectionIds ?? [])[0] });
-  const [element] = node?.[0] ?? [];
+  const nodeGenerator = editor.api.nodes({
+    id: Array.from(selectionIds ?? [])[0],
+  });
+  const [element] = Array.from(nodeGenerator)?.[0] ?? [];
 
   if (!element) return;
 
   // Handle parent-child relationship elements (lists, groups, etc.)
-  if (PARENT_CHILD_RELATIONSHIP[element.type]?.child) {
+  const relationship =
+    PARENT_CHILD_RELATIONSHIP[
+      element.type as keyof typeof PARENT_CHILD_RELATIONSHIP
+    ];
+  if (relationship && "child" in relationship) {
     editor.tf.withoutNormalizing(() => {
       editor.tf.setNodes({ type }, { at: editor.api.findPath(element) });
-      element.children.forEach((child) => {
+      (element.children as any[]).forEach((child: any) => {
+        const targetType =
+          PARENT_CHILD_RELATIONSHIP[
+            type as keyof typeof PARENT_CHILD_RELATIONSHIP
+          ]?.child;
+        const childType = Array.isArray(targetType)
+          ? targetType[0]
+          : targetType;
         editor.tf.setNodes(
-          { type: PARENT_CHILD_RELATIONSHIP[type]?.child },
+          { type: childType },
           { at: editor.api.findPath(child) },
         );
       });
@@ -308,7 +321,7 @@ export function handleLayoutChange(editor: MyEditor, type: string): void {
   }
 
   // Handle chart elements (direct conversion)
-  if (isChartType(element.type)) {
+  if (typeof element.type === "string" && isChartType(element.type)) {
     editor.tf.setNodes({ type }, { at: editor.api.findPath(element) });
   }
 }
@@ -325,8 +338,10 @@ export function handleNodePropertyUpdate(
   value: string | boolean | undefined,
 ): void {
   const selectionIds = editor.getOption(BlockSelectionPlugin, "selectedIds");
-  const node = editor.api.nodes({ id: Array.from(selectionIds ?? [])[0] });
-  const [element] = node?.[0] ?? [];
+  const nodeGenerator = editor.api.nodes({
+    id: Array.from(selectionIds ?? [])[0],
+  });
+  const [element] = Array.from(nodeGenerator)?.[0] ?? [];
 
   if (!element) return;
 
@@ -342,7 +357,7 @@ export function handleNodePropertyUpdate(
       editor.tf.setNodes({ [key]: value }, { at: elementPath });
     }
     // Force update all the siblings so that the UI is updated
-    element.children.forEach((child) => {
+    (element.children as any[]).forEach((child: any) => {
       editor.tf.setNodes(
         { lastUpdate: Date.now() },
         { at: editor.api.findPath(child) },

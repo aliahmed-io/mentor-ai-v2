@@ -1,11 +1,24 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import { Trophy, CheckCircle, XCircle, AlertCircle, RotateCcw, BookOpen } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { QuizResult } from '@/types/quiz';
+import { motion } from "framer-motion";
+import {
+  AlertCircle,
+  BookOpen,
+  CheckCircle,
+  RotateCcw,
+  Trophy,
+  XCircle,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import type { QuizResult } from "@/types/quiz";
 
 interface QuizResultsProps {
   result: QuizResult;
@@ -13,23 +26,27 @@ interface QuizResultsProps {
   onNewQuiz: () => void;
 }
 
-export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizResultsProps) {
-  const getGradeColor = (_percentage: number) => 'text-foreground';
+export default function QuizResults({
+  result,
+  onRetakeQuiz,
+  onNewQuiz,
+}: QuizResultsProps) {
+  const getGradeColor = (_percentage: number) => "text-foreground";
 
-  const getGradeEmoji = (percentage: number) => {
-    if (percentage >= 90) return '🏆';
-    if (percentage >= 80) return '🎉';
-    if (percentage >= 70) return '👍';
-    if (percentage >= 60) return '📚';
-    return '💪';
+  const _getGradeEmoji = (percentage: number) => {
+    if (percentage >= 90) return "🏆";
+    if (percentage >= 80) return "🎉";
+    if (percentage >= 70) return "👍";
+    if (percentage >= 60) return "📚";
+    return "💪";
   };
 
   const getGradeText = (percentage: number) => {
-    if (percentage >= 90) return 'Excellent!';
-    if (percentage >= 80) return 'Great Job!';
-    if (percentage >= 70) return 'Good Work!';
-    if (percentage >= 60) return 'Keep Learning!';
-    return 'Practice More!';
+    if (percentage >= 90) return "Excellent!";
+    if (percentage >= 80) return "Great Job!";
+    if (percentage >= 70) return "Good Work!";
+    if (percentage >= 60) return "Keep Learning!";
+    return "Practice More!";
   };
 
   return (
@@ -41,9 +58,10 @@ export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizRes
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-       
           <h1 className="text-4xl font-bold mb-2">Quiz Complete!</h1>
-          <p className="text-xl text-muted-foreground">Here&apos;s how you performed</p>
+          <p className="text-xl text-muted-foreground">
+            Here&apos;s how you performed
+          </p>
         </motion.div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -63,10 +81,14 @@ export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizRes
               </CardHeader>
               <CardContent className="text-center space-y-6">
                 <div>
-                  <div className={`text-5xl font-bold ${getGradeColor(result.percentage)}`}>
+                  <div
+                    className={`text-5xl font-bold ${getGradeColor(result.percentage)}`}
+                  >
                     {Math.round(result.percentage)}%
                   </div>
-                  <div className={`text-xl font-semibold ${getGradeColor(result.percentage)}`}>
+                  <div
+                    className={`text-xl font-semibold ${getGradeColor(result.percentage)}`}
+                  >
                     {getGradeText(result.percentage)}
                   </div>
                 </div>
@@ -75,15 +97,21 @@ export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizRes
 
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-foreground">{result.correctAnswers}</div>
+                    <div className="text-2xl font-bold text-foreground">
+                      {result.correctAnswers}
+                    </div>
                     <div className="text-muted-foreground">Correct</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-foreground">{result.incorrectAnswers}</div>
+                    <div className="text-2xl font-bold text-foreground">
+                      {result.incorrectAnswers}
+                    </div>
                     <div className="text-muted-foreground">Incorrect</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-foreground">{result.unanswered}</div>
+                    <div className="text-2xl font-bold text-foreground">
+                      {result.unanswered}
+                    </div>
                     <div className="text-muted-foreground">Skipped</div>
                   </div>
                 </div>
@@ -125,10 +153,13 @@ export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizRes
               <CardContent>
                 <div className="space-y-4 max-h-96 overflow-y-auto">
                   {result.questions.map((question, index) => {
-                    const answer = result.answers.find(a => a.questionId === question.id);
+                    const answer = result.answers.find(
+                      (a) => a.questionId === question.id,
+                    );
                     const userAnswer = answer?.selectedAnswer;
                     const isCorrect = answer?.isCorrect ?? false;
-                    const wasAnswered = userAnswer !== null && userAnswer !== undefined;
+                    const wasAnswered =
+                      userAnswer !== null && userAnswer !== undefined;
 
                     return (
                       <motion.div
@@ -152,21 +183,25 @@ export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizRes
                             <div className="mb-2 font-semibold text-foreground">
                               {index + 1}. {question.question}
                             </div>
-                            
+
                             {!wasAnswered ? (
                               <div className="mb-2 text-muted-foreground">
-                                <span className="font-medium">Not answered</span>
+                                <span className="font-medium">
+                                  Not answered
+                                </span>
                               </div>
                             ) : (
                               <div className="mb-2">
                                 <div className="text-sm text-muted-foreground">
-                                  Your answer: <span className="text-foreground">
+                                  Your answer:{" "}
+                                  <span className="text-foreground">
                                     {question.options[userAnswer!]}
                                   </span>
                                 </div>
                                 {!isCorrect && (
                                   <div className="text-sm text-muted-foreground">
-                                    Correct answer: <span className="text-foreground">
+                                    Correct answer:{" "}
+                                    <span className="text-foreground">
                                       {question.options[question.correctAnswer]}
                                     </span>
                                   </div>
@@ -176,7 +211,8 @@ export default function QuizResults({ result, onRetakeQuiz, onNewQuiz }: QuizRes
 
                             {(!wasAnswered || !isCorrect) && (
                               <div className="rounded border bg-muted p-3 text-sm text-foreground">
-                                <strong>Explanation:</strong> {question.explanation}
+                                <strong>Explanation:</strong>{" "}
+                                {question.explanation}
                               </div>
                             )}
                           </div>

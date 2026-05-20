@@ -1,5 +1,9 @@
 "use client";
 
+import { Edit, ImageOff, Trash2 } from "lucide-react";
+import { useEditorReadOnly } from "platejs/react";
+import { Resizable } from "re-resizable";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -10,11 +14,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useRootImageActions } from "@/hooks/presentation/useRootImageActions";
 import { cn } from "@/lib/utils";
 import { usePresentationState } from "@/states/presentation-state";
-import { Edit, ImageOff, Trash2 } from "lucide-react";
-import { useEditorReadOnly } from "platejs/react";
-import { Resizable } from "re-resizable";
-import { useState } from "react";
-import { type RootImage as RootImageType } from "../../utils/parser";
+import type { RootImage as RootImageType } from "../../utils/parser";
 import ImagePlaceholder from "./image-placeholder";
 import { PresentationImageEditor } from "./presentation-image-editor";
 
@@ -153,7 +153,6 @@ export default function RootImage({
               <PopoverTrigger asChild>
                 <div
                   className="relative h-full"
-                  tabIndex={0}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (!readOnly) {

@@ -1,10 +1,10 @@
+import { ChevronsUpDownIcon, Loader2, SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronsUpDownIcon, Loader2, SearchIcon } from "lucide-react";
 
 export interface SearchResult {
   url: string;

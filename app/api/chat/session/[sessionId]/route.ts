@@ -12,10 +12,12 @@ export async function GET(
     }
 
     // Update last active timestamp (best-effort)
-    await db.chatSession.update({
-      where: { id: sessionId },
-      data: { lastActiveAt: new Date() },
-    }).catch(() => {});
+    await db.chatSession
+      .update({
+        where: { id: sessionId },
+        data: { lastActiveAt: new Date() },
+      })
+      .catch(() => {});
 
     const messages = await db.chatMessage.findMany({
       where: { sessionId },
@@ -32,5 +34,3 @@ export async function GET(
     );
   }
 }
-
-

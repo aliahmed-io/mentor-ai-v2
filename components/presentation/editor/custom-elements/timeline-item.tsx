@@ -1,9 +1,9 @@
 "use client";
-import { cn } from "@/lib/utils";
 import { cva } from "class-variance-authority";
 import { NodeApi, PathApi } from "platejs";
 import { PlateElement, type PlateElementProps } from "platejs/react";
-import { type TTimelineGroupElement } from "../plugins/timeline-plugin";
+import { cn } from "@/lib/utils";
+import type { TTimelineGroupElement } from "../plugins/timeline-plugin";
 
 export const containerVariants = cva("flex flex-1", {
   variants: {

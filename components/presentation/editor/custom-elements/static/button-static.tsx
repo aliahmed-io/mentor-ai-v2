@@ -1,7 +1,7 @@
-import { cn } from "@/lib/utils";
 import { SlateElement, type SlateElementProps, type TElement } from "platejs";
 import type * as React from "react";
-import { type BUTTON_ELEMENT } from "../../lib";
+import { cn } from "@/lib/utils";
+import type { BUTTON_ELEMENT } from "../../lib";
 
 type ButtonStaticElement = TElement & {
   type: typeof BUTTON_ELEMENT;

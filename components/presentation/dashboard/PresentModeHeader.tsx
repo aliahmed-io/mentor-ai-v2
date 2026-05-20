@@ -3,7 +3,15 @@
 import { Button } from "@/components/ui/button";
 import { usePresentationState } from "@/states/presentation-state";
 
-export function PresentModeHeader({ showHeader, presentationTitle }) {
+export interface PresentModeHeaderProps {
+  showHeader: boolean;
+  presentationTitle: string;
+}
+
+export function PresentModeHeader({
+  showHeader,
+  presentationTitle,
+}: PresentModeHeaderProps) {
   return (
     <div
       className={`fixed left-0 right-0 top-0 z-[1000] transition-all duration-300 ${

@@ -1,10 +1,6 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: This use requires any */
 "use client";
 
-import * as React from "react";
-
-import type * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
-
 import { useDraggable, useDropLine } from "@platejs/dnd";
 import {
   BlockSelectionPlugin,
@@ -20,6 +16,7 @@ import {
   useTableElement,
   useTableMergeState,
 } from "@platejs/table/react";
+import type * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { PopoverAnchor } from "@radix-ui/react-popover";
 import { cva } from "class-variance-authority";
 import {
@@ -37,16 +34,16 @@ import {
   XIcon,
 } from "lucide-react";
 import {
+  KEYS,
+  PathApi,
   type TElement,
   type TTableCellElement,
   type TTableElement,
   type TTableRowElement,
-  KEYS,
-  PathApi,
 } from "platejs";
 import {
-  type PlateElementProps,
   PlateElement,
+  type PlateElementProps,
   useComposedRef,
   useEditorPlugin,
   useEditorRef,
@@ -59,6 +56,7 @@ import {
   useSelected,
   withHOC,
 } from "platejs/react";
+import * as React from "react";
 
 import { Button } from "@/components/plate/ui/button";
 import {

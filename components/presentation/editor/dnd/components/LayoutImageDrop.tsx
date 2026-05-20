@@ -1,12 +1,12 @@
-import { type LayoutType } from "@/components/presentation/utils/parser";
-import { cn } from "@/lib/utils";
-import { usePresentationState } from "@/states/presentation-state";
 import { DRAG_ITEM_BLOCK } from "@platejs/dnd";
 import { ImagePlugin } from "@platejs/media/react";
-import { type TElement } from "platejs";
-import { useEditorRef, type PlateEditor } from "platejs/react";
+import type { TElement } from "platejs";
+import { type PlateEditor, useEditorRef } from "platejs/react";
 import { useRef } from "react";
 import { useDrop } from "react-dnd";
+import type { LayoutType } from "@/components/presentation/utils/parser";
+import { cn } from "@/lib/utils";
+import { usePresentationState } from "@/states/presentation-state";
 
 function removeNodeById(editor: PlateEditor, element: TElement) {
   const path = editor.api.findPath(element);

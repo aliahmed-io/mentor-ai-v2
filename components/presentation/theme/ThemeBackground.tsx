@@ -1,12 +1,12 @@
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 import {
   setThemeVariables,
-  themes,
   type ThemeProperties,
+  themes,
 } from "@/lib/presentation/themes";
 import { cn } from "@/lib/utils";
 import { usePresentationState } from "@/states/presentation-state";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 
 interface ThemeBackgroundProps {
   className?: string;

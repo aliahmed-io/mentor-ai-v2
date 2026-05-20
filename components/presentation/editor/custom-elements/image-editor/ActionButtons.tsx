@@ -1,15 +1,15 @@
 "use client";
 
-import { useUploadFile } from "@/components/plate/hooks/use-upload-file";
-import { Button } from "@/components/ui/button";
-import { usePresentationState } from "@/states/presentation-state";
 import { Crop, Loader2, Upload } from "lucide-react";
-import { type TElement } from "platejs";
+import type { TElement } from "platejs";
 import { useEditorRef } from "platejs/react";
 import { useRef } from "react";
 import { toast } from "sonner";
-import { type RootImage as RootImageType } from "../../../utils/parser";
-import { type EditorMode } from "../presentation-image-editor";
+import { useUploadFile } from "@/components/plate/hooks/use-upload-file";
+import { Button } from "@/components/ui/button";
+import { usePresentationState } from "@/states/presentation-state";
+import type { RootImage as RootImageType } from "../../../utils/parser";
+import type { EditorMode } from "../presentation-image-editor";
 
 interface ActionButtonsProps {
   currentMode: EditorMode;

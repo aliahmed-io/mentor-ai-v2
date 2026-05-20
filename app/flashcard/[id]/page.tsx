@@ -1,57 +1,57 @@
-'use client'
-import React, { useEffect, useMemo, useState } from 'react'
-import Link from 'next/link'
-import { useParams } from 'next/navigation'
-import { ArrowLeft, ArrowRight, RotateCcw, Eye, EyeOff } from 'lucide-react'
-import { Button, buttonVariants } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
+"use client";
+import { ArrowLeft, ArrowRight, Eye, EyeOff, RotateCcw } from "lucide-react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
-type Flashcard = { id: string; front: string; back: string; tags?: string[] }
+type Flashcard = { id: string; front: string; back: string; tags?: string[] };
 
 export default function FlashcardStudyPage() {
-  const params = useParams<{ id: string }>()
-  const id = params?.id
-  const [cards, setCards] = useState<Flashcard[] | null>(null)
-  const [index, setIndex] = useState(0)
-  const [showBack, setShowBack] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const params = useParams<{ id: string }>();
+  const id = params?.id;
+  const [cards, setCards] = useState<Flashcard[] | null>(null);
+  const [index, setIndex] = useState(0);
+  const [showBack, setShowBack] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let active = true
+    let active = true;
     async function load() {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
       try {
-        const res = await fetch(`/api/flashcards/${id}`, { cache: 'no-store' })
+        const res = await fetch(`/api/flashcards/${id}`, { cache: "no-store" });
         if (!res.ok) {
-          const d = await res.json().catch(() => ({}))
-          throw new Error(d.error || 'Failed to load flashcards')
+          const d = await res.json().catch(() => ({}));
+          throw new Error(d.error || "Failed to load flashcards");
         }
-        const data = await res.json()
-        if (active) setCards(data?.flashcards || [])
+        const data = await res.json();
+        if (active) setCards(data?.flashcards || []);
       } catch (e: any) {
-        if (active) setError(e.message || 'Failed to load flashcards')
+        if (active) setError(e.message || "Failed to load flashcards");
       } finally {
-        if (active) setLoading(false)
+        if (active) setLoading(false);
       }
     }
-    if (id) load()
+    if (id) load();
     return () => {
-      active = false
-    }
-  }, [id])
+      active = false;
+    };
+  }, [id]);
 
   useEffect(() => {
-    setShowBack(false)
-  }, [index])
+    setShowBack(false);
+  }, []);
 
   const progress = useMemo(() => {
-    if (!cards || cards.length === 0) return 0
-    return ((index + 1) / cards.length) * 100
-  }, [cards, index])
+    if (!cards || cards.length === 0) return 0;
+    return ((index + 1) / cards.length) * 100;
+  }, [cards, index]);
 
   if (loading) {
     return (
@@ -61,32 +61,42 @@ export default function FlashcardStudyPage() {
           Loading flashcards…
         </div>
       </div>
-    )
+    );
   }
 
   if (error || !cards || cards.length === 0) {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-2">
-          <Link href="/flashcard" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}><ArrowLeft className="h-4 w-4" /></Link>
+          <Link
+            href="/flashcard"
+            className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
           <h1 className="text-xl font-semibold">Flashcards</h1>
         </div>
         <Card>
           <CardContent className="p-6 text-sm text-muted-foreground">
-            {error || 'No flashcards found.'}
+            {error || "No flashcards found."}
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
-  const card = cards[index]
+  const card = cards[index];
 
   return (
     <div className="space-y-6">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Link href="/flashcard" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}><ArrowLeft className="h-4 w-4" /></Link>
+          <Link
+            href="/flashcard"
+            className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
           <h1 className="text-xl font-semibold">Study Flashcards</h1>
         </div>
         <div className="text-sm text-muted-foreground">
@@ -101,14 +111,23 @@ export default function FlashcardStudyPage() {
 
       <Card className="select-none">
         <CardHeader>
-          <CardTitle className="text-base text-muted-foreground">{showBack ? 'Answer' : 'Question'}</CardTitle>
+          <CardTitle className="text-base text-muted-foreground">
+            {showBack ? "Answer" : "Question"}
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="min-h-[160px] whitespace-pre-wrap text-base leading-7">{showBack ? card.back : card.front}</div>
+          <div className="min-h-[160px] whitespace-pre-wrap text-base leading-7">
+            {showBack ? card.back : card.front}
+          </div>
           {card.tags && card.tags.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
               {card.tags.map((t, i) => (
-                <span key={i} className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">{t}</span>
+                <span
+                  key={i}
+                  className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground"
+                >
+                  {t}
+                </span>
               ))}
             </div>
           )}
@@ -137,16 +156,35 @@ export default function FlashcardStudyPage() {
           </Button>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="secondary" size="sm" onClick={() => setShowBack((s) => !s)} className="flex items-center gap-2">
-            {showBack ? <><EyeOff className="h-4 w-4" /> Hide Answer</> : <><Eye className="h-4 w-4" /> Show Answer</>}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setShowBack((s) => !s)}
+            className="flex items-center gap-2"
+          >
+            {showBack ? (
+              <>
+                <EyeOff className="h-4 w-4" /> Hide Answer
+              </>
+            ) : (
+              <>
+                <Eye className="h-4 w-4" /> Show Answer
+              </>
+            )}
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => { setIndex(0); setShowBack(false) }} className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setIndex(0);
+              setShowBack(false);
+            }}
+            className="flex items-center gap-2"
+          >
             <RotateCcw className="h-4 w-4" /> Restart
           </Button>
         </div>
       </div>
     </div>
-  )
+  );
 }
-
-

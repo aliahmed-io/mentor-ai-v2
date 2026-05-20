@@ -1,5 +1,5 @@
 import { PlateElement, type PlateElementProps } from "platejs/react";
-import { type TArrowListElement } from "../plugins/arrow-plugin";
+import type { TArrowListElement } from "../plugins/arrow-plugin";
 
 export default function ArrowList(props: PlateElementProps<TArrowListElement>) {
   return (

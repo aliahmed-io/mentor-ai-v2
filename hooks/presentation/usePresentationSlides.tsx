@@ -1,17 +1,17 @@
 "use client";
 
-import { type PlateSlide } from "@/components/presentation/utils/parser";
-import { usePresentationState } from "@/states/presentation-state";
 import {
+  type DragEndEvent,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
-  type DragEndEvent,
 } from "@dnd-kit/core";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { nanoid } from "nanoid";
 import { useCallback, useMemo } from "react";
+import type { PlateSlide } from "@/components/presentation/utils/parser";
+import { usePresentationState } from "@/states/presentation-state";
 
 interface SlideWithId extends PlateSlide {
   id: string;

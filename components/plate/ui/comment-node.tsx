@@ -1,10 +1,13 @@
 "use client";
 
-import { type TCommentText } from "platejs";
-import { type PlateLeafProps } from "platejs/react";
-
 import { getCommentCount } from "@platejs/comment";
-import { PlateLeaf, useEditorPlugin, usePluginOption } from "platejs/react";
+import type { TCommentText } from "platejs";
+import {
+  PlateLeaf,
+  type PlateLeafProps,
+  useEditorPlugin,
+  usePluginOption,
+} from "platejs/react";
 
 import { commentPlugin } from "@/components/plate/plugins/comment-kit";
 import { cn } from "@/lib/utils";

@@ -1,3 +1,4 @@
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -10,7 +11,6 @@ import {
 import { type Themes, themes } from "@/lib/presentation/themes";
 import { cn } from "@/lib/utils";
 import { usePresentationState } from "@/states/presentation-state";
-import { useTheme } from "next-themes";
 import { ImageSourceSelector } from "./ImageSourceSelector";
 import { ThemeModal } from "./ThemeModal";
 

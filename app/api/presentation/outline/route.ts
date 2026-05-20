@@ -1,7 +1,7 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { auth } from "@/server/auth";
 import { streamText } from "ai";
 import { NextResponse } from "next/server";
+import { auth } from "@/server/auth";
 
 interface OutlineRequest {
   prompt: string;
@@ -54,7 +54,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { prompt, numberOfCards, language } = (await req.json()) as OutlineRequest;
+    const { prompt, numberOfCards, language } =
+      (await req.json()) as OutlineRequest;
 
     if (!prompt || !numberOfCards || !language) {
       return NextResponse.json(

@@ -1,13 +1,10 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: This use requires any */
-import { getEmptyImage, NativeTypes } from "react-dnd-html5-backend";
 
-import { type ConnectDragSource, type DropTargetMonitor } from "react-dnd";
+import { DRAG_ITEM_BLOCK, type DragItemNode } from "@platejs/dnd";
 
 import { type PlateEditor, useEditorRef } from "platejs/react";
-
-import { type DragItemNode } from "@platejs/dnd";
-
-import { DRAG_ITEM_BLOCK } from "@platejs/dnd";
+import type { ConnectDragSource, DropTargetMonitor } from "react-dnd";
+import { getEmptyImage, NativeTypes } from "react-dnd-html5-backend";
 import { type UseDragNodeOptions, useDragNode } from "./useDragNode";
 import { type UseDropNodeOptions, useDropNode } from "./useDropNode";
 

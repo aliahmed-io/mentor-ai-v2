@@ -1,8 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { PlateElement, type PlateElementProps } from "platejs/react";
-import { type TButtonElement } from "../plugins/button-plugin";
+import { cn } from "@/lib/utils";
+import type { TButtonElement } from "../plugins/button-plugin";
 
 export default function ButtonElement(
   props: PlateElementProps<TButtonElement>,

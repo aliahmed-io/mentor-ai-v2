@@ -1,13 +1,13 @@
 "use client";
 
-import { IconPicker } from "@/components/ui/icon-picker";
-import { cn } from "@/lib/utils";
 import {
   PlateElement,
   type PlateElementProps,
   useEditorRef,
 } from "platejs/react";
-import { type TIconElement } from "../plugins/icon-plugin";
+import { IconPicker } from "@/components/ui/icon-picker";
+import { cn } from "@/lib/utils";
+import type { TIconElement } from "../plugins/icon-plugin";
 
 // Icon component that uses IconPicker
 export const Icon = ({

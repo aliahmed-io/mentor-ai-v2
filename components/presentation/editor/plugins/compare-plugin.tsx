@@ -1,4 +1,4 @@
-import { type TElement } from "platejs";
+import type { TElement } from "platejs";
 import { createTPlatePlugin } from "platejs/react";
 import CompareGroup from "../custom-elements/compare";
 import { CompareSide } from "../custom-elements/compare-side";

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.3.2/schema.json",
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "recommended": false
+      },
+      "style": {
+        "useImportType": "off",
+        "noNonNullAssertion": "off"
+      },
+      "correctness": {
+        "noUnusedVariables": "off",
+        "noUnusedFunctionParameters": "off",
+        "useExhaustiveDependencies": "off",
+        "noInvalidUseBeforeDeclaration": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off",
+        "noImplicitAnyLet": "off",
+        "noCommentText": "off",
+        "noArrayIndexKey": "off",
+        "noUnknownAtRules": "off",
+        "useIterableCallbackReturn": "off",
+        "noAssignInExpressions": "off",
+        "noNonNullAssertedOptionalChain": "off",
+        "noShadowRestrictedNames": "off",
+        "noDocumentCookie": "off"
+      },
+      "complexity": {
+        "noForEach": "off",
+        "useOptionalChain": "off"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": true,
+    "indentStyle": "space",
+    "indentWidth": 2
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!**/*.css",
+      "!**/.next/**/*",
+      "!**/node_modules/**/*",
+      "!**/out/**/*",
+      "!**/build/**/*",
+      "!**/public/**/*",
+      "!**/pnpm-lock.yaml"
+    ]
+  }
+}

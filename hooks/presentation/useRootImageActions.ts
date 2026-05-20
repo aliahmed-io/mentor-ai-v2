@@ -1,19 +1,19 @@
 "use client";
 
-import { useDraggable } from "@/components/presentation/editor/dnd/hooks/useDraggable";
-import {
-  type LayoutType,
-  type PlateSlide,
-  type RootImage,
-} from "@/components/presentation/utils/parser";
-import { type ImageCropSettings } from "@/components/presentation/utils/types";
-import { useDebouncedSave } from "@/hooks/presentation/useDebouncedSave";
-import { usePresentationState } from "@/states/presentation-state";
 import { DndPlugin, type DragItemNode } from "@platejs/dnd";
 import { ImagePlugin } from "@platejs/media/react";
 import { useEditorRef } from "platejs/react";
 import { useCallback, useId, useMemo, useState } from "react";
-import { type DragSourceMonitor } from "react-dnd";
+import type { DragSourceMonitor } from "react-dnd";
+import { useDraggable } from "@/components/presentation/editor/dnd/hooks/useDraggable";
+import type {
+  LayoutType,
+  PlateSlide,
+  RootImage,
+} from "@/components/presentation/utils/parser";
+import type { ImageCropSettings } from "@/components/presentation/utils/types";
+import { useDebouncedSave } from "@/hooks/presentation/useDebouncedSave";
+import { usePresentationState } from "@/states/presentation-state";
 
 export const BASE_WIDTH_PERCENTAGE = "45%";
 export const BASE_HEIGHT = 384;
@@ -188,7 +188,7 @@ export function useRootImageActions(
       setSlides(updatedSlides);
       void saveImmediately();
     },
-    [setSlides, slideIndex],
+    [setSlides, slideIndex, saveImmediately],
   );
 
   // Resizable handler logic moved here
@@ -204,16 +204,18 @@ export function useRootImageActions(
         setSize({ h: nextHeight });
         updateRootImageSize({ h: nextHeight });
       } else {
-        const parentElementRect = _ref.parentElement!.getBoundingClientRect();
-        const parentWidth = parentElementRect.width;
-        const width = parseFloat(size?.w ?? BASE_WIDTH_PERCENTAGE);
-        const originalWidth = parentWidth * (width / 100);
-        const changeInWidth = d.width;
-        const newWidth = originalWidth + changeInWidth;
-        const newWidthPercentage = (newWidth / parentWidth) * 100;
-        const nextWidth = `${newWidthPercentage}%`;
-        setSize({ w: nextWidth });
-        updateRootImageSize({ w: nextWidth });
+        const parentElementRect = _ref.parentElement?.getBoundingClientRect();
+        if (parentElementRect) {
+          const parentWidth = parentElementRect.width;
+          const width = parseFloat(size?.w ?? BASE_WIDTH_PERCENTAGE);
+          const originalWidth = parentWidth * (width / 100);
+          const changeInWidth = d.width;
+          const newWidth = originalWidth + changeInWidth;
+          const newWidthPercentage = (newWidth / parentWidth) * 100;
+          const nextWidth = `${newWidthPercentage}%`;
+          setSize({ w: nextWidth });
+          updateRootImageSize({ w: nextWidth });
+        }
       }
     },
     [layoutType, size?.h, size?.w, updateRootImageSize],

@@ -1,5 +1,8 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
+import { Brain, ChevronDown, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Collapsible,
@@ -7,9 +10,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
-import { Brain, ChevronDown, Loader2 } from "lucide-react";
-import { useState } from "react";
 
 interface ThinkingDisplayProps {
   thinking: string;
@@ -22,6 +22,8 @@ export function ThinkingDisplay({
   isGenerating: _isGenerating,
   title = "AI is thinking...",
 }: ThinkingDisplayProps) {
+  const [open, setOpen] = useState(false);
+
   const extractThinkingContent = (text: string): string => {
     return text
       .replace(/^<think>/, "")
@@ -36,7 +38,6 @@ export function ThinkingDisplay({
   if (!thinkingContent) {
     return null;
   }
-  const [open, setOpen] = useState(false);
 
   return (
     <Card

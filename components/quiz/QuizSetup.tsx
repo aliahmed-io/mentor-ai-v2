@@ -1,50 +1,75 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { BookOpen, Brain, FileText, Upload } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { QuizSetup as QuizSetupType } from '@/types/quiz';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { motion } from "framer-motion";
+import { BookOpen, FileText, Upload } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import type { QuizSetup as QuizSetupType } from "@/types/quiz";
 
 interface QuizSetupProps {
   onSetupComplete: (setup: QuizSetupType) => void;
 }
 
 const difficultyOptions = [
-  { value: 'easy', label: 'Easy', description: 'Basic concepts and fundamentals'},
-  { value: 'medium', label: 'Medium', description: 'Intermediate level questions'},
-  { value: 'hard', label: 'Hard', description: 'Advanced and challenging topics'},
+  {
+    value: "easy",
+    label: "Easy",
+    description: "Basic concepts and fundamentals",
+  },
+  {
+    value: "medium",
+    label: "Medium",
+    description: "Intermediate level questions",
+  },
+  {
+    value: "hard",
+    label: "Hard",
+    description: "Advanced and challenging topics",
+  },
 ] as const;
 
 const topicSuggestions = [
-  'JavaScript', 'React', 'Python', 'TypeScript', 'Node.js'
-
+  "JavaScript",
+  "React",
+  "Python",
+  "TypeScript",
+  "Node.js",
 ];
 
 export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
-  const [topic, setTopic] = useState('');
-  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+  const [topic, setTopic] = useState("");
+  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">(
+    "medium",
+  );
   const [questionCount, setQuestionCount] = useState(10);
-  const [studyMaterial, setStudyMaterial] = useState('');
-  const [fileContent, setFileContent] = useState('');
+  const [studyMaterial, setStudyMaterial] = useState("");
+  const [fileContent, setFileContent] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     // For plain text-like files, read on client; otherwise, send to server to extract
     const lower = file.name.toLowerCase();
-    const isPlain = lower.endsWith('.txt') || lower.endsWith('.md');
+    const isPlain = lower.endsWith(".txt") || lower.endsWith(".md");
 
     if (isPlain) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const content = (e.target?.result as string) || '';
+        const content = (e.target?.result as string) || "";
         setFileContent(content);
         setStudyMaterial(content);
       };
@@ -55,11 +80,11 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
     try {
       setIsUploading(true);
       const fd = new FormData();
-      fd.append('file', file);
-      const res = await fetch('/api/quiz/upload', { method: 'POST', body: fd });
+      fd.append("file", file);
+      const res = await fetch("/api/quiz/upload", { method: "POST", body: fd });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to extract text');
-      const content: string = data.text || '';
+      if (!res.ok) throw new Error(data.error || "Failed to extract text");
+      const content: string = data.text || "";
       setFileContent(content);
       setStudyMaterial(content);
     } catch (e) {
@@ -70,10 +95,14 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
   };
 
   const inferTopicFromText = (text: string): string => {
-    const cleaned = (text || '').replace(/\r/g, '');
-    const firstNonEmptyLine = cleaned.split('\n').map((l) => l.trim()).find((l) => l.length > 8) || cleaned.slice(0, 60);
-    const words = firstNonEmptyLine.split(/\s+/).slice(0, 8).join(' ');
-    return words || 'Uploaded Material';
+    const cleaned = (text || "").replace(/\r/g, "");
+    const firstNonEmptyLine =
+      cleaned
+        .split("\n")
+        .map((l) => l.trim())
+        .find((l) => l.length > 8) || cleaned.slice(0, 60);
+    const words = firstNonEmptyLine.split(/\s+/).slice(0, 8).join(" ");
+    return words || "Uploaded Material";
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -100,159 +129,204 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
         className="w-full max-w-2xl mx-auto"
       >
         <div className="text-center space-y-4">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted"
-            >
-              <img src="/white-short-logo.svg" alt="Quiz Logo" className="h-8 w-8" />
-            </motion.div>
-            <div className="text-3xl font-bold text-foreground">Create Your Quiz</div>
-            <div className="text-lg text-muted-foreground">Customize your learning experience with AI-powered questions</div>
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted"
+          >
+            {/* biome-ignore lint/performance/noImgElement: static local SVG logo */}
+            <img
+              src="/white-short-logo.svg"
+              alt="Quiz Logo"
+              className="h-8 w-8"
+            />
+          </motion.div>
+          <div className="text-3xl font-bold text-foreground">
+            Create Your Quiz
           </div>
+          <div className="text-lg text-muted-foreground">
+            Customize your learning experience with AI-powered questions
+          </div>
+        </div>
 
-          <div className="space-y-8 mt-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Topic Selection */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-                className="space-y-3"
+        <div className="space-y-8 mt-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Topic Selection */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="space-y-3"
+            >
+              <Label
+                htmlFor="topic"
+                className="text-sm font-semibold flex items-center gap-2"
               >
-                <Label htmlFor="topic" className="text-sm font-semibold flex items-center gap-2">
-                  <BookOpen className="w-4 h-4" />
-                  Quiz Topic
-                </Label>
+                <BookOpen className="w-4 h-4" />
+                Quiz Topic
+              </Label>
+              <Input
+                id="topic"
+                placeholder="e.g., JavaScript, React, Python..."
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                className="text-lg py-6"
+              />
+              <p className="text-xs text-muted-foreground">
+                Tip: If you upload a PDF/PPTX below, topic is optional.
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {topicSuggestions.map((suggestion) => (
+                  <Button
+                    key={suggestion}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setTopic(suggestion)}
+                    className="text-xs"
+                  >
+                    {suggestion}
+                  </Button>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Difficulty Selection */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+              className="space-y-3"
+            >
+              <Label className="text-sm font-semibold">Difficulty Level</Label>
+              <Select
+                value={difficulty}
+                onValueChange={(v: any) => setDifficulty(v)}
+              >
+                <SelectTrigger className="w-full overflow-hidden">
+                  <SelectValue placeholder="Select difficulty" />
+                </SelectTrigger>
+                <SelectContent className="z-50 max-h-96 bg-background">
+                  {difficultyOptions.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </motion.div>
+
+            {/* Question Count */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+              className="space-y-3"
+            >
+              <Label htmlFor="questionCount" className="text-sm font-semibold">
+                Number of Questions
+              </Label>
+              <div className="flex items-center gap-4">
                 <Input
-                  id="topic"
-                  placeholder="e.g., JavaScript, React, Python..."
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  className="text-lg py-6"
+                  id="questionCount"
+                  type="number"
+                  min="5"
+                  max="50"
+                  value={questionCount}
+                  onChange={(e) =>
+                    setQuestionCount(parseInt(e.target.value, 10) || 10)
+                  }
+                  className="w-32"
                 />
-                <p className="text-xs text-muted-foreground">Tip: If you upload a PDF/PPTX below, topic is optional.</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {topicSuggestions.map((suggestion) => (
+                <div className="flex gap-2">
+                  {[5, 10, 15, 20].map((count) => (
                     <Button
-                      key={suggestion}
+                      key={count}
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => setTopic(suggestion)}
-                      className="text-xs"
+                      onClick={() => setQuestionCount(count)}
+                      className={questionCount === count ? "bg-muted" : ""}
                     >
-                      {suggestion}
+                      {count}
                     </Button>
                   ))}
                 </div>
-              </motion.div>
+              </div>
+            </motion.div>
 
-              {/* Difficulty Selection */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
-                className="space-y-3"
-              >
-                <Label className="text-sm font-semibold">Difficulty Level</Label>
-                <Select value={difficulty} onValueChange={(v: any) => setDifficulty(v)}>
-                  <SelectTrigger className="w-full overflow-hidden"><SelectValue placeholder="Select difficulty" /></SelectTrigger>
-                  <SelectContent className="z-50 max-h-96 bg-background">
-                    {difficultyOptions.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </motion.div>
-
-              {/* Question Count */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 }}
-                className="space-y-3"
-              >
-                <Label htmlFor="questionCount" className="text-sm font-semibold">
-                  Number of Questions
-                </Label>
-                <div className="flex items-center gap-4">
+            {/* Study Material */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6 }}
+              className="space-y-3"
+            >
+              <Label className="text-sm font-semibold flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Study Material (Optional)
+              </Label>
+              <div className="space-y-3">
+                <Textarea
+                  placeholder="Paste your study material here, or upload a file below..."
+                  value={studyMaterial}
+                  onChange={(e) => setStudyMaterial(e.target.value)}
+                  className="min-h-[120px] resize-none"
+                />
+                <div className="flex items-center gap-3">
+                  <Label htmlFor="file-upload" className="sr-only">
+                    Upload Study Material
+                  </Label>
                   <Input
-                    id="questionCount"
-                    type="number"
-                    min="5"
-                    max="50"
-                    value={questionCount}
-                    onChange={(e) => setQuestionCount(parseInt(e.target.value) || 10)}
-                    className="w-32"
+                    id="file-upload"
+                    type="file"
+                    accept=".txt,.md,.pdf,.pptx,.docx"
+                    onChange={handleFileUpload}
+                    className="max-w-xs"
                   />
-                  <div className="flex gap-2">
-                    {[5, 10, 15, 20].map((count) => (
-                      <Button
-                        key={count}
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setQuestionCount(count)}
-                        className={questionCount === count ? 'bg-muted' : ''}
-                      >
-                        {count}
-                      </Button>
-                    ))}
-                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="border-dashed"
+                    onClick={() =>
+                      document.getElementById("file-upload")?.click()
+                    }
+                    disabled={isUploading}
+                  >
+                    <Upload className="w-4 h-4 mr-2" /> Choose file
+                  </Button>
+                  {isUploading && (
+                    <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                      Extracting…
+                    </span>
+                  )}
+                  {!isUploading && fileContent && (
+                    <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                      ✅ File uploaded successfully
+                    </span>
+                  )}
                 </div>
-              </motion.div>
+              </div>
+            </motion.div>
 
-              {/* Study Material */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6 }}
-                className="space-y-3"
+            {/* Submit Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+              className="pt-4"
+            >
+              <Button
+                type="submit"
+                className="w-full py-6 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
+                disabled={!topic.trim() && !studyMaterial.trim()}
               >
-                <Label className="text-sm font-semibold flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
-                  Study Material (Optional)
-                </Label>
-                <div className="space-y-3">
-                  <Textarea
-                    placeholder="Paste your study material here, or upload a file below..."
-                    value={studyMaterial}
-                    onChange={(e) => setStudyMaterial(e.target.value)}
-                    className="min-h-[120px] resize-none"
-                  />
-                  <div className="flex items-center gap-3">
-                    <Label htmlFor="file-upload" className="sr-only">Upload Study Material</Label>
-                    <Input id="file-upload" type="file" accept=".txt,.md,.pdf,.pptx,.docx" onChange={handleFileUpload} className="max-w-xs" />
-                    <Button type="button" variant="outline" className="border-dashed" onClick={() => document.getElementById('file-upload')?.click()} disabled={isUploading}>
-                      <Upload className="w-4 h-4 mr-2" /> Choose file
-                    </Button>
-                    {isUploading && (
-                      <span className="flex items-center gap-1 text-sm text-muted-foreground">Extracting…</span>
-                    )}
-                    {!isUploading && fileContent && (
-                      <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                        ✅ File uploaded successfully
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Submit Button */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 }}
-                className="pt-4"
-              >
-                <Button type="submit" className="w-full py-6 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90" disabled={!topic.trim() && !studyMaterial.trim()}>
-                  Start Quiz
-                </Button>
-              </motion.div>
-            </form>
-          </div>
+                Start Quiz
+              </Button>
+            </motion.div>
+          </form>
+        </div>
       </motion.div>
     </div>
   );

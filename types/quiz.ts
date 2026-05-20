@@ -1,6 +1,6 @@
 export interface QuizSetup {
   topic: string;
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: "easy" | "medium" | "hard";
   questionCount: number;
   studyMaterial?: string;
 }

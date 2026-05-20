@@ -1,10 +1,6 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: This use requires any */
 "use client";
 
-import * as React from "react";
-
-import { type CreatePlateEditorOptions } from "platejs/react";
-
 import { getCommentKey, getDraftCommentKey } from "@platejs/comment";
 import { CommentPlugin, useCommentId } from "@platejs/comment/react";
 import {
@@ -21,19 +17,21 @@ import {
   TrashIcon,
   XIcon,
 } from "lucide-react";
-import { type Value, KEYS, nanoid, NodeApi } from "platejs";
+import { KEYS, NodeApi, nanoid, type Value } from "platejs";
 import {
+  type CreatePlateEditorOptions,
   Plate,
   useEditorPlugin,
   useEditorRef,
   usePlateEditor,
   usePluginOption,
 } from "platejs/react";
+import * as React from "react";
 
 import { BasicMarksKit } from "@/components/plate/plugins/basic-marks-kit";
 import {
-  type TDiscussion,
   discussionPlugin,
+  type TDiscussion,
 } from "@/components/plate/plugins/discussion-kit";
 import {
   Avatar,

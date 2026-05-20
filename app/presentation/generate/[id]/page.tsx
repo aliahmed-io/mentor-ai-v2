@@ -1,5 +1,9 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft, Wand2 } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { getPresentation } from "@/app/_actions/presentation/presentationActions";
 import { getCustomThemeById } from "@/app/_actions/presentation/theme-actions";
 import { ThinkingDisplay } from "@/components/presentation/dashboard/ThinkingDisplay";
@@ -13,15 +17,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import {
-  themes,
   type ThemeProperties,
   type Themes,
+  themes,
 } from "@/lib/presentation/themes";
 import { usePresentationState } from "@/states/presentation-state";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Wand2 } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
 
 export const PRESENTATION_GENERATION_COOKIE = "presentation_generation_pending";
 
@@ -78,7 +78,7 @@ export default function PresentationGenerateWithIdPage() {
   // Clear the cookie when the page loads
   useEffect(() => {
     clearPresentationCookie();
-  }, []);
+  }, [clearPresentationCookie]);
 
   // This effect handles the immediate startup of generation upon first mount
   // only if we're coming fresh from the dashboard (isGeneratingOutline === true)
@@ -186,6 +186,9 @@ export default function PresentationGenerateWithIdPage() {
     setImageSource,
     setPresentationStyle,
     setLanguage,
+    isGeneratingOutline,
+    setSearchResults,
+    setWebSearchEnabled,
   ]);
 
   const handleGenerate = () => {

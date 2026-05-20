@@ -1,13 +1,13 @@
 // Main visualization item component with withRef pattern
 "use client";
 
-import { cn } from "@/lib/utils";
 import { NodeApi, PathApi } from "platejs";
-import { type StyledPlateElementProps } from "platejs/react";
+import type { StyledPlateElementProps } from "platejs/react";
+import { cn } from "@/lib/utils";
 import { ARROW_LIST_ITEM, PYRAMID_ITEM, TIMELINE_ITEM } from "../../lib";
-import { type TArrowListItemElement } from "../../plugins/arrow-plugin";
-import { type TVisualizationListElement } from "../../plugins/legacy/visualization-list-plugin";
-import { type TPyramidItemElement } from "../../plugins/pyramid-plugin";
+import type { TArrowListItemElement } from "../../plugins/arrow-plugin";
+import type { TVisualizationListElement } from "../../plugins/legacy/visualization-list-plugin";
+import type { TPyramidItemElement } from "../../plugins/pyramid-plugin";
 import { ArrowItem } from "../arrow-item";
 import { PyramidItem } from "../pyramid-item";
 import { TimelineItem } from "../timeline-item";
@@ -31,7 +31,7 @@ export const VisualizationItemElement = ({
     | "timeline";
 
   switch (visualizationType) {
-    case "pyramid":
+    case "pyramid": {
       const pyramidItemElement = {
         ...element,
         children: element.children,
@@ -48,8 +48,9 @@ export const VisualizationItemElement = ({
           {children}
         </PyramidItem>
       );
+    }
 
-    case "arrow":
+    case "arrow": {
       const arrowItemElement = {
         ...element,
         children: element.children,
@@ -65,8 +66,9 @@ export const VisualizationItemElement = ({
           {children}
         </ArrowItem>
       );
+    }
 
-    case "timeline":
+    case "timeline": {
       const timelineItemElement = {
         ...element,
         children: element.children,
@@ -78,5 +80,6 @@ export const VisualizationItemElement = ({
           {children}
         </TimelineItem>
       );
+    }
   }
 };

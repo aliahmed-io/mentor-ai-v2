@@ -1,40 +1,10 @@
-import { createTPlatePlugin } from "platejs/react";
-import {
-  ARROW_LIST,
-  ARROW_LIST_ITEM,
-  BEFORE_AFTER_GROUP,
-  BEFORE_AFTER_SIDE,
-  BOX_GROUP,
-  BOX_ITEM,
-  BULLET_GROUP,
-  BULLET_ITEM,
-  BUTTON_ELEMENT,
-  COMPARE_GROUP,
-  COMPARE_SIDE,
-  CONS_ITEM,
-  CYCLE_GROUP,
-  CYCLE_ITEM,
-  ICON_ELEMENT,
-  ICON_LIST,
-  ICON_LIST_ITEM,
-  PROS_CONS_GROUP,
-  PROS_ITEM,
-  PYRAMID_GROUP,
-  PYRAMID_ITEM,
-  SEQUENCE_ARROW_GROUP,
-  SEQUENCE_ARROW_ITEM,
-  STAIRCASE_GROUP,
-  STAIR_ITEM,
-  TIMELINE_GROUP,
-  TIMELINE_ITEM,
-} from "../lib";
-
 import {
   BaseTableCellHeaderPlugin,
   BaseTableCellPlugin,
   BaseTablePlugin,
   BaseTableRowPlugin,
 } from "@platejs/table";
+import { createTPlatePlugin } from "platejs/react";
 import VisualizationItemElementStatic from "../custom-elements/legacy/visualization-item-static";
 import VisualizationListElementStatic from "../custom-elements/legacy/visualization-list-static";
 import { ArrowItemStatic } from "../custom-elements/static/arrow-item-static";
@@ -71,6 +41,35 @@ import { StairItemStatic } from "../custom-elements/static/staircase-item-static
 import StaircaseStatic from "../custom-elements/static/staircase-static";
 import { TimelineItemStatic } from "../custom-elements/static/timeline-item-static";
 import TimelineStatic from "../custom-elements/static/timeline-static";
+import {
+  ARROW_LIST,
+  ARROW_LIST_ITEM,
+  BEFORE_AFTER_GROUP,
+  BEFORE_AFTER_SIDE,
+  BOX_GROUP,
+  BOX_ITEM,
+  BULLET_GROUP,
+  BULLET_ITEM,
+  BUTTON_ELEMENT,
+  COMPARE_GROUP,
+  COMPARE_SIDE,
+  CONS_ITEM,
+  CYCLE_GROUP,
+  CYCLE_ITEM,
+  ICON_ELEMENT,
+  ICON_LIST,
+  ICON_LIST_ITEM,
+  PROS_CONS_GROUP,
+  PROS_ITEM,
+  PYRAMID_GROUP,
+  PYRAMID_ITEM,
+  SEQUENCE_ARROW_GROUP,
+  SEQUENCE_ARROW_ITEM,
+  STAIR_ITEM,
+  STAIRCASE_GROUP,
+  TIMELINE_GROUP,
+  TIMELINE_ITEM,
+} from "../lib";
 import {
   AreaChartStaticPlugin,
   BarChartStaticPlugin,

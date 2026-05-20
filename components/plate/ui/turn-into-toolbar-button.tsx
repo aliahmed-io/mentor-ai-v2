@@ -1,11 +1,9 @@
 "use client";
 
-import * as React from "react";
-
-import { type DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
-import { type TElement } from "platejs";
-
-import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
+import {
+  DropdownMenuItemIndicator,
+  type DropdownMenuProps,
+} from "@radix-ui/react-dropdown-menu";
 import {
   CheckIcon,
   ChevronRightIcon,
@@ -23,8 +21,9 @@ import {
   QuoteIcon,
   SquareIcon,
 } from "lucide-react";
-import { KEYS } from "platejs";
+import { KEYS, type TElement } from "platejs";
 import { useEditorRef, useSelectionFragmentProp } from "platejs/react";
+import * as React from "react";
 
 import {
   DropdownMenu,
@@ -149,7 +148,7 @@ export function TurnIntoToolbarButton(props: DropdownMenuProps) {
           tooltip="Turn into"
           isDropdown
         >
-          {selectedItem!.label}
+          {selectedItem?.label}
         </ToolbarButton>
       </DropdownMenuTrigger>
 

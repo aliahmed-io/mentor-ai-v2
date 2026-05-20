@@ -4,7 +4,7 @@ import React, { useEffect, useMemo } from "react";
 
 import { cn } from "@/lib/utils";
 import { usePresentationState } from "@/states/presentation-state";
-import { type PlateSlide } from "../utils/parser";
+import type { PlateSlide } from "../utils/parser";
 import { EditorStatic } from "./custom-elements/static/editor-static";
 import RootImageStatic from "./custom-elements/static/root-image-static";
 import { PresentationEditorBaseKit } from "./plugins/presentation-editor-base-kit";
@@ -46,7 +46,7 @@ const PresentationEditorStaticView = React.memo(
           components: PresentationStaticComponents,
           value: initialContent?.content ?? ([] as Value),
         }),
-      [],
+      [initialContent?.content],
     );
 
     // Keep value in sync without recreating editor

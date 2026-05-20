@@ -1,3 +1,4 @@
+import { Check, Trash2, X } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,7 +11,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Check, Trash2, X } from "lucide-react";
 
 interface SelectionControlsProps {
   isSelecting: boolean;

@@ -1,84 +1,97 @@
-'use client'
-import React, { useState, useEffect, useRef } from 'react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { useToast } from '@/components/ui/use-toast'
+"use client";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 
 type ChatProps = {
-  sessionId: string
-}
+  sessionId: string;
+};
 
 type Message = {
-  role: 'user' | 'assistant'
-  content: string
-}
+  role: "user" | "assistant";
+  content: string;
+};
 
 export default function Chat({ sessionId }: ChatProps) {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement | null>(null)
-  const { toast } = useToast()
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const { toast } = useToast();
 
   // Auto-scroll to bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
 
   const sendMessage = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || loading) return
+    e.preventDefault();
+    if (!input.trim() || loading) return;
 
-    const userMessage: Message = { role: 'user', content: input.trim() }
-    setMessages((prev) => [...prev, userMessage])
-    setInput('')
-    setLoading(true)
+    const userMessage: Message = { role: "user", content: input.trim() };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setLoading(true);
 
     try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId, message: userMessage.content }),
-      })
+      });
 
       if (!res.ok) {
-        const errorData = await res.json()
-        throw new Error(errorData.error || 'Failed to fetch response')
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to fetch response");
       }
 
-      const data = await res.json()
-      const aiMessage: Message = { role: 'assistant', content: data.reply || 'No reply.' }
+      const data = await res.json();
+      const aiMessage: Message = {
+        role: "assistant",
+        content: data.reply || "No reply.",
+      };
 
-      setMessages((prev) => [...prev, aiMessage])
+      setMessages((prev) => [...prev, aiMessage]);
     } catch (err: any) {
-      console.error(err)
+      console.error(err);
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: '⚠️ Error fetching response. Please try again.' },
-      ])
+        {
+          role: "assistant",
+          content: "⚠️ Error fetching response. Please try again.",
+        },
+      ]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Load history when sessionId changes
   useEffect(() => {
-    let active = true
-    ;(async () => {
-      if (!sessionId) return
+    let active = true;
+    (async () => {
+      if (!sessionId) return;
       try {
-        const res = await fetch(`/api/chat/session/${sessionId}`, { cache: 'no-store' })
-        if (!res.ok) return
-        const data = await res.json()
-        if (!active) return
-        const msgs: Message[] = Array.isArray(data?.messages) ? data.messages : []
-        setMessages(msgs)
+        const res = await fetch(`/api/chat/session/${sessionId}`, {
+          cache: "no-store",
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!active) return;
+        const msgs: Message[] = Array.isArray(data?.messages)
+          ? data.messages
+          : [];
+        setMessages(msgs);
       } catch {}
-    })()
-    return () => { active = false }
-  }, [sessionId])
+    })();
+    return () => {
+      active = false;
+    };
+  }, [sessionId]);
 
   return (
     <div className="rounded-lg border bg-card p-5">
@@ -88,16 +101,27 @@ export default function Chat({ sessionId }: ChatProps) {
           size="sm"
           onClick={async () => {
             try {
-              const title = `Chat notes - ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`
-              const res = await fetch('/api/chat/docs', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId, wholeConversation: true, title }),
-              })
-              if (!res.ok) throw new Error('Failed to save conversation')
-              toast({ title: 'Saved', description: 'Conversation saved as a document.' })
+              const title = `Chat notes - ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
+              const res = await fetch("/api/chat/docs", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  sessionId,
+                  wholeConversation: true,
+                  title,
+                }),
+              });
+              if (!res.ok) throw new Error("Failed to save conversation");
+              toast({
+                title: "Saved",
+                description: "Conversation saved as a document.",
+              });
             } catch (e: any) {
-              toast({ title: 'Failed to save', description: e.message || 'Error', variant: 'destructive' })
+              toast({
+                title: "Failed to save",
+                description: e.message || "Error",
+                variant: "destructive",
+              });
             }
           }}
         >
@@ -116,48 +140,107 @@ export default function Chat({ sessionId }: ChatProps) {
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={`mb-3 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`mb-3 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
               className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm ${
-                msg.role === 'user'
-                  ? 'bg-primary text-primary-foreground rounded-br-sm'
-                  : 'bg-muted text-foreground border'
+                msg.role === "user"
+                  ? "bg-primary text-primary-foreground rounded-br-sm"
+                  : "bg-muted text-foreground border"
               }`}
             >
-              {msg.role === 'assistant' ? (
+              {msg.role === "assistant" ? (
                 <div className="prose prose-sm max-w-none prose-headings:my-2 prose-p:my-2 prose-li:my-1">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     components={{
-                      h1: ({node, ...props}) => (<h1 className="mt-2 text-xl font-bold" {...props} />),
-                      h2: ({node, ...props}) => (<h2 className="mt-2 text-lg font-semibold" {...props} />),
-                      h3: ({node, ...props}) => (<h3 className="mt-2 text-base font-semibold" {...props} />),
-                      p: ({node, ...props}) => (<p className="my-2" {...props} />),
-                      a: ({node, ...props}) => (<a className="text-primary underline hover:no-underline" target="_blank" rel="noreferrer" {...props} />),
-                      blockquote: ({node, ...props}) => (<blockquote className="border-l-2 pl-3 text-muted-foreground italic" {...props} />),
-                      ul: ({node, ...props}) => (<ul className="my-2 ml-5 list-disc" {...props} />),
-                      ol: ({node, ...props}) => (<ol className="my-2 ml-5 list-decimal" {...props} />),
-                      table: ({node, ...props}) => (
+                      h1: ({ node, ...props }) => (
+                        <h1 className="mt-2 text-xl font-bold" {...props} />
+                      ),
+                      h2: ({ node, ...props }) => (
+                        <h2 className="mt-2 text-lg font-semibold" {...props} />
+                      ),
+                      h3: ({ node, ...props }) => (
+                        <h3
+                          className="mt-2 text-base font-semibold"
+                          {...props}
+                        />
+                      ),
+                      p: ({ node, ...props }) => (
+                        <p className="my-2" {...props} />
+                      ),
+                      a: ({ node, ...props }) => (
+                        <a
+                          className="text-primary underline hover:no-underline"
+                          target="_blank"
+                          rel="noreferrer"
+                          {...props}
+                        />
+                      ),
+                      blockquote: ({ node, ...props }) => (
+                        <blockquote
+                          className="border-l-2 pl-3 text-muted-foreground italic"
+                          {...props}
+                        />
+                      ),
+                      ul: ({ node, ...props }) => (
+                        <ul className="my-2 ml-5 list-disc" {...props} />
+                      ),
+                      ol: ({ node, ...props }) => (
+                        <ol className="my-2 ml-5 list-decimal" {...props} />
+                      ),
+                      table: ({ node, ...props }) => (
                         <div className="my-3 w-full overflow-x-auto">
-                          <table className="w-full border-collapse text-sm" {...props} />
+                          <table
+                            className="w-full border-collapse text-sm"
+                            {...props}
+                          />
                         </div>
                       ),
-                      thead: ({node, ...props}) => (<thead className="bg-muted" {...props} />),
-                      th: ({node, ...props}) => (<th className="border px-2 py-1 text-left" {...props} />),
-                      td: ({node, ...props}) => (<td className="border px-2 py-1 align-top" {...props} />),
-                      code: ({inline, className, children, ...props}) => {
-                        if (inline) {
-                          return <code className="rounded bg-muted px-1 py-0.5" {...props}>{children}</code>
+                      thead: ({ node, ...props }) => (
+                        <thead className="bg-muted" {...props} />
+                      ),
+                      th: ({ node, ...props }) => (
+                        <th className="border px-2 py-1 text-left" {...props} />
+                      ),
+                      td: ({ node, ...props }) => (
+                        <td className="border px-2 py-1 align-top" {...props} />
+                      ),
+                      code: ({ className, children, ...props }) => {
+                        const match = /language-(\w+)/.exec(className || "");
+                        const isInline =
+                          !match &&
+                          !(
+                            typeof children === "string" &&
+                            children.includes("\n")
+                          );
+                        if (isInline) {
+                          return (
+                            <code
+                              className="rounded bg-muted px-1 py-0.5"
+                              {...props}
+                            >
+                              {children}
+                            </code>
+                          );
                         }
                         return (
                           <pre className="rounded-md border bg-muted p-3 overflow-x-auto">
                             <code {...props}>{children}</code>
                           </pre>
-                        )
+                        );
                       },
-                      img: ({node, ...props}) => (<img className="max-h-64 rounded border" {...props} alt={(props as any).alt ?? ''} />),
-                      hr: ({node, ...props}) => (<hr className="my-3 border-muted" {...props} />),
+                      img: ({ node, ...props }) => (
+                        // biome-ignore lint/performance/noImgElement: markdown image support
+                        <img
+                          className="max-h-64 rounded border"
+                          {...props}
+                          alt={(props as any).alt ?? ""}
+                        />
+                      ),
+                      hr: ({ node, ...props }) => (
+                        <hr className="my-3 border-muted" {...props} />
+                      ),
                     }}
                   >
                     {msg.content}
@@ -167,25 +250,38 @@ export default function Chat({ sessionId }: ChatProps) {
                 msg.content
               )}
             </div>
-            {msg.role === 'assistant' && (
+            {msg.role === "assistant" && (
               <div className="mt-1 flex justify-end">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={async () => {
                     try {
-                      const res = await fetch('/api/chat/docs', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ sessionId, title: 'AI Note', content: msg.content }),
-                      })
-                      if (!res.ok) throw new Error('Failed to save')
-                      toast({ title: 'Saved', description: 'Assistant message saved as document.' })
+                      const res = await fetch("/api/chat/docs", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          sessionId,
+                          title: "AI Note",
+                          content: msg.content,
+                        }),
+                      });
+                      if (!res.ok) throw new Error("Failed to save");
+                      toast({
+                        title: "Saved",
+                        description: "Assistant message saved as document.",
+                      });
                     } catch (e: any) {
-                      toast({ title: 'Failed to save', description: e.message || 'Error', variant: 'destructive' })
+                      toast({
+                        title: "Failed to save",
+                        description: e.message || "Error",
+                        variant: "destructive",
+                      });
                     }
                   }}
-                >Save as doc</Button>
+                >
+                  Save as doc
+                </Button>
               </div>
             )}
           </div>
@@ -222,10 +318,10 @@ export default function Chat({ sessionId }: ChatProps) {
               Sending
             </span>
           ) : (
-            'Send'
+            "Send"
           )}
         </Button>
       </form>
     </div>
-  )
+  );
 }

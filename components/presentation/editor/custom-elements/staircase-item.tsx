@@ -1,11 +1,11 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { NodeApi, PathApi } from "platejs";
 import { PlateElement, type PlateElementProps } from "platejs/react";
-import {
-  type TStairGroupElement,
-  type TStairItemElement,
+import { cn } from "@/lib/utils";
+import type {
+  TStairGroupElement,
+  TStairItemElement,
 } from "../plugins/staircase-plugin";
 
 // StairItem component aligned with PyramidItem behavior

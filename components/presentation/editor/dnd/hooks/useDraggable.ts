@@ -1,9 +1,9 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: This is a valid use case */
-import React from "react";
-
-import { useEditorRef } from "platejs/react";
 
 import { DRAG_ITEM_BLOCK } from "@platejs/dnd";
+
+import { useEditorRef } from "platejs/react";
+import React from "react";
 import { type UseDndNodeOptions, useDndNode } from "./useDndNode";
 
 export type DraggableState = {

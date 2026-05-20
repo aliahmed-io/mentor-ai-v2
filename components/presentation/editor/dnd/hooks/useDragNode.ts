@@ -1,7 +1,6 @@
-import { MultiDndPlugin } from "@/components/plate/plugins/dnd-kit";
-import { type DragItemNode } from "@platejs/dnd";
-import { type TElement } from "platejs";
-import { type PlateEditor } from "platejs/react";
+import type { DragItemNode } from "@platejs/dnd";
+import type { TElement } from "platejs";
+import type { PlateEditor } from "platejs/react";
 import React from "react";
 import {
   type ConnectDragPreview,
@@ -9,6 +8,7 @@ import {
   type DragSourceHookSpec,
   useDrag,
 } from "react-dnd";
+import { MultiDndPlugin } from "@/components/plate/plugins/dnd-kit";
 
 export interface UseDragNodeOptions
   extends DragSourceHookSpec<DragItemNode, unknown, { isDragging: boolean }> {

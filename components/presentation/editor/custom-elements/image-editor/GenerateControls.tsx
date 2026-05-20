@@ -1,5 +1,9 @@
 "use client";
 
+import { AlertTriangle, RefreshCw, Wand2 } from "lucide-react";
+import type { TElement } from "platejs";
+import { useEditorRef } from "platejs/react";
+import { useEffect, useState } from "react";
 import {
   generateImageAction,
   type ImageModelList,
@@ -10,11 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { usePresentationState } from "@/states/presentation-state";
-import { AlertTriangle, RefreshCw, Wand2 } from "lucide-react";
-import { type TElement } from "platejs";
-import { useEditorRef } from "platejs/react";
-import { useEffect, useState } from "react";
-import { type RootImage as RootImageType } from "../../../utils/parser";
+import type { RootImage as RootImageType } from "../../../utils/parser";
 
 interface GenerateControlsProps {
   element: TElement & RootImageType;

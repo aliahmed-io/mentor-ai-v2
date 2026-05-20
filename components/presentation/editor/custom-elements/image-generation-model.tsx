@@ -1,3 +1,7 @@
+import { ImagePlugin } from "@platejs/media/react";
+import { useEditorRef } from "platejs/react";
+import { useState } from "react";
+import { toast } from "sonner";
 import {
   generateImageAction,
   type ImageModelList,
@@ -21,10 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ImagePlugin } from "@platejs/media/react";
-import { useEditorRef } from "platejs/react";
-import { useState } from "react";
-import { toast } from "sonner";
 
 const MODEL_OPTIONS = [
   {

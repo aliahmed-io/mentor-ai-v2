@@ -1,20 +1,19 @@
 "use client";
 
-import { Editor } from "@/components/plate/ui/editor";
 import debounce from "lodash.debounce";
-import { type Value } from "platejs";
+import type { Value } from "platejs";
 import { Plate } from "platejs/react";
 import React, { useCallback, useEffect, useState } from "react";
-
 import { usePlateEditor } from "@/components/plate/hooks/usePlateEditor";
+import { Editor } from "@/components/plate/ui/editor";
 import { TooltipProvider } from "@/components/plate/ui/tooltip";
 import { extractFontsFromEditor } from "@/components/plate/utils/extractFontsFromEditor";
 import { FontLoader } from "@/components/plate/utils/font-loader";
 import { cn } from "@/lib/utils";
 import { usePresentationState } from "@/states/presentation-state";
 import "@/styles/presentation.css";
-import { type TElement } from "platejs";
-import { type PlateNode, type PlateSlide } from "../utils/parser";
+import type { TElement } from "platejs";
+import type { PlateNode, PlateSlide } from "../utils/parser";
 import ImageGenerationModel from "./custom-elements/image-generation-model";
 import RootImage from "./custom-elements/root-image";
 import LayoutImageDrop from "./dnd/components/LayoutImageDrop";
@@ -74,7 +73,7 @@ const PresentationEditor = React.memo(
           editor.tf.setValue(initialContent.content);
         });
       }
-    }, []);
+    }, [editor.tf.setValue, initialContent]);
 
     useEffect(() => {
       if (isGenerating) {
@@ -82,7 +81,7 @@ const PresentationEditor = React.memo(
           editor.tf.setValue(initialContent?.content);
         });
       }
-    }, [initialContent, isGenerating]);
+    }, [initialContent, isGenerating, editor.tf.setValue]);
 
     const handleSlideChange = useCallback(
       (value: Value, slideIndex: number) => {

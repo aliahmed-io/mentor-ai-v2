@@ -1,12 +1,16 @@
 "use client";
 
-import * as React from "react";
-
-import { type TSuggestionData, type TSuggestionText } from "platejs";
-import { type PlateLeafProps, type RenderNodeWrapper } from "platejs/react";
-
 import { CornerDownLeftIcon } from "lucide-react";
-import { PlateLeaf, useEditorPlugin, usePluginOption } from "platejs/react";
+
+import type { TSuggestionData, TSuggestionText } from "platejs";
+import {
+  PlateLeaf,
+  type PlateLeafProps,
+  type RenderNodeWrapper,
+  useEditorPlugin,
+  usePluginOption,
+} from "platejs/react";
+import * as React from "react";
 
 import {
   type SuggestionConfig,

@@ -1,11 +1,13 @@
+import {
+  NodeApi,
+  PathApi,
+  type SlateElementProps,
+  type TElement,
+} from "platejs";
 import type * as React from "react";
 
-import { type SlateElementProps, type TElement } from "platejs";
-
-import { NodeApi, PathApi } from "platejs";
-
 import { ARROW_LIST_ITEM, PYRAMID_ITEM, TIMELINE_ITEM } from "../../lib";
-import { type TArrowListItemElement } from "../../plugins/arrow-plugin";
+import type { TArrowListItemElement } from "../../plugins/arrow-plugin";
 import { ArrowItemStatic } from "../static/arrow-item-static";
 import { PyramidItemStatic } from "../static/pyramid-item-static";
 import { TimelineItemStatic } from "../static/timeline-item-static";

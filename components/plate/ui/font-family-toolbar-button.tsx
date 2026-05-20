@@ -1,10 +1,10 @@
 "use client";
 
-import { Skeleton } from "@/components/ui/skeleton";
 import { FontFamilyPlugin } from "@platejs/basic-styles/react";
 import dynamic from "next/dynamic";
 import { KEYS } from "platejs";
 import { useEditorRef, useEditorSelector } from "platejs/react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Dynamically import FontPicker with a skeleton loader
 const FontPicker = dynamic(

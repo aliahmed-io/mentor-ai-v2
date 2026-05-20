@@ -1,23 +1,22 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
+import { AnimatePresence, motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useQuiz } from "@/contexts/QuizContext";
+import { generateQuizQuestions } from "@/lib/gemini";
+import type { QuizSetup as QuizSetupType } from "@/types/quiz";
+import QuizQuestion from "./QuizQuestion";
+import QuizResults from "./QuizResults";
+import QuizSetup from "./QuizSetup";
 
-import { QuizSetup as QuizSetupType } from '@/types/quiz';
-import { useQuiz } from '@/contexts/QuizContext';
-import { generateQuizQuestions } from '@/lib/gemini';
-import QuizSetup from './QuizSetup';
-import QuizQuestion from './QuizQuestion';
-import QuizResults from './QuizResults';
-
-type QuizPhase = 'setup' | 'questions' | 'results';
+type QuizPhase = "setup" | "questions" | "results";
 
 export default function Quiz() {
-  const [phase, setPhase] = useState<QuizPhase>('setup');
+  const [phase, setPhase] = useState<QuizPhase>("setup");
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  
+
   const {
     state,
     setSetup,
@@ -39,11 +38,13 @@ export default function Quiz() {
       // Generate questions using Gemini API
       const questions = await generateQuizQuestions(setup);
       setQuestions(questions);
-      setPhase('questions');
+      setPhase("questions");
     } catch (error) {
-      console.error('Error generating quiz questions:', error);
-      alert('Failed to generate quiz questions. Please check your internet connection and try again.');
-      setPhase('setup');
+      console.error("Error generating quiz questions:", error);
+      alert(
+        "Failed to generate quiz questions. Please check your internet connection and try again.",
+      );
+      setPhase("setup");
     } finally {
       setIsLoading(false);
     }
@@ -62,13 +63,13 @@ export default function Quiz() {
   const handleFinishQuiz = async () => {
     setIsAnalyzing(true);
     completeQuiz();
-    
+
     try {
       await calculateResult();
-      setPhase('results');
+      setPhase("results");
     } catch (error) {
-      console.error('Error calculating results:', error);
-      alert('Failed to analyze quiz results. Please try again.');
+      console.error("Error calculating results:", error);
+      alert("Failed to analyze quiz results. Please try again.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -83,11 +84,13 @@ export default function Quiz() {
 
   const handleNewQuiz = () => {
     resetQuiz();
-    setPhase('setup');
+    setPhase("setup");
   };
 
   const currentQuestion = state.questions[state.currentQuestionIndex];
-  const selectedAnswer = currentQuestion ? state.answers.get(currentQuestion.id) : null;
+  const selectedAnswer = currentQuestion
+    ? state.answers.get(currentQuestion.id)
+    : null;
 
   if (isLoading) {
     return (
@@ -113,7 +116,7 @@ export default function Quiz() {
 
   return (
     <AnimatePresence mode="wait">
-      {phase === 'setup' && (
+      {phase === "setup" && (
         <motion.div
           key="setup"
           initial={{ opacity: 0 }}
@@ -125,7 +128,7 @@ export default function Quiz() {
         </motion.div>
       )}
 
-      {phase === 'questions' && currentQuestion && (
+      {phase === "questions" && currentQuestion && (
         <motion.div
           key="questions"
           initial={{ opacity: 0 }}
@@ -145,13 +148,15 @@ export default function Quiz() {
             onFinish={handleFinishQuiz}
             canGoNext={state.currentQuestionIndex < state.questions.length - 1}
             canGoPrevious={state.currentQuestionIndex > 0}
-            isLastQuestion={state.currentQuestionIndex === state.questions.length - 1}
+            isLastQuestion={
+              state.currentQuestionIndex === state.questions.length - 1
+            }
             isAnalyzing={isAnalyzing}
           />
         </motion.div>
       )}
 
-      {phase === 'results' && state.result && (
+      {phase === "results" && state.result && (
         <motion.div
           key="results"
           initial={{ opacity: 0 }}

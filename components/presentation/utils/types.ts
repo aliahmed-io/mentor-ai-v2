@@ -1,4 +1,4 @@
-import { type TElement, type TText } from "platejs";
+import type { TElement, TText } from "platejs";
 
 export interface GeneratingText extends TText {
   text: string;
@@ -25,7 +25,14 @@ export type ImageElement = TElement & {
 };
 
 export type TChartElement = TElement & {
-  type: "chart";
-  chartType: "horizontal-bar" | "vertical-bar" | "pie" | "line";
-  data: Array<{ label: string; value: number }>;
+  type:
+    | "chart"
+    | "chart-bar"
+    | "chart-pie"
+    | "chart-line"
+    | "chart-area"
+    | "chart-radar"
+    | "chart-scatter";
+  chartType?: "horizontal-bar" | "vertical-bar" | "pie" | "line";
+  data: Array<{ label?: string; value?: number; x?: number; y?: number }>;
 };

@@ -1,7 +1,7 @@
-import { env } from "@/env";
 import { tavily } from "@tavily/core";
-import { type Tool } from "ai";
+import type { Tool } from "ai";
 import z from "zod";
+import { env } from "@/env";
 
 const tavilyService = tavily({ apiKey: env.TAVILY_API_KEY });
 

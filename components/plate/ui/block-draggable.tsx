@@ -5,17 +5,17 @@ import { expandListItemsWithChildren } from "@platejs/list";
 import { BlockSelectionPlugin } from "@platejs/selection/react";
 import { GripHorizontal, GripVertical } from "lucide-react";
 import {
-  type TElement,
   getContainerTypes,
   isType,
   KEYS,
   PathApi,
+  type TElement,
 } from "platejs";
 import {
+  MemoizedChildren,
   type PlateEditor,
   type PlateElementProps,
   type RenderNodeWrapper,
-  MemoizedChildren,
   useEditorRef,
   useElement,
   usePath,
@@ -177,7 +177,7 @@ export function Draggable(props: PlateElementProps) {
     if (!isDragging) {
       resetPreview();
     }
-  }, [isDragging, previewRef]);
+  }, [isDragging, resetPreview]);
 
   React.useEffect(() => {
     if (isAboutToDrag) {
@@ -574,16 +574,18 @@ const createDragPreviewElements = (
 
     if (lastDomNode) {
       const lastDomNodeRect = editor.api
-        .toDOMNode(lastDomNode)!
-        .parentElement!.getBoundingClientRect();
+        .toDOMNode(lastDomNode)
+        ?.parentElement?.getBoundingClientRect();
 
-      const domNodeRect = domNode.parentElement!.getBoundingClientRect();
+      const domNodeRect = domNode.parentElement?.getBoundingClientRect();
 
-      const distance = domNodeRect.top - lastDomNodeRect.bottom;
+      if (domNodeRect && lastDomNodeRect) {
+        const distance = domNodeRect.top - lastDomNodeRect.bottom;
 
-      // Check if the two elements are adjacent (touching each other)
-      if (distance > 15) {
-        wrapper.style.marginTop = `${distance}px`;
+        // Check if the two elements are adjacent (touching each other)
+        if (distance > 15) {
+          wrapper.style.marginTop = `${distance}px`;
+        }
       }
     }
 

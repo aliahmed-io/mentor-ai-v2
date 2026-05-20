@@ -1,18 +1,18 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: This use requires any */
+
+import type {
+  DragItemNode,
+  ElementDragItemNode,
+  FileDragItemNode,
+} from "@platejs/dnd";
+
+import type { NodeEntry, TElement } from "platejs";
+import type { PlateEditor } from "platejs/react";
 import {
   type DropTargetHookSpec,
   type DropTargetMonitor,
   useDrop,
 } from "react-dnd";
-
-import { type NodeEntry, type TElement } from "platejs";
-import { type PlateEditor } from "platejs/react";
-
-import {
-  type DragItemNode,
-  type ElementDragItemNode,
-  type FileDragItemNode,
-} from "@platejs/dnd";
 
 import { MultiDndPlugin } from "@/components/plate/plugins/dnd-kit";
 import { onDropNode } from "../transforms/onDropNode";

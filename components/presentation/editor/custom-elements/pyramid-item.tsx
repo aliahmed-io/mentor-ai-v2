@@ -1,11 +1,11 @@
 // custom-elements/pyramid-item.tsx
 "use client";
-import { cn } from "@/lib/utils";
 import { NodeApi, PathApi } from "platejs";
 import { PlateElement, type PlateElementProps } from "platejs/react";
-import {
-  type TPyramidGroupElement,
-  type TPyramidItemElement,
+import { cn } from "@/lib/utils";
+import type {
+  TPyramidGroupElement,
+  TPyramidItemElement,
 } from "../plugins/pyramid-plugin";
 
 // PyramidItem component for individual items in the pyramid

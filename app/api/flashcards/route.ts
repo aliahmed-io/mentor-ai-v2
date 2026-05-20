@@ -1,54 +1,58 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { GoogleGenAI } from '@google/genai'
-import { auth } from '@/server/auth'
-import { db } from '@/server/db'
-import { getImageFromUnsplash } from '@/app/_actions/image/unsplash'
+import { GoogleGenAI } from "@google/genai";
+import { type NextRequest, NextResponse } from "next/server";
+import { getImageFromUnsplash } from "@/app/_actions/image/unsplash";
+import { auth } from "@/server/auth";
+import { db } from "@/server/db";
 
 const flashcardsSchema = {
-  type: 'object',
+  type: "object",
   properties: {
     flashcards: {
-      type: 'array',
+      type: "array",
       items: {
-        type: 'object',
+        type: "object",
         properties: {
-          id: { type: 'string' },
-          front: { type: 'string' },
-          back: { type: 'string' },
-          tags: { type: 'array', items: { type: 'string' } },
+          id: { type: "string" },
+          front: { type: "string" },
+          back: { type: "string" },
+          tags: { type: "array", items: { type: "string" } },
         },
-        required: ['id', 'front', 'back'],
+        required: ["id", "front", "back"],
       },
     },
   },
-  required: ['flashcards'],
-} as const
+  required: ["flashcards"],
+} as const;
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const material: string | undefined = body?.material
-    const topic: string | undefined = body?.topic
-    const count: number = Math.max(4, Math.min(50, Number(body?.count) || 12))
+    const body = await request.json();
+    const material: string | undefined = body?.material;
+    const topic: string | undefined = body?.topic;
+    const count: number = Math.max(4, Math.min(50, Number(body?.count) || 12));
 
-    if (!material || typeof material !== 'string' || material.trim().length < 20) {
+    if (
+      !material ||
+      typeof material !== "string" ||
+      material.trim().length < 20
+    ) {
       return NextResponse.json(
-        { error: 'Please provide at least ~20 characters of study material.' },
+        { error: "Please provide at least ~20 characters of study material." },
         { status: 400 },
-      )
+      );
     }
 
-    const apiKey = process.env.GEMINI_API_KEY
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'GEMINI_API_KEY environment variable is not set' },
+        { error: "GEMINI_API_KEY environment variable is not set" },
         { status: 500 },
-      )
+      );
     }
 
-    const client = new GoogleGenAI({ apiKey })
+    const client = new GoogleGenAI({ apiKey });
 
-    const prompt = `Create ${count} high‑quality study flashcards${topic ? ` about "${topic}"` : ''} from the material below.
+    const prompt = `Create ${count} high‑quality study flashcards${topic ? ` about "${topic}"` : ""} from the material below.
 
 INSTRUCTIONS:
 - Use concise, testable facts.
@@ -60,33 +64,35 @@ INSTRUCTIONS:
 
 MATERIAL:
 ${material}
-`
+`;
 
     const response = await client.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
-        responseMimeType: 'application/json',
+        responseMimeType: "application/json",
         responseSchema: flashcardsSchema as any,
         thinkingConfig: { thinkingBudget: 0 },
       },
-    })
+    });
 
     if (!response.text) {
-      throw new Error('No response text received from Gemini API')
+      throw new Error("No response text received from Gemini API");
     }
 
-    const parsed = JSON.parse(response.text)
-    const cards = Array.isArray(parsed?.flashcards) ? parsed.flashcards : []
+    const parsed = JSON.parse(response.text);
+    const cards = Array.isArray(parsed?.flashcards) ? parsed.flashcards : [];
 
-    const session = await auth()
-    let thumb: string | undefined
+    const session = await auth();
+    let thumb: string | undefined;
     try {
-      const unsplash = await getImageFromUnsplash(topic || (cards?.[0]?.front ?? 'flashcards'))
-      if (unsplash.success && unsplash.imageUrl) thumb = unsplash.imageUrl
+      const unsplash = await getImageFromUnsplash(
+        topic || (cards?.[0]?.front ?? "flashcards"),
+      );
+      if (unsplash.success && unsplash.imageUrl) thumb = unsplash.imageUrl;
     } catch {}
-    const anyDb = db as any
-    let set: { id: string }
+    const anyDb = db as any;
+    let set: { id: string };
     try {
       set = await anyDb.flashcardSet.create({
         data: {
@@ -95,11 +101,15 @@ ${material}
           count,
           thumbnailUrl: thumb ?? null,
           cards: {
-            create: cards.map((c: any) => ({ front: c.front, back: c.back, tags: c.tags ?? [] })),
+            create: cards.map((c: any) => ({
+              front: c.front,
+              back: c.back,
+              tags: c.tags ?? [],
+            })),
           },
         },
         select: { id: true },
-      })
+      });
     } catch {
       // Fallback if schema hasn't been pushed yet
       set = await anyDb.flashcardSet.create({
@@ -108,18 +118,23 @@ ${material}
           topic: topic ?? null,
           count,
           cards: {
-            create: cards.map((c: any) => ({ front: c.front, back: c.back, tags: c.tags ?? [] })),
+            create: cards.map((c: any) => ({
+              front: c.front,
+              back: c.back,
+              tags: c.tags ?? [],
+            })),
           },
         },
         select: { id: true },
-      })
+      });
     }
 
-    return NextResponse.json({ id: set.id, flashcards: cards })
+    return NextResponse.json({ id: set.id, flashcards: cards });
   } catch (error) {
-    console.error('Error generating flashcards:', error)
-    return NextResponse.json({ error: 'Failed to generate flashcards' }, { status: 500 })
+    console.error("Error generating flashcards:", error);
+    return NextResponse.json(
+      { error: "Failed to generate flashcards" },
+      { status: 500 },
+    );
   }
 }
-
-

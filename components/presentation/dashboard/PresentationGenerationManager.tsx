@@ -1,14 +1,14 @@
 "use client";
 
+import { useChat, useCompletion } from "@ai-sdk/react";
+import debounce from "lodash.debounce";
+import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 import { generateImageAction } from "@/app/_actions/image/generate";
 import { getImageFromUnsplash } from "@/app/_actions/image/unsplash";
 import { updatePresentation } from "@/app/_actions/presentation/presentationActions";
 import { extractThinking } from "@/lib/thinking-extractor";
 import { usePresentationState } from "@/states/presentation-state";
-import { useChat, useCompletion } from "@ai-sdk/react";
-import { useEffect, useRef } from "react";
-import debounce from "lodash.debounce";
-import { toast } from "sonner";
 import { SlideParser } from "../utils/parser";
 
 function stripXmlCodeBlock(input: string): string {
@@ -344,7 +344,7 @@ export function PresentationGenerationManager() {
       }
     },
     onError: (error) => {
-      toast.error("Failed to generate outline: " + error.message);
+      toast.error(`Failed to generate outline: ${error.message}`);
       resetGeneration();
 
       // Cancel any pending outline animation frame
@@ -370,7 +370,11 @@ export function PresentationGenerationManager() {
         outlineRafIdRef.current = requestAnimationFrame(updateOutlineWithRAF);
       }
     }
-  }, [outlineMessages, webSearchEnabled]);
+  }, [
+    outlineMessages, // Process messages and store in buffers (non-blocking)
+    processMessages,
+    updateOutlineWithRAF,
+  ]);
 
   // Watch for outline generation start
   useEffect(() => {
@@ -418,7 +422,16 @@ export function PresentationGenerationManager() {
     };
 
     void startOutlineGeneration();
-  }, [shouldStartOutlineGeneration]);
+  }, [
+    shouldStartOutlineGeneration,
+    appendOutlineMessage,
+    language,
+    numSlides, // Reset all state except ID and input when starting new generation
+    resetForNewGeneration,
+    setIsGeneratingOutline,
+    setShouldStartOutlineGeneration,
+    updateOutlineWithRAF,
+  ]);
 
   const { completion: presentationCompletion, complete: generatePresentation } =
     useCompletion({
@@ -448,7 +461,7 @@ export function PresentationGenerationManager() {
         }
       },
       onError: (error) => {
-        toast.error("Failed to generate presentation: " + error.message);
+        toast.error(`Failed to generate presentation: ${error.message}`);
         resetGeneration();
         streamingParserRef.current.reset();
 
@@ -472,7 +485,7 @@ export function PresentationGenerationManager() {
         toast.error("Error processing presentation content");
       }
     }
-  }, [presentationCompletion]);
+  }, [presentationCompletion, updateSlidesWithRAF]);
 
   useEffect(() => {
     if (shouldStartPresentationGeneration) {
@@ -501,7 +514,11 @@ export function PresentationGenerationManager() {
         },
       });
     }
-  }, [shouldStartPresentationGeneration]);
+  }, [
+    shouldStartPresentationGeneration,
+    generatePresentation,
+    setIsGeneratingPresentation,
+  ]);
 
   // Debounced incremental persistence while streaming
   const debouncedStreamSaveRef = useRef(
@@ -514,14 +531,18 @@ export function PresentationGenerationManager() {
           content: { slides: s.slides, config: s.config },
           title: s.currentPresentationTitle ?? undefined,
         });
-      } catch (e) {
+      } catch (_e) {
         // swallow; withDbRetry inside action and next run will try again
       }
     }, 1200),
   );
 
   useEffect(() => {
-    if (isGeneratingPresentation && slides.length > 0 && currentPresentationId) {
+    if (
+      isGeneratingPresentation &&
+      slides.length > 0 &&
+      currentPresentationId
+    ) {
       debouncedStreamSaveRef.current();
     }
   }, [slides, isGeneratingPresentation, currentPresentationId]);
@@ -538,7 +559,8 @@ export function PresentationGenerationManager() {
       if (gen.status === "pending") {
         // Find the slide to get the rootImage query
         const slide = slides.find((s) => s.id === slideId);
-        if (slide?.rootImage?.query) {
+        const query = slide?.rootImage?.query;
+        if (query) {
           void (async () => {
             try {
               let result;
@@ -546,18 +568,15 @@ export function PresentationGenerationManager() {
               if (imageSource === "stock") {
                 // Use Unsplash for stock images
                 const unsplashResult = await getImageFromUnsplash(
-                  slide.rootImage!.query,
-                  slide.rootImage!.layoutType,
+                  query,
+                  slide?.rootImage?.layoutType,
                 );
                 if (unsplashResult.success && unsplashResult.imageUrl) {
                   result = { image: { url: unsplashResult.imageUrl } };
                 }
               } else {
                 // Use AI generation
-                result = await generateImageAction(
-                  slide.rootImage!.query,
-                  imageModel,
-                );
+                result = await generateImageAction(query, imageModel);
               }
 
               if (result?.image?.url) {

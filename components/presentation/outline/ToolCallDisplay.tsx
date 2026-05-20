@@ -1,3 +1,5 @@
+import { Loader2, Search } from "lucide-react";
+import { useState } from "react";
 import {
   Searched,
   type SearchResult,
@@ -8,8 +10,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { usePresentationState } from "@/states/presentation-state";
-import { Loader2, Search } from "lucide-react";
-import { useState } from "react";
 
 export function ToolCallDisplay() {
   const { searchResults, isGeneratingOutline, webSearchEnabled } =

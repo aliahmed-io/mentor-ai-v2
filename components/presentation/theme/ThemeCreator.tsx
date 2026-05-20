@@ -1,5 +1,8 @@
 "use client";
 
+import { Loader2, Plus } from "lucide-react";
+import { type ReactNode, useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { createCustomTheme } from "@/app/_actions/presentation/theme-actions";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -11,16 +14,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { useUploadThing } from "@/hooks/globals/useUploadthing";
 import { themes } from "@/lib/presentation/themes";
-import { Loader2, Plus } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
-import { Controller, useForm } from "react-hook-form";
 
 import { usePresentationState } from "@/states/presentation-state";
 import { ColorPicker } from "./ColorPicker";
 import { FontSelector } from "./FontSelector";
 import { LogoUploader } from "./LogoUploader";
 import { ThemePreview } from "./ThemePreview";
-import { type ColorKey, type ThemeFormValues } from "./types";
+import type { ColorKey, ThemeFormValues } from "./types";
 
 // Define steps for the stepper
 const STEPS = [

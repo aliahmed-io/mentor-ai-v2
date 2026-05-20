@@ -1,9 +1,12 @@
-import { type SlateElementProps } from "platejs";
-
-import { NodeApi, PathApi, SlateElement } from "platejs";
+import {
+  NodeApi,
+  PathApi,
+  SlateElement,
+  type SlateElementProps,
+} from "platejs";
 
 import { cn } from "@/lib/utils";
-import { type TArrowListItemElement } from "../../plugins/arrow-plugin";
+import type { TArrowListItemElement } from "../../plugins/arrow-plugin";
 
 export function ArrowItemStatic(
   props: SlateElementProps<TArrowListItemElement>,

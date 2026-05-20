@@ -1,9 +1,5 @@
 "use client";
 
-import * as React from "react";
-
-import { type WithRequiredKey } from "platejs";
-
 import {
   FloatingMedia as FloatingMediaPrimitive,
   FloatingMediaStore,
@@ -12,6 +8,7 @@ import {
 } from "@platejs/media/react";
 import { cva } from "class-variance-authority";
 import { Link, Trash2Icon } from "lucide-react";
+import type { WithRequiredKey } from "platejs";
 import {
   useEditorRef,
   useEditorSelector,
@@ -20,6 +17,7 @@ import {
   useRemoveNodeButton,
   useSelected,
 } from "platejs/react";
+import * as React from "react";
 
 import { Button, buttonVariants } from "@/components/plate/ui/button";
 import {
@@ -59,7 +57,7 @@ export function MediaToolbar({
     if (!isOpen && isEditing) {
       FloatingMediaStore.set("isEditing", false);
     }
-  }, [isOpen]);
+  }, [isOpen, isEditing]);
 
   const element = useElement();
   const { props: buttonProps } = useRemoveNodeButton({ element });

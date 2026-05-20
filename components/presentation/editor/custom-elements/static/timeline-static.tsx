@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils";
 import { SlateElement, type SlateElementProps } from "platejs";
-import { type TTimelineGroupElement } from "../../plugins/timeline-plugin";
+import { cn } from "@/lib/utils";
+import type { TTimelineGroupElement } from "../../plugins/timeline-plugin";
 import { containerVariants, lineVariants } from "../timeline";
 
 export default function TimelineStatic(

@@ -1,4 +1,8 @@
 "use client";
+import { LogOut } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
+import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,14 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
-import Link from "next/link";
-import { useState } from "react";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export function getInitials(name: string): string {
   // Split the name by spaces to get individual words
   const words = name.split(" ");
@@ -72,7 +70,7 @@ export default function SideBarDropdown({
   align?: "start";
 }) {
   const session = useSession();
-  const userId = session.data?.user.id;
+  const _userId = session.data?.user.id;
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   return (

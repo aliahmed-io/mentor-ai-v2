@@ -2,10 +2,10 @@
 
 import { PlateElement, type StyledPlateElementProps } from "platejs/react";
 import { ARROW_LIST, PYRAMID_GROUP, TIMELINE_GROUP } from "../../lib";
-import { type TArrowListElement } from "../../plugins/arrow-plugin";
-import { type TVisualizationListElement } from "../../plugins/legacy/visualization-list-plugin";
-import { type TPyramidGroupElement } from "../../plugins/pyramid-plugin";
-import { type TTimelineGroupElement } from "../../plugins/timeline-plugin";
+import type { TArrowListElement } from "../../plugins/arrow-plugin";
+import type { TVisualizationListElement } from "../../plugins/legacy/visualization-list-plugin";
+import type { TPyramidGroupElement } from "../../plugins/pyramid-plugin";
+import type { TTimelineGroupElement } from "../../plugins/timeline-plugin";
 import ArrowList from "../arrow-list";
 import Pyramid from "../pyramid";
 import Timeline from "../timeline";
@@ -19,7 +19,7 @@ export const VisualizationListElement = ({
   const { visualizationType, children } = element as TVisualizationListElement;
   const renderer = () => {
     switch (visualizationType) {
-      case "pyramid":
+      case "pyramid": {
         const pyramidElement = {
           ...element,
           children: element.children,
@@ -36,7 +36,8 @@ export const VisualizationListElement = ({
             {props.children}
           </Pyramid>
         );
-      case "arrow":
+      }
+      case "arrow": {
         const arrowElement = {
           ...element,
           children: element.children,
@@ -52,7 +53,8 @@ export const VisualizationListElement = ({
             {props.children}
           </ArrowList>
         );
-      case "timeline":
+      }
+      case "timeline": {
         const timelineElement = {
           ...element,
           children: element.children,
@@ -71,6 +73,7 @@ export const VisualizationListElement = ({
             {children}
           </Timeline>
         );
+      }
       default:
         return <div>{props.children}</div>;
     }

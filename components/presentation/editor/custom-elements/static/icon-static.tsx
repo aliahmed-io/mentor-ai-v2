@@ -1,13 +1,11 @@
 "use client";
+
+import { SlateElement, type SlateElementProps } from "platejs";
 import type React from "react";
-import { useEffect, useState, type ReactNode } from "react";
-
-import { type SlateElementProps } from "platejs";
-
-import { SlateElement } from "platejs";
+import { type ReactNode, useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
-import { type TIconElement } from "../../plugins/icon-plugin";
+import type { TIconElement } from "../../plugins/icon-plugin";
 
 type IconModule = Record<string, React.ComponentType<{ size?: number }>>;
 

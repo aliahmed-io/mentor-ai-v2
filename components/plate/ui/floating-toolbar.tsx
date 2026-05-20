@@ -1,7 +1,5 @@
 "use client";
 
-import * as React from "react";
-
 import { type FloatingToolbarState, flip, offset } from "@platejs/floating";
 import { BlockSelectionPlugin } from "@platejs/selection/react";
 import { KEYS } from "platejs";
@@ -12,11 +10,10 @@ import {
   useEventEditorValue,
   usePluginOption,
 } from "platejs/react";
-
-import { cn } from "@/lib/utils";
-
+import * as React from "react";
 import { BLOCKS } from "@/components/presentation/editor/lib";
-import { type MyEditor } from "../editor-kit";
+import { cn } from "@/lib/utils";
+import type { MyEditor } from "../editor-kit";
 import {
   useFloatingToolbar,
   useFloatingToolbarState,

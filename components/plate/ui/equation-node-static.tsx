@@ -1,8 +1,10 @@
-import { type SlateElementProps, type TEquationElement } from "platejs";
-
 import { getEquationHtml } from "@platejs/math";
 import { RadicalIcon } from "lucide-react";
-import { SlateElement } from "platejs";
+import {
+  SlateElement,
+  type SlateElementProps,
+  type TEquationElement,
+} from "platejs";
 
 import { cn } from "@/lib/utils";
 

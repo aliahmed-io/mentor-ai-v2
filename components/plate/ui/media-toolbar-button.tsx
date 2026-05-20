@@ -1,10 +1,8 @@
 "use client";
 
-import * as React from "react";
-
-import { type DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
-
 import { PlaceholderPlugin } from "@platejs/media/react";
+
+import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
 import {
   AudioLinesIcon,
   FileUpIcon,
@@ -14,6 +12,7 @@ import {
 } from "lucide-react";
 import { isUrl, KEYS } from "platejs";
 import { useEditorRef } from "platejs/react";
+import * as React from "react";
 import { toast } from "sonner";
 import { useFilePicker } from "use-file-picker";
 
@@ -88,10 +87,18 @@ export function MediaToolbarButton({
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const { openFilePicker } = useFilePicker({
-    accept: currentConfig!.accept,
+    accept: currentConfig?.accept,
     multiple: true,
-    onFilesSelected: ({ plainFiles: updatedFiles }) => {
-      editor.getTransforms(PlaceholderPlugin).insert.media(updatedFiles);
+    onFilesSelected: ({
+      plainFiles: updatedFiles,
+    }: {
+      plainFiles?: File[];
+    }) => {
+      if (updatedFiles) {
+        editor
+          .getTransforms(PlaceholderPlugin)
+          .insert.media(updatedFiles as unknown as FileList);
+      }
     },
   });
 
@@ -110,7 +117,7 @@ export function MediaToolbarButton({
         pressed={open}
       >
         <ToolbarSplitButtonPrimary>
-          {currentConfig!.icon}
+          {currentConfig?.icon}
         </ToolbarSplitButtonPrimary>
 
         <DropdownMenu
@@ -130,7 +137,7 @@ export function MediaToolbarButton({
           >
             <DropdownMenuGroup>
               <DropdownMenuItem onSelect={() => openFilePicker()}>
-                {currentConfig!.icon}
+                {currentConfig?.icon}
                 Upload from computer
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setDialogOpen(true)}>

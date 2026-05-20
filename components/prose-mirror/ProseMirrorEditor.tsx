@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { baseKeymap, toggleMark } from "prosemirror-commands";
 import { history, redo, undo } from "prosemirror-history";
 import { keymap } from "prosemirror-keymap";
@@ -10,6 +9,7 @@ import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 import FloatingToolbar from "./FloatingToolbar";
 import mySchema from "./ProseMirrorSchema";
 
@@ -183,7 +183,15 @@ const ProseMirrorEditor: React.FC<ProseMirrorEditorProps> = ({
       }
       document.head.removeChild(style);
     };
-  }, [isEditing, updateToolbarPosition]);
+  }, [
+    isEditing,
+    updateToolbarPosition,
+    checkForChanges,
+    content,
+    onBlur,
+    onChange,
+    onChangeState,
+  ]);
 
   // Update content when it changes externally
   useEffect(() => {
@@ -202,7 +210,7 @@ const ProseMirrorEditor: React.FC<ProseMirrorEditorProps> = ({
         onChangeState?.(false);
       }
     }
-  }, [content]);
+  }, [content, onChangeState]);
 
   return (
     <div className="relative">

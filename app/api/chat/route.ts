@@ -1,8 +1,8 @@
+import { createOpenAI } from "@ai-sdk/openai";
+import { generateText } from "ai";
 import { NextResponse } from "next/server";
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
-import { createOpenAI } from "@ai-sdk/openai";
-import { generateText } from "ai";
 
 type ChatBody = {
   sessionId: string;
@@ -79,7 +79,7 @@ export async function POST(req: Request) {
         role: "system" | "user" | "assistant";
         content: string;
       }>,
-      maxOutputTokens: 1024,
+      maxTokens: 1024,
     });
 
     const reply = text || "(no content)";

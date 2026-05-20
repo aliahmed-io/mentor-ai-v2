@@ -1,15 +1,15 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: This use requires any */
-import React from "react";
 
 import { MarkdownPlugin } from "@platejs/markdown";
-import { type Value } from "@platejs/slate";
-import { type AnyPluginConfig } from "platejs";
+import type { Value } from "@platejs/slate";
+import type { AnyPluginConfig } from "platejs";
 import {
-  createPlateEditor,
   type CreatePlateEditorOptions,
+  createPlateEditor,
   type PlateCorePlugin,
   type TPlateEditor,
 } from "platejs/react";
+import React from "react";
 
 /**
  * Creates a memoized Plate editor for React components.
@@ -89,5 +89,5 @@ export function usePlateEditor<
     });
 
     return editor;
-  }, [options.id, options.enabled, ...deps]);
+  }, [options.id, options.enabled, ...deps, options, value]);
 }

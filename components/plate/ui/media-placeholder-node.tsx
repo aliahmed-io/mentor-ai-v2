@@ -1,19 +1,20 @@
 /** biome-ignore-all lint/performance/noImgElement: This is a valid use case */
 "use client";
 
-import * as React from "react";
-
-import { type TPlaceholderElement } from "platejs";
-import { type PlateElementProps } from "platejs/react";
-
 import {
   PlaceholderPlugin,
   PlaceholderProvider,
   updateUploadHistory,
 } from "@platejs/media/react";
 import { AudioLines, FileUp, Film, ImageIcon, Loader2Icon } from "lucide-react";
-import { KEYS } from "platejs";
-import { PlateElement, useEditorPlugin, withHOC } from "platejs/react";
+import { KEYS, type TPlaceholderElement } from "platejs";
+import {
+  PlateElement,
+  type PlateElementProps,
+  useEditorPlugin,
+  withHOC,
+} from "platejs/react";
+import * as React from "react";
 import { useFilePicker } from "use-file-picker";
 
 import { useUploadFile } from "@/components/plate/hooks/use-upload-file";
@@ -68,16 +69,23 @@ export const PlaceholderElement = withHOC(
     const imageRef = React.useRef<HTMLImageElement>(null);
 
     const { openFilePicker } = useFilePicker({
-      accept: currentContent!.accept,
+      accept: currentContent?.accept,
       multiple: true,
-      onFilesSelected: ({ plainFiles: updatedFiles }) => {
-        const firstFile = updatedFiles[0];
+      onFilesSelected: ({
+        plainFiles: updatedFiles,
+      }: {
+        plainFiles?: File[];
+      }) => {
+        if (!updatedFiles || updatedFiles.length === 0) return;
+        const firstFile = updatedFiles[0]!;
         const restFiles = updatedFiles.slice(1);
 
         replaceCurrentPlaceholder(firstFile);
 
         if (restFiles.length > 0) {
-          editor.getTransforms(PlaceholderPlugin).insert.media(restFiles);
+          editor
+            .getTransforms(PlaceholderPlugin)
+            .insert.media(restFiles as unknown as FileList);
         }
       },
     });
@@ -115,7 +123,13 @@ export const PlaceholderElement = withHOC(
       });
 
       api.placeholder.removeUploadingFile(element.id as string);
-    }, [uploadedFile, element.id]);
+    }, [
+      uploadedFile,
+      element.id,
+      api.placeholder.removeUploadingFile,
+      editor,
+      element,
+    ]);
 
     // React dev mode will call React.useEffect twice
     const isReplaced = React.useRef(false);
@@ -132,7 +146,11 @@ export const PlaceholderElement = withHOC(
       if (!currentFiles) return;
 
       replaceCurrentPlaceholder(currentFiles);
-    }, [isReplaced]);
+    }, [
+      api.placeholder.getUploadingFile,
+      element.id,
+      replaceCurrentPlaceholder,
+    ]);
 
     return (
       <PlateElement className="my-1" {...props}>
@@ -145,11 +163,11 @@ export const PlaceholderElement = withHOC(
             contentEditable={false}
           >
             <div className="relative mr-3 flex text-muted-foreground/80 [&_svg]:size-6">
-              {currentContent!.icon}
+              {currentContent?.icon}
             </div>
             <div className="whitespace-nowrap text-sm text-muted-foreground">
               <div>
-                {loading ? uploadingFile?.name : currentContent!.content}
+                {loading ? uploadingFile?.name : currentContent?.content}
               </div>
 
               {loading && !isImage && (

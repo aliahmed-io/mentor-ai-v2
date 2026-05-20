@@ -1,4 +1,4 @@
-import { type TElement } from "platejs";
+import type { TElement } from "platejs";
 import { createTPlatePlugin } from "platejs/react";
 import { IconList } from "../custom-elements/icon-list";
 import { IconListElement } from "../custom-elements/icon-list-item";

@@ -1,12 +1,3 @@
-import { Button } from "@/components/ui/button";
-import ColorPicker from "@/components/ui/color-picker";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { usePresentationState } from "@/states/presentation-state";
 import {
   AlignCenter,
   ArrowUpFromLine,
@@ -21,7 +12,16 @@ import {
   PanelTop,
   Trash2,
 } from "lucide-react";
-import { type LayoutType } from "../utils/parser";
+import { Button } from "@/components/ui/button";
+import ColorPicker from "@/components/ui/color-picker";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { usePresentationState } from "@/states/presentation-state";
+import type { LayoutType } from "../utils/parser";
 
 interface SlideEditPopoverProps {
   index: number;

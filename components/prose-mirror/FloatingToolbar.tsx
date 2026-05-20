@@ -1,3 +1,10 @@
+import { Bold, ChevronDown, Code, Heading, Italic, List } from "lucide-react";
+import { setBlockType, toggleMark } from "prosemirror-commands";
+import type { NodeType } from "prosemirror-model";
+import { liftListItem, wrapInList } from "prosemirror-schema-list";
+import type { Command } from "prosemirror-state";
+import type { EditorView } from "prosemirror-view";
+import type React from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -5,13 +12,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Bold, ChevronDown, Code, Heading, Italic, List } from "lucide-react";
-import { setBlockType, toggleMark } from "prosemirror-commands";
-import { type NodeType } from "prosemirror-model";
-import { liftListItem, wrapInList } from "prosemirror-schema-list";
-import { type Command } from "prosemirror-state";
-import { type EditorView } from "prosemirror-view";
-import type React from "react";
 
 interface FloatingToolbarProps {
   view: EditorView;

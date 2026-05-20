@@ -1,12 +1,12 @@
+import { BaseTocPlugin, type Heading, isHeading } from "@platejs/toc";
+import { cva } from "class-variance-authority";
 import {
+  NodeApi,
   type SlateEditor,
+  SlateElement,
   type SlateElementProps,
   type TElement,
 } from "platejs";
-
-import { type Heading, BaseTocPlugin, isHeading } from "@platejs/toc";
-import { cva } from "class-variance-authority";
-import { NodeApi, SlateElement } from "platejs";
 
 import { Button } from "@/components/plate/ui/button";
 

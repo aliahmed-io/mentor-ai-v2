@@ -1,45 +1,13 @@
 import { ColumnItemPlugin, ColumnPlugin } from "@platejs/layout/react";
 import { nanoid } from "nanoid"; // Import nanoid for unique ID generation
-import {
-  type Descendant,
-  type TColumnElement,
-  type TColumnGroupElement,
-  type TText,
-} from "platejs";
-import {
-  type TArrowListElement,
-  type TArrowListItemElement,
-} from "../editor/plugins/arrow-plugin";
-import {
-  type TBulletGroupElement,
-  type TBulletItemElement,
-} from "../editor/plugins/bullet-plugin";
-import {
-  type TCycleGroupElement,
-  type TCycleItemElement,
-} from "../editor/plugins/cycle-plugin";
-import {
-  type TIconListElement,
-  type TIconListItemElement,
-} from "../editor/plugins/icon-list-plugin";
-import { type TIconElement } from "../editor/plugins/icon-plugin";
-import {
-  type TPyramidGroupElement,
-  type TPyramidItemElement,
-} from "../editor/plugins/pyramid-plugin";
-import {
-  type TStairGroupElement,
-  type TStairItemElement,
-} from "../editor/plugins/staircase-plugin";
-import {
-  type TTimelineGroupElement,
-  type TTimelineItemElement,
-} from "../editor/plugins/timeline-plugin";
-
-import {
-  type TTableCellElement,
-  type TTableElement,
-  type TTableRowElement,
+import type {
+  Descendant,
+  TColumnElement,
+  TColumnGroupElement,
+  TTableCellElement,
+  TTableElement,
+  TTableRowElement,
+  TText,
 } from "platejs";
 import {
   AREA_CHART_ELEMENT,
@@ -49,35 +17,64 @@ import {
   RADAR_CHART_ELEMENT,
   SCATTER_CHART_ELEMENT,
 } from "../editor/lib";
-import {
-  type TBeforeAfterGroupElement,
-  type TBeforeAfterSideElement,
+import type {
+  TArrowListElement,
+  TArrowListItemElement,
+} from "../editor/plugins/arrow-plugin";
+import type {
+  TBeforeAfterGroupElement,
+  TBeforeAfterSideElement,
 } from "../editor/plugins/before-after-plugin";
-import {
-  type TBoxGroupElement,
-  type TBoxItemElement,
+import type {
+  TBoxGroupElement,
+  TBoxItemElement,
 } from "../editor/plugins/box-plugin";
-import { type TButtonElement } from "../editor/plugins/button-plugin";
-import {
-  type TCompareGroupElement,
-  type TCompareSideElement,
+import type {
+  TBulletGroupElement,
+  TBulletItemElement,
+} from "../editor/plugins/bullet-plugin";
+import type { TButtonElement } from "../editor/plugins/button-plugin";
+import type {
+  TCompareGroupElement,
+  TCompareSideElement,
 } from "../editor/plugins/compare-plugin";
-import {
-  type TConsItemElement,
-  type TProsConsGroupElement,
-  type TProsItemElement,
+import type {
+  TCycleGroupElement,
+  TCycleItemElement,
+} from "../editor/plugins/cycle-plugin";
+import type {
+  TIconListElement,
+  TIconListItemElement,
+} from "../editor/plugins/icon-list-plugin";
+import type { TIconElement } from "../editor/plugins/icon-plugin";
+import type {
+  TConsItemElement,
+  TProsConsGroupElement,
+  TProsItemElement,
 } from "../editor/plugins/pros-cons-plugin";
-import {
-  type TSequenceArrowGroupElement,
-  type TSequenceArrowItemElement,
+import type {
+  TPyramidGroupElement,
+  TPyramidItemElement,
+} from "../editor/plugins/pyramid-plugin";
+import type {
+  TSequenceArrowGroupElement,
+  TSequenceArrowItemElement,
 } from "../editor/plugins/sequence-arrow-plugin";
-import {
-  type GeneratingText,
-  type HeadingElement,
-  type ImageCropSettings,
-  type ImageElement,
-  type ParagraphElement,
-  type TChartElement,
+import type {
+  TStairGroupElement,
+  TStairItemElement,
+} from "../editor/plugins/staircase-plugin";
+import type {
+  TTimelineGroupElement,
+  TTimelineItemElement,
+} from "../editor/plugins/timeline-plugin";
+import type {
+  GeneratingText,
+  HeadingElement,
+  ImageCropSettings,
+  ImageElement,
+  ParagraphElement,
+  TChartElement,
 } from "./types";
 
 // Union type for all possible Plate elements
@@ -220,7 +217,7 @@ export class SlideParser {
 
       if (remainingBuffer.startsWith("<SECTION")) {
         // We have an incomplete section, force close it
-        const fixedSection = remainingBuffer + "</SECTION>";
+        const fixedSection = `${remainingBuffer}</SECTION>`;
         this.completedSections.push(fixedSection);
       }
 
@@ -380,7 +377,7 @@ export class SlideParser {
           partialSection.includes("<IMG")
         ) {
           // Add a closing tag and process it
-          this.completedSections.push(partialSection + "</SECTION>");
+          this.completedSections.push(`${partialSection}</SECTION>`);
         }
 
         startIdx = nextSectionIdx;
@@ -434,7 +431,7 @@ export class SlideParser {
       .slice(0, 3)
       .map((child) => child.tag.toUpperCase());
     if (childTags.length > 0) {
-      fingerprint += "|" + childTags.join("-");
+      fingerprint += `|${childTags.join("-")}`;
     }
 
     // If we still don't have a usable fingerprint, use the full section content hash

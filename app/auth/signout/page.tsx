@@ -1,5 +1,8 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
+import { signOut } from "next-auth/react";
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,10 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { signOut } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
 
-export default function SignOut() {
+function SignOutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
@@ -25,21 +26,50 @@ export default function SignOut() {
   };
 
   return (
+    <Card className="w-full max-w-md shadow-lg">
+      <CardHeader className="space-y-1 text-center">
+        <CardTitle className="text-2xl font-bold">Sign Out</CardTitle>
+        <CardDescription>Are you sure you want to sign out?</CardDescription>
+      </CardHeader>
+      <CardContent className="grid gap-4">
+        <div className="flex flex-col space-y-4">
+          <Button onClick={handleSignOut}>Yes, sign me out</Button>
+          <Button variant="outline" onClick={handleCancel}>
+            No, take me back
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function SignOut() {
+  return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-slate-900 px-4">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">Sign Out</CardTitle>
-          <CardDescription>Are you sure you want to sign out?</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <div className="flex flex-col space-y-4">
-            <Button onClick={handleSignOut}>Yes, sign me out</Button>
-            <Button variant="outline" onClick={handleCancel}>
-              No, take me back
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <Suspense
+        fallback={
+          <Card className="w-full max-w-md shadow-lg animate-pulse">
+            <CardHeader className="space-y-1 text-center">
+              <CardTitle className="text-2xl font-bold text-muted-foreground">
+                Sign Out
+              </CardTitle>
+              <CardDescription>Loading page content...</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              <div className="flex flex-col space-y-4">
+                <Button disabled variant="secondary">
+                  Yes, sign me out
+                </Button>
+                <Button disabled variant="outline">
+                  No, take me back
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        }
+      >
+        <SignOutContent />
+      </Suspense>
     </div>
   );
 }

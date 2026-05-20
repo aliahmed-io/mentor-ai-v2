@@ -1,5 +1,5 @@
+import fs from "node:fs";
 import { NextResponse } from "next/server";
-import fs from "fs";
 import { extractTextFromFile } from "@/utils/extractText";
 
 export async function POST(req: Request) {
@@ -28,5 +28,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "upload failed" }, { status: 500 });
   }
 }
-
-

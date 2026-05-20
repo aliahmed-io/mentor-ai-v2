@@ -1,14 +1,12 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: This use requires any */
 import { useCallback, useEffect, useMemo, useState } from "react";
-
+import { cn } from "@/lib/utils";
 // The font info is now imported statically at the top of the file.
 import fontInfos from "../font-preview/fontInfo.json";
-
-import { cn } from "@/lib/utils";
 import {
+  defaultFont,
   type Font,
   type FontPickerProps,
-  defaultFont,
   toString,
 } from "../types";
 import { checkLoaded } from "../utils/fontChecker";

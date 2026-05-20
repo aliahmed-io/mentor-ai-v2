@@ -1,9 +1,12 @@
-import { type SlateElementProps } from "platejs";
-
-import { NodeApi, PathApi, SlateElement } from "platejs";
+import {
+  NodeApi,
+  PathApi,
+  SlateElement,
+  type SlateElementProps,
+} from "platejs";
 
 import { cn } from "@/lib/utils";
-import { type TStairGroupElement } from "../../plugins/staircase-plugin";
+import type { TStairGroupElement } from "../../plugins/staircase-plugin";
 
 export function StairItemStatic(props: SlateElementProps) {
   const path = props.editor.api.findPath(props.element) ?? [-1];

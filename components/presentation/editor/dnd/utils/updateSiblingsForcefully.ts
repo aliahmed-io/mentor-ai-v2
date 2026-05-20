@@ -1,5 +1,5 @@
 import { type NodeEntry, PathApi, type TElement, type TText } from "platejs";
-import { type PlateEditor } from "platejs/react";
+import type { PlateEditor } from "platejs/react";
 
 /**
  * Components that require force full sibling updates when their siblings change

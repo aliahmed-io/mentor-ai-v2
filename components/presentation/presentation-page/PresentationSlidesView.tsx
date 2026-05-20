@@ -1,17 +1,17 @@
 "use client";
 
-import { SlideContainer } from "@/components/presentation/presentation-page/SlideContainer";
-import { usePresentationSlides } from "@/hooks/presentation/usePresentationSlides";
-import { useSlideChangeWatcher } from "@/hooks/presentation/useSlideChangeWatcher";
-import { cn } from "@/lib/utils";
-import { usePresentationState } from "@/states/presentation-state";
-import { DndContext, closestCenter } from "@dnd-kit/core";
+import { closestCenter, DndContext } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { PlateController } from "platejs/react";
 import { useEffect } from "react";
+import { SlideContainer } from "@/components/presentation/presentation-page/SlideContainer";
+import { usePresentationSlides } from "@/hooks/presentation/usePresentationSlides";
+import { useSlideChangeWatcher } from "@/hooks/presentation/useSlideChangeWatcher";
+import { cn } from "@/lib/utils";
+import { usePresentationState } from "@/states/presentation-state";
 import { PresentModeHeader } from "../dashboard/PresentModeHeader";
 import { ThinkingDisplay } from "../dashboard/ThinkingDisplay";
 import PresentationEditor from "../editor/presentation-editor";
@@ -71,7 +71,7 @@ export const PresentationSlidesView = ({
 
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [isPresenting]);
+  }, [isPresenting, setShouldShowExitHeader]);
 
   return (
     <DndContext
@@ -81,7 +81,7 @@ export const PresentationSlidesView = ({
     >
       <SortableContext items={items} strategy={verticalListSortingStrategy}>
         <PresentModeHeader
-          presentationTitle={currentPresentationTitle}
+          presentationTitle={currentPresentationTitle || ""}
           showHeader={isPresenting && shouldShowExitHeader}
         />
 

@@ -1,9 +1,12 @@
-import { type SlateElementProps } from "platejs";
-
-import { NodeApi, PathApi, SlateElement } from "platejs";
+import {
+  NodeApi,
+  PathApi,
+  SlateElement,
+  type SlateElementProps,
+} from "platejs";
 
 import { cn } from "@/lib/utils";
-import { type TCycleGroupElement } from "../../plugins/cycle-plugin";
+import type { TCycleGroupElement } from "../../plugins/cycle-plugin";
 
 export function CycleItemStatic(props: SlateElementProps) {
   const path = props.editor.api.findPath(props.element) ?? [-1];

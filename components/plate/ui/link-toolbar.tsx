@@ -1,18 +1,14 @@
 "use client";
 
-import * as React from "react";
-
-import { type TLinkElement } from "platejs";
-
 import {
-  type UseVirtualFloatingOptions,
   flip,
   offset,
+  type UseVirtualFloatingOptions,
 } from "@platejs/floating";
 import { getLinkAttributes } from "@platejs/link";
 import {
-  type LinkFloatingToolbarState,
   FloatingLinkUrlInput,
+  type LinkFloatingToolbarState,
   useFloatingLinkEdit,
   useFloatingLinkEditState,
   useFloatingLinkInsert,
@@ -20,13 +16,14 @@ import {
 } from "@platejs/link/react";
 import { cva } from "class-variance-authority";
 import { ExternalLink, Link, Text, Unlink } from "lucide-react";
-import { KEYS } from "platejs";
+import { KEYS, type TLinkElement } from "platejs";
 import {
   useEditorRef,
   useEditorSelection,
   useFormInputProps,
   usePluginOption,
 } from "platejs/react";
+import * as React from "react";
 
 import { buttonVariants } from "@/components/plate/ui/button";
 import { Separator } from "@/components/plate/ui/separator";
@@ -172,7 +169,7 @@ export function LinkFloatingToolbar({
 
 function LinkOpenButton() {
   const editor = useEditorRef();
-  const selection = useEditorSelection();
+  const _selection = useEditorSelection();
 
   const attributes = React.useMemo(() => {
     const entry = editor.api.node<TLinkElement>({
@@ -183,7 +180,7 @@ function LinkOpenButton() {
     }
     const [element] = entry;
     return getLinkAttributes(editor, element);
-  }, [editor, selection]);
+  }, [editor]);
 
   return (
     <a

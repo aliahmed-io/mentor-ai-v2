@@ -1,12 +1,5 @@
 "use client";
 
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "@/components/ui/chart";
-import { cn } from "@/lib/utils";
 import { PlateElement, type PlateElementProps } from "platejs/react";
 import {
   Legend,
@@ -16,7 +9,14 @@ import {
   Radar,
   RadarChart,
 } from "recharts";
-import { type TChartNode } from "../plugins/chart-plugin";
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { cn } from "@/lib/utils";
+import type { TChartNode } from "../plugins/chart-plugin";
 
 type AnyRecord = Record<string, unknown>;
 

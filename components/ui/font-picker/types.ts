@@ -48,7 +48,7 @@ export function toString(v: Variant) {
   if (typeof v === "string") {
     return v;
   }
-  return (v.italic ? "1" : "0") + "," + v.weight;
+  return `${v.italic ? "1" : "0"},${v.weight}`;
 }
 
 export const defaultFont: Font = {

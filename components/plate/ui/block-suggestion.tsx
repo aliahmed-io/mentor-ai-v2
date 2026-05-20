@@ -1,34 +1,32 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: This use requires any */
 "use client";
 
-import * as React from "react";
-
-import { type TResolvedSuggestion } from "@platejs/suggestion";
-
 import {
   acceptSuggestion,
   getSuggestionKey,
   keyId2SuggestionId,
   rejectSuggestion,
+  type TResolvedSuggestion,
 } from "@platejs/suggestion";
 import { SuggestionPlugin } from "@platejs/suggestion/react";
 import { CheckIcon, XIcon } from "lucide-react";
 import {
-  type NodeEntry,
-  type Path,
-  type TElement,
-  type TSuggestionElement,
-  type TSuggestionText,
   ElementApi,
   KEYS,
+  type NodeEntry,
+  type Path,
   PathApi,
+  type TElement,
   TextApi,
+  type TSuggestionElement,
+  type TSuggestionText,
 } from "platejs";
 import { useEditorPlugin, usePluginOption } from "platejs/react";
+import * as React from "react";
 
 import {
-  type TDiscussion,
   discussionPlugin,
+  type TDiscussion,
 } from "@/components/plate/plugins/discussion-kit";
 import { suggestionPlugin } from "@/components/plate/plugins/suggestion-kit";
 import {
@@ -40,10 +38,10 @@ import { Button } from "@/components/plate/ui/button";
 import { cn } from "@/lib/utils";
 
 import {
-  type TComment,
   Comment,
   CommentCreateForm,
   formatCommentDate,
+  type TComment,
 } from "./comment";
 
 export interface ResolvedSuggestion extends TResolvedSuggestion {
@@ -410,18 +408,18 @@ export const useResolveSuggestion = (
           if (lineBreakData.type === "insert") {
             newText += lineBreakData.isLineBreak
               ? BLOCK_SUGGESTION
-              : BLOCK_SUGGESTION + TYPE_TEXT_MAP[node.type]!(node);
+              : BLOCK_SUGGESTION + TYPE_TEXT_MAP[node.type]?.(node);
           } else if (lineBreakData.type === "remove") {
             text += lineBreakData.isLineBreak
               ? BLOCK_SUGGESTION
-              : BLOCK_SUGGESTION + TYPE_TEXT_MAP[node.type]!(node);
+              : BLOCK_SUGGESTION + TYPE_TEXT_MAP[node.type]?.(node);
           }
         }
       });
 
       if (entries.length === 0) return;
 
-      const nodeData = api.suggestion.suggestionData(entries![0]![0]);
+      const nodeData = api.suggestion.suggestionData(entries?.[0]?.[0]);
 
       if (!nodeData) return;
 

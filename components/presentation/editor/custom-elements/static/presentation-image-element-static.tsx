@@ -1,11 +1,12 @@
+import {
+  SlateElement,
+  type SlateElementProps,
+  type TImageElement,
+} from "platejs";
 import type * as React from "react";
 
-import { type SlateElementProps, type TImageElement } from "platejs";
-
-import { SlateElement } from "platejs";
-
 import { cn } from "@/lib/utils";
-import { type ImageCropSettings } from "../../../utils/types";
+import type { ImageCropSettings } from "../../../utils/types";
 
 // Static renderer for presentation image that preserves crop styles
 export function PresentationImageElementStatic(

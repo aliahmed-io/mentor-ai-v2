@@ -1,6 +1,6 @@
+import { Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePresentationState } from "@/states/presentation-state";
-import { Globe } from "lucide-react";
 
 export function WebSearchToggle() {
   const { webSearchEnabled, setWebSearchEnabled, isGeneratingOutline } =

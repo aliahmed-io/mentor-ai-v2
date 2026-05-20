@@ -1,16 +1,15 @@
 "use client";
 
-import { previewSignature } from "@/hooks/presentation/previewSignature";
 import { AnimatePresence, motion } from "framer-motion";
 import { GripVertical, PanelLeftOpen, PanelRightOpen } from "lucide-react";
 import { Resizable } from "re-resizable";
 import React, { useCallback, useState } from "react";
-
 import { Button } from "@/components/ui/button";
+import { previewSignature } from "@/hooks/presentation/previewSignature";
 import { usePresentationSlides } from "@/hooks/presentation/usePresentationSlides";
 import { usePresentationState } from "@/states/presentation-state";
 import PresentationEditorStaticView from "../editor/presentation-editor-static";
-import { type PlateSlide } from "../utils/parser";
+import type { PlateSlide } from "../utils/parser";
 import { SlidePreviewCard } from "./SlidePreviewCard";
 
 interface SlidePreviewProps {

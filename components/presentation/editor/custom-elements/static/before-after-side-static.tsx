@@ -1,10 +1,10 @@
-import { cn } from "@/lib/utils";
 import {
   NodeApi,
   PathApi,
   SlateElement,
   type SlateElementProps,
 } from "platejs";
+import { cn } from "@/lib/utils";
 
 export function BeforeAfterSideStatic(props: SlateElementProps) {
   const path = props.editor.api.findPath(props.element) ?? [-1];

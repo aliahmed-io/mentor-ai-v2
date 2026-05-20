@@ -1,17 +1,17 @@
 "use client";
 
+import { Download, Image as ImageIcon } from "lucide-react";
+import type { TElement } from "platejs";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import {
   BASE_HEIGHT,
   BASE_WIDTH_PERCENTAGE,
 } from "@/hooks/presentation/useRootImageActions";
-import { Download, Image as ImageIcon } from "lucide-react";
-import { type TElement } from "platejs";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { type RootImage as RootImageType } from "../../../utils/parser";
-import { type ImageCropSettings } from "../../../utils/types";
-import { type EditorMode } from "../presentation-image-editor";
+import type { RootImage as RootImageType } from "../../../utils/parser";
+import type { ImageCropSettings } from "../../../utils/types";
+import type { EditorMode } from "../presentation-image-editor";
 
 interface ImagePreviewProps {
   element: TElement & RootImageType;
@@ -190,7 +190,7 @@ export function ImagePreview({
 
     console.log("actualWidth", actualWidth, "actualHeight", actualHeight);
     return { width: actualWidth, height: actualHeight };
-  }, [slideIndex]);
+  }, [slideIndex, element.size?.h, element.size?.w, layoutType]);
 
   const containerScale = useMemo(() => {
     const maxHeight = window.innerHeight * MAX_HEIGHT_RATIO_WITH_WINDOW;

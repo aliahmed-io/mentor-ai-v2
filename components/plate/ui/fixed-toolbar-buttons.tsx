@@ -4,13 +4,13 @@ import {
   ArrowUpToLineIcon,
   BaselineIcon,
   BoldIcon,
+  BrainCircuitIcon,
   Code2Icon,
   HighlighterIcon,
   ItalicIcon,
   PaintBucketIcon,
   StrikethroughIcon,
   UnderlineIcon,
-  WandSparklesIcon,
 } from "lucide-react";
 import { KEYS } from "platejs";
 import { useEditorReadOnly } from "platejs/react";
@@ -59,7 +59,7 @@ export function FixedToolbarButtons() {
 
           <ToolbarGroup>
             <AIToolbarButton tooltip="AI commands">
-              <WandSparklesIcon />
+              <BrainCircuitIcon />
             </AIToolbarButton>
           </ToolbarGroup>
 

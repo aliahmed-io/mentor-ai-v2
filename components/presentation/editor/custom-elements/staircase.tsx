@@ -1,7 +1,7 @@
 "use client";
 
 import { PlateElement, type PlateElementProps } from "platejs/react";
-import { type TStairGroupElement } from "../plugins/staircase-plugin";
+import type { TStairGroupElement } from "../plugins/staircase-plugin";
 
 export default function Staircase(
   props: PlateElementProps<TStairGroupElement>,

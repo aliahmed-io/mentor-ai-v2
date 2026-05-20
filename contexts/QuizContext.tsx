@@ -1,19 +1,20 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { QuizState, QuizSetup, Question, QuizResult } from '@/types/quiz';
-import { analyzeQuizResults } from '@/lib/gemini';
+import type React from "react";
+import { createContext, type ReactNode, useContext, useReducer } from "react";
+import { analyzeQuizResults } from "@/lib/gemini";
+import type { Question, QuizResult, QuizSetup, QuizState } from "@/types/quiz";
 
 type QuizAction =
-  | { type: 'SET_SETUP'; payload: QuizSetup }
-  | { type: 'SET_QUESTIONS'; payload: Question[] }
-  | { type: 'ANSWER_QUESTION'; payload: { questionId: string; answer: number } }
-  | { type: 'CLEAR_ANSWER'; payload: string }
-  | { type: 'NEXT_QUESTION' }
-  | { type: 'PREVIOUS_QUESTION' }
-  | { type: 'COMPLETE_QUIZ' }
-  | { type: 'SET_RESULT'; payload: QuizResult }
-  | { type: 'RESET_QUIZ' };
+  | { type: "SET_SETUP"; payload: QuizSetup }
+  | { type: "SET_QUESTIONS"; payload: Question[] }
+  | { type: "ANSWER_QUESTION"; payload: { questionId: string; answer: number } }
+  | { type: "CLEAR_ANSWER"; payload: string }
+  | { type: "NEXT_QUESTION" }
+  | { type: "PREVIOUS_QUESTION" }
+  | { type: "COMPLETE_QUIZ" }
+  | { type: "SET_RESULT"; payload: QuizResult }
+  | { type: "RESET_QUIZ" };
 
 const initialState: QuizState = {
   setup: null,
@@ -26,46 +27,48 @@ const initialState: QuizState = {
 
 function quizReducer(state: QuizState, action: QuizAction): QuizState {
   switch (action.type) {
-    case 'SET_SETUP':
+    case "SET_SETUP":
       return { ...state, setup: action.payload };
-    
-    case 'SET_QUESTIONS':
+
+    case "SET_QUESTIONS":
       return { ...state, questions: action.payload };
-    
-    case 'ANSWER_QUESTION':
+
+    case "ANSWER_QUESTION": {
       const newAnswers = new Map(state.answers);
       newAnswers.set(action.payload.questionId, action.payload.answer);
       return { ...state, answers: newAnswers };
-    
-    case 'CLEAR_ANSWER':
+    }
+
+    case "CLEAR_ANSWER": {
       const clearedAnswers = new Map(state.answers);
       clearedAnswers.delete(action.payload);
       return { ...state, answers: clearedAnswers };
-    
-    case 'NEXT_QUESTION':
+    }
+
+    case "NEXT_QUESTION":
       return {
         ...state,
         currentQuestionIndex: Math.min(
           state.currentQuestionIndex + 1,
-          state.questions.length - 1
+          state.questions.length - 1,
         ),
       };
-    
-    case 'PREVIOUS_QUESTION':
+
+    case "PREVIOUS_QUESTION":
       return {
         ...state,
         currentQuestionIndex: Math.max(state.currentQuestionIndex - 1, 0),
       };
-    
-    case 'COMPLETE_QUIZ':
+
+    case "COMPLETE_QUIZ":
       return { ...state, isCompleted: true };
-    
-    case 'SET_RESULT':
+
+    case "SET_RESULT":
       return { ...state, result: action.payload };
-    
-    case 'RESET_QUIZ':
+
+    case "RESET_QUIZ":
       return initialState;
-    
+
     default:
       return state;
   }
@@ -91,36 +94,36 @@ export function QuizProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(quizReducer, initialState);
 
   const setSetup = (setup: QuizSetup) => {
-    dispatch({ type: 'SET_SETUP', payload: setup });
+    dispatch({ type: "SET_SETUP", payload: setup });
   };
 
   const setQuestions = (questions: Question[]) => {
-    dispatch({ type: 'SET_QUESTIONS', payload: questions });
+    dispatch({ type: "SET_QUESTIONS", payload: questions });
   };
 
   const answerQuestion = (questionId: string, answer: number) => {
-    dispatch({ type: 'ANSWER_QUESTION', payload: { questionId, answer } });
+    dispatch({ type: "ANSWER_QUESTION", payload: { questionId, answer } });
   };
 
   const clearAnswer = (questionId: string) => {
-    dispatch({ type: 'CLEAR_ANSWER', payload: questionId });
+    dispatch({ type: "CLEAR_ANSWER", payload: questionId });
   };
 
   const nextQuestion = () => {
-    dispatch({ type: 'NEXT_QUESTION' });
+    dispatch({ type: "NEXT_QUESTION" });
   };
 
   const previousQuestion = () => {
-    dispatch({ type: 'PREVIOUS_QUESTION' });
+    dispatch({ type: "PREVIOUS_QUESTION" });
   };
 
   const completeQuiz = () => {
-    dispatch({ type: 'COMPLETE_QUIZ' });
+    dispatch({ type: "COMPLETE_QUIZ" });
   };
 
   const calculateResult = async () => {
     const { questions, answers, setup } = state;
-    
+
     let correctAnswers = 0;
     let incorrectAnswers = 0;
     let unanswered = 0;
@@ -129,7 +132,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     for (const question of questions) {
       const userAnswer = answers.get(question.id);
       const isCorrect = userAnswer === question.correctAnswer;
-      
+
       if (userAnswer === undefined) {
         unanswered++;
       } else if (isCorrect) {
@@ -160,7 +163,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
       recommendations: [],
     };
 
-    dispatch({ type: 'SET_RESULT', payload: basicResult });
+    dispatch({ type: "SET_RESULT", payload: basicResult });
 
     // Generate AI-powered analysis if setup is available
     if (setup) {
@@ -171,16 +174,17 @@ export function QuizProvider({ children }: { children: ReactNode }) {
           weakTopics: analysis.weakTopics,
           recommendations: analysis.recommendations,
         };
-        dispatch({ type: 'SET_RESULT', payload: enhancedResult });
+        dispatch({ type: "SET_RESULT", payload: enhancedResult });
       } catch (error) {
-        console.error('Error analyzing quiz results:', error);
+        console.error("Error analyzing quiz results:", error);
         // Fall back to basic analysis
-        const topicCounts: Record<string, { correct: number; total: number }> = {};
+        const topicCounts: Record<string, { correct: number; total: number }> =
+          {};
 
         for (const question of questions) {
           const userAnswer = answers.get(question.id);
           const isCorrect = userAnswer === question.correctAnswer;
-          
+
           if (!topicCounts[question.topic]) {
             topicCounts[question.topic] = { correct: 0, total: 0 };
           }
@@ -196,9 +200,13 @@ export function QuizProvider({ children }: { children: ReactNode }) {
 
         const recommendations = [];
         if (percentage < 50) {
-          recommendations.push("Consider reviewing the fundamental concepts thoroughly");
+          recommendations.push(
+            "Consider reviewing the fundamental concepts thoroughly",
+          );
         } else if (percentage < 70) {
-          recommendations.push("Good progress! Focus on the weak areas identified");
+          recommendations.push(
+            "Good progress! Focus on the weak areas identified",
+          );
         } else if (percentage < 90) {
           recommendations.push("Great job! Polish up on the topics you missed");
         } else {
@@ -206,7 +214,9 @@ export function QuizProvider({ children }: { children: ReactNode }) {
         }
 
         if (weakTopics.length > 0) {
-          recommendations.push(`Pay special attention to: ${weakTopics.join(", ")}`);
+          recommendations.push(
+            `Pay special attention to: ${weakTopics.join(", ")}`,
+          );
         }
 
         const fallbackResult: QuizResult = {
@@ -214,13 +224,13 @@ export function QuizProvider({ children }: { children: ReactNode }) {
           weakTopics,
           recommendations,
         };
-        dispatch({ type: 'SET_RESULT', payload: fallbackResult });
+        dispatch({ type: "SET_RESULT", payload: fallbackResult });
       }
     }
   };
 
   const resetQuiz = () => {
-    dispatch({ type: 'RESET_QUIZ' });
+    dispatch({ type: "RESET_QUIZ" });
   };
 
   const value: QuizContextType = {
@@ -243,7 +253,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
 export function useQuiz() {
   const context = useContext(QuizContext);
   if (context === undefined) {
-    throw new Error('useQuiz must be used within a QuizProvider');
+    throw new Error("useQuiz must be used within a QuizProvider");
   }
   return context;
 }

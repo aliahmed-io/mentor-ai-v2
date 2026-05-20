@@ -1,3 +1,7 @@
+import { ChevronDown, Loader2 } from "lucide-react";
+import dynamic from "next/dynamic";
+import { useEffect } from "react";
+import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -14,11 +18,7 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronDown, Loader2 } from "lucide-react";
-import dynamic from "next/dynamic";
-import { useEffect } from "react";
-import { useInView } from "react-intersection-observer";
-import { type Font } from "../types";
+import type { Font } from "../types";
 import { usePaginatedFonts } from "../utils/usePaginatedFonts";
 import { FontItem } from "./FontItem";
 

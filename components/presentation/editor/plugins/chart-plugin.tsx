@@ -1,4 +1,4 @@
-import { type TElement } from "platejs";
+import type { TElement } from "platejs";
 import { createTPlatePlugin } from "platejs/react";
 import AreaChartElement from "../custom-elements/area-chart";
 import BarGraphElement from "../custom-elements/bar-graph";

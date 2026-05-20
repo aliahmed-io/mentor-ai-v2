@@ -1,9 +1,12 @@
-import { NodeApi, PathApi, type SlateElementProps } from "platejs";
-
-import { SlateElement } from "platejs";
+import {
+  NodeApi,
+  PathApi,
+  SlateElement,
+  type SlateElementProps,
+} from "platejs";
 
 import { cn } from "@/lib/utils";
-import { type TBulletItemElement } from "../../plugins/bullet-plugin";
+import type { TBulletItemElement } from "../../plugins/bullet-plugin";
 // Static bullet item mirrors UI but computes index from path
 export function BulletItemStatic(props: SlateElementProps<TBulletItemElement>) {
   const path = props.editor.api.findPath(props.element) ?? [-1];

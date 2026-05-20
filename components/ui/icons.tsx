@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import {
   Book,
   CandlestickChart,
@@ -12,6 +11,7 @@ import {
   Globe,
   Heart,
   Lightbulb,
+  type LucideProps,
   Mail,
   Network,
   Newspaper,
@@ -28,9 +28,9 @@ import {
   Triangle,
   User,
   Youtube,
-  type LucideProps,
 } from "lucide-react";
-import { forwardRef } from "react";
+import { forwardRef, type SVGProps } from "react";
+import { cn } from "@/lib/utils";
 
 interface Props {
   className?: string;
@@ -172,7 +172,7 @@ export function Museum(props: { className?: string }) {
   );
 }
 
-function PillBottleIcon(props) {
+function PillBottleIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -233,7 +233,7 @@ export function Mouth({ className }: { className?: string }) {
     </svg>
   );
 }
-function CookingPotIcon(props) {
+function CookingPotIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -254,7 +254,7 @@ function CookingPotIcon(props) {
     </svg>
   );
 }
-export function CakeIcon(props) {
+export function CakeIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -281,7 +281,7 @@ export function CakeIcon(props) {
   );
 }
 
-function UtensilsIcon(props) {
+function UtensilsIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -302,7 +302,7 @@ function UtensilsIcon(props) {
   );
 }
 
-export function CalendarIcon(props) {
+export function CalendarIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -324,7 +324,7 @@ export function CalendarIcon(props) {
   );
 }
 
-export function CarIcon(props) {
+export function CarIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -346,7 +346,7 @@ export function CarIcon(props) {
   );
 }
 
-export function PenToolIcon(props) {
+export function PenToolIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -368,7 +368,7 @@ export function PenToolIcon(props) {
   );
 }
 
-export function ShoppingCartIcon(props) {
+export function ShoppingCartIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}

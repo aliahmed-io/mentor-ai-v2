@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
-import { type Font } from "../types";
+import { cn } from "@/lib/utils";
+import type { Font } from "../types";
 import { useImageLoaded } from "../utils/useImageLoaded";
 import { getSpriteNumber } from "../utils/utils";
 

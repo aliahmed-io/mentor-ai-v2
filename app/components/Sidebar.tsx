@@ -1,16 +1,20 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentProps } from "react";
-import Image from "next/image";
 import SideBarDropdown from "@/components/auth/Dropdown";
 
 type SidebarProps = ComponentProps<"nav"> & {
   itemsClassName?: string;
 };
 
-export default function Sidebar({ className, itemsClassName, ...rest }: SidebarProps) {
+export default function Sidebar({
+  className,
+  itemsClassName,
+  ...rest
+}: SidebarProps) {
   const pathname = usePathname() ?? "/";
 
   const links: Array<{ href: string; label: string }> = [
@@ -25,24 +29,27 @@ export default function Sidebar({ className, itemsClassName, ...rest }: SidebarP
 
   return (
     <nav
-      className={`bg-neutral-950 text-neutral-200 border-r border-neutral-800 ${className ?? ""}`}
+      className={`bg-card text-foreground border-r border-border/60 ${className ?? ""}`}
       aria-label="Primary"
       {...rest}
     >
       <div className="h-full flex flex-col">
-        <div className="px-4 py-4">
+        <div className="px-6 py-5 border-b border-border/40">
           <Link href="/" className="inline-flex items-center gap-2">
             <Image
               src="/white-long-logo.svg"
               alt="Mentor AI"
-              width={160}
-              height={28}
+              width={140}
+              height={24}
               priority
+              className="dark:invert-0 invert transition-all duration-300"
             />
           </Link>
         </div>
-        <div className={`flex-1 overflow-y-auto ${itemsClassName ?? ""}`}>
-          <ul className="py-2">
+        <div
+          className={`flex-1 overflow-y-auto px-2 py-4 ${itemsClassName ?? ""}`}
+        >
+          <ul className="space-y-1">
             {links.map((link) => {
               const isActive = pathname === link.href;
               return (
@@ -50,10 +57,10 @@ export default function Sidebar({ className, itemsClassName, ...rest }: SidebarP
                   <Link
                     href={link.href}
                     aria-current={isActive ? "page" : undefined}
-                    className={`block px-4 py-2.5 text-sm rounded-md mx-2 my-1 transition-colors ${
+                    className={`block px-4 py-2.5 text-sm rounded-lg transition-all duration-200 ${
                       isActive
-                        ? "bg-neutral-800 text-white"
-                        : "text-neutral-300 hover:bg-neutral-900 hover:text-white"
+                        ? "bg-primary text-primary-foreground font-medium shadow-sm shadow-primary/10"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground font-normal"
                     }`}
                   >
                     {link.label}
@@ -63,13 +70,10 @@ export default function Sidebar({ className, itemsClassName, ...rest }: SidebarP
             })}
           </ul>
         </div>
-        <div className="mt-auto border-t border-neutral-800 px-3 py-3">
+        <div className="mt-auto border-t border-border/40 p-4">
           <SideBarDropdown shouldViewFullName align="start" side="top" />
-          
         </div>
       </div>
     </nav>
   );
 }
-
-

@@ -1,9 +1,9 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { NodeApi, PathApi } from "platejs";
 import { PlateElement, type PlateElementProps } from "platejs/react";
-import { type TBulletItemElement } from "../plugins/bullet-plugin";
+import { cn } from "@/lib/utils";
+import type { TBulletItemElement } from "../plugins/bullet-plugin";
 
 // BulletItem component for numbered blocks with content
 export const BulletItem = (props: PlateElementProps<TBulletItemElement>) => {

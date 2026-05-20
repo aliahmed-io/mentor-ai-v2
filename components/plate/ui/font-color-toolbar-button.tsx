@@ -1,15 +1,13 @@
 "use client";
 
-import React from "react";
-
-import {
-  type DropdownMenuItemProps,
-  type DropdownMenuProps,
+import type {
+  DropdownMenuItemProps,
+  DropdownMenuProps,
 } from "@radix-ui/react-dropdown-menu";
-
 import debounce from "lodash.debounce";
 import { EraserIcon, PlusIcon } from "lucide-react";
 import { useComposedRef, useEditorRef, useEditorSelector } from "platejs/react";
+import React from "react";
 
 import { buttonVariants } from "@/components/plate/ui/button";
 import {
@@ -55,7 +53,7 @@ export function FontColorToolbarButton({
     (value = !open) => {
       setOpen(value);
     },
-    [open, setOpen],
+    [open],
   );
 
   const updateColor = React.useCallback(
@@ -231,7 +229,7 @@ function ColorCustom({
 
   const updateCustomColorDebounced = React.useCallback(
     debounce(updateCustomColor, 100),
-    [updateCustomColor],
+    [],
   );
 
   return (

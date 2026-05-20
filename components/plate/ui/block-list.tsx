@@ -1,20 +1,18 @@
 /* eslint-disable react/display-name */
 "use client";
 
-import type React from "react";
-
-import { type TListElement } from "platejs";
-
 import { isOrderedList } from "@platejs/list";
 import {
   useTodoListElement,
   useTodoListElementState,
 } from "@platejs/list/react";
+import type { TListElement } from "platejs";
 import {
   type PlateElementProps,
   type RenderNodeWrapper,
   useReadOnly,
 } from "platejs/react";
+import type React from "react";
 
 import { Checkbox } from "@/components/plate/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -49,10 +47,7 @@ function List(props: PlateElementProps) {
 
   if (isParagraphWithListStyle) {
     return (
-      <div
-        className="relative m-0 p-0"
-        style={{ listStyleType }}
-      >
+      <div className="relative m-0 p-0" style={{ listStyleType }}>
         {Marker && <Marker {...props} />}
         {Li ? <Li {...props} /> : <div>{props.children}</div>}
       </div>

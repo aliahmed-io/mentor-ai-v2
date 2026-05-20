@@ -9,7 +9,7 @@ import {
 import { cn } from "@/lib/utils";
 import { usePresentationState } from "@/states/presentation-state";
 import ImagePlaceholder from "../image-placeholder";
-import { type RootImageProps } from "../root-image";
+import type { RootImageProps } from "../root-image";
 
 export default function RootImageStatic({
   image,
@@ -61,7 +61,7 @@ export default function RootImageStatic({
             </p>
           </div>
         ) : (
-          <div className="relative h-full" tabIndex={0}>
+          <div className="relative h-full">
             {(computedGen?.status === "success" && computedGen.url) ||
             image.url ? (
               <img

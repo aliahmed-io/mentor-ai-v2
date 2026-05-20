@@ -1,7 +1,8 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { auth } from "@/server/auth";
 import { streamText } from "ai";
 import { NextResponse } from "next/server";
+import { auth } from "@/server/auth";
+
 // Use AI SDK types for proper type safety
 
 interface SlidesRequest {

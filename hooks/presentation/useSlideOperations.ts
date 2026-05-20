@@ -1,8 +1,8 @@
 "use client";
 
-import { type PlateSlide } from "@/components/presentation/utils/parser";
-import { usePresentationState } from "@/states/presentation-state";
 import { nanoid } from "nanoid";
+import type { PlateSlide } from "@/components/presentation/utils/parser";
+import { usePresentationState } from "@/states/presentation-state";
 
 export type InsertPosition = "before" | "after";
 

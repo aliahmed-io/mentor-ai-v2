@@ -1,5 +1,9 @@
 "use client";
 
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical, Plus, Trash } from "lucide-react";
+import React, { useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,10 +19,6 @@ import { Button } from "@/components/ui/button";
 import { useSlideOperations } from "@/hooks/presentation/useSlideOperations";
 import { cn } from "@/lib/utils";
 import { usePresentationState } from "@/states/presentation-state";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Plus, Trash } from "lucide-react";
-import React, { useEffect } from "react";
 import { SlideEditPopover } from "./SlideEditPopover";
 
 interface SlideContainerProps {

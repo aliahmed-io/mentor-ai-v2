@@ -1,5 +1,14 @@
 "use client";
 
+import type { Prisma } from "@prisma/client";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { FileX, Plus } from "lucide-react";
+import { useEffect } from "react";
+import { useInView } from "react-intersection-observer";
 import { fetchPresentations } from "@/app/_actions/presentation/fetchPresentations";
 import { deletePresentations } from "@/app/_actions/presentation/presentationActions";
 import { Button } from "@/components/ui/button";
@@ -13,15 +22,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import { usePresentationState } from "@/states/presentation-state";
-import { type Prisma } from "@prisma/client";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { FileX, Plus } from "lucide-react";
-import { useEffect } from "react";
-import { useInView } from "react-intersection-observer";
 import { PresentationItem } from "./PresentationItem";
 import { SelectionControls } from "./SelectionControls";
 

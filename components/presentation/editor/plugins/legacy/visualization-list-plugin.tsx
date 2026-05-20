@@ -1,4 +1,4 @@
-import { type TElement } from "platejs";
+import type { TElement } from "platejs";
 import { createTPlatePlugin } from "platejs/react";
 import { VisualizationItemElement } from "../../custom-elements/legacy/visualization-item";
 import { VisualizationListElement } from "../../custom-elements/legacy/visualization-list";

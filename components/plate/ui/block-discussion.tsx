@@ -1,10 +1,6 @@
 /* eslint-disable react/display-name */
 "use client";
 
-import * as React from "react";
-
-import { type PlateElementProps, type RenderNodeWrapper } from "platejs/react";
-
 import { getDraftCommentKey } from "@platejs/comment";
 import { CommentPlugin } from "@platejs/comment/react";
 import { SuggestionPlugin } from "@platejs/suggestion/react";
@@ -17,18 +13,25 @@ import {
   type AnyPluginConfig,
   type NodeEntry,
   type Path,
+  PathApi,
   type TCommentText,
   type TElement,
-  type TSuggestionText,
-  PathApi,
   TextApi,
+  type TSuggestionText,
 } from "platejs";
-import { useEditorPlugin, useEditorRef, usePluginOption } from "platejs/react";
+import {
+  type PlateElementProps,
+  type RenderNodeWrapper,
+  useEditorPlugin,
+  useEditorRef,
+  usePluginOption,
+} from "platejs/react";
+import * as React from "react";
 
 import { commentPlugin } from "@/components/plate/plugins/comment-kit";
 import {
-  type TDiscussion,
   discussionPlugin,
+  type TDiscussion,
 } from "@/components/plate/plugins/discussion-kit";
 import { suggestionPlugin } from "@/components/plate/plugins/suggestion-kit";
 import { Button } from "@/components/plate/ui/button";
@@ -165,13 +168,13 @@ const BlockCommentContent = ({
 
     return editor.api.toDOMNode(activeNode[0])!;
   }, [
-    open,
     activeSuggestion,
     activeCommentId,
     editor.api,
     suggestionNodes,
     draftCommentNode,
     commentNodes,
+    editor.getApi,
   ]);
 
   if (suggestionsCount + resolvedDiscussions.length === 0 && !draftCommentNode)

@@ -1,5 +1,19 @@
 "use client";
 
+import type { BaseDocument } from "@prisma/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Check,
+  Copy,
+  EllipsisVertical,
+  Loader2,
+  Pencil,
+  Presentation,
+  Trash2,
+} from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   deletePresentations,
   duplicatePresentation,
@@ -26,20 +40,6 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { usePresentationState } from "@/states/presentation-state";
-import { type BaseDocument } from "@prisma/client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  Check,
-  Copy,
-  EllipsisVertical,
-  Loader2,
-  Pencil,
-  Presentation,
-  Trash2,
-} from "lucide-react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 interface PresentationItemProps {
   presentation: BaseDocument & {

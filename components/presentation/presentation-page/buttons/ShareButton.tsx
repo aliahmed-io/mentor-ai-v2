@@ -1,4 +1,8 @@
 "use client";
+import { useMutation } from "@tanstack/react-query";
+import { Check, Copy, Share } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { togglePresentationPublicStatus } from "@/app/_actions/presentation/sharedPresentationActions";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,10 +17,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { usePresentationState } from "@/states/presentation-state";
-import { useMutation } from "@tanstack/react-query";
-import { Check, Copy, Share } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
 
 export function ShareButton() {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);

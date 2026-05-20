@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
-import { QuizResult, QuizSetup } from '@/types/quiz';
+import { GoogleGenAI } from "@google/genai";
+import { type NextRequest, NextResponse } from "next/server";
+import type { QuizResult, QuizSetup } from "@/types/quiz";
 
 // JSON schema for improvement analysis
 const improvementAnalysisSchema = {
@@ -8,54 +8,66 @@ const improvementAnalysisSchema = {
   properties: {
     weakTopics: {
       type: "array",
-      items: { type: "string" }
+      items: { type: "string" },
     },
     recommendations: {
       type: "array",
-      items: { type: "string" }
+      items: { type: "string" },
     },
-    overallAssessment: { type: "string" }
+    overallAssessment: { type: "string" },
   },
-  required: ["weakTopics", "recommendations", "overallAssessment"]
+  required: ["weakTopics", "recommendations", "overallAssessment"],
 };
 
 export async function POST(request: NextRequest) {
   try {
-    const { result, setup }: { result: QuizResult; setup: QuizSetup } = await request.json();
-    
+    const { result, setup }: { result: QuizResult; setup: QuizSetup } =
+      await request.json();
+
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'GEMINI_API_KEY environment variable is not set' },
-        { status: 500 }
+        { error: "GEMINI_API_KEY environment variable is not set" },
+        { status: 500 },
       );
     }
 
     const client = new GoogleGenAI({ apiKey });
-    
+
     // Build analysis prompt
     const incorrectQuestions = result.answers
-      .filter(answer => !answer.isCorrect && answer.selectedAnswer !== null)
-      .map(answer => {
-        const question = result.questions.find(q => q.id === answer.questionId);
-        return question ? {
-          question: question.question,
-          topic: question.topic,
-          correctAnswer: question.options[question.correctAnswer],
-          selectedAnswer: answer.selectedAnswer !== null ? question.options[answer.selectedAnswer] : 'Not answered',
-          explanation: question.explanation
-        } : null;
+      .filter((answer) => !answer.isCorrect && answer.selectedAnswer !== null)
+      .map((answer) => {
+        const question = result.questions.find(
+          (q) => q.id === answer.questionId,
+        );
+        return question
+          ? {
+              question: question.question,
+              topic: question.topic,
+              correctAnswer: question.options[question.correctAnswer],
+              selectedAnswer:
+                answer.selectedAnswer !== null
+                  ? question.options[answer.selectedAnswer]
+                  : "Not answered",
+              explanation: question.explanation,
+            }
+          : null;
       })
       .filter((q): q is NonNullable<typeof q> => q !== null);
 
     const unansweredQuestions = result.answers
-      .filter(answer => answer.selectedAnswer === null)
-      .map(answer => {
-        const question = result.questions.find(q => q.id === answer.questionId);
-        return question ? {
-          question: question.question,
-          topic: question.topic
-        } : null;
+      .filter((answer) => answer.selectedAnswer === null)
+      .map((answer) => {
+        const question = result.questions.find(
+          (q) => q.id === answer.questionId,
+        );
+        return question
+          ? {
+              question: question.question,
+              topic: question.topic,
+            }
+          : null;
       })
       .filter((q): q is NonNullable<typeof q> => q !== null);
 
@@ -71,13 +83,17 @@ QUIZ DETAILS:
 - Score: ${result.percentage.toFixed(1)}%
 
 INCORRECT ANSWERS:
-${incorrectQuestions.map((q, i) => `${i + 1}. Question: "${q.question}"
+${incorrectQuestions
+  .map(
+    (q, i) => `${i + 1}. Question: "${q.question}"
    - Selected: ${q.selectedAnswer}
    - Correct: ${q.correctAnswer}
-   - Topic: ${q.topic}`).join('\n')}
+   - Topic: ${q.topic}`,
+  )
+  .join("\n")}
 
 UNANSWERED QUESTIONS:
-${unansweredQuestions.map((q, i) => `${i + 1}. "${q.question}" (Topic: ${q.topic})`).join('\n')}
+${unansweredQuestions.map((q, i) => `${i + 1}. "${q.question}" (Topic: ${q.topic})`).join("\n")}
 
 INSTRUCTIONS:
 - Identify the main weak areas/topics based on incorrect and unanswered questions
@@ -96,22 +112,21 @@ Return analysis in the exact JSON format specified.`;
       config: {
         responseMimeType: "application/json",
         responseSchema: improvementAnalysisSchema,
-        thinkingConfig: { thinkingBudget: 0 }
-      }
+        thinkingConfig: { thinkingBudget: 0 },
+      },
     });
 
     if (!response.text) {
-      throw new Error('No response text received from Gemini API');
+      throw new Error("No response text received from Gemini API");
     }
 
     const analysis = JSON.parse(response.text);
     return NextResponse.json(analysis);
-
   } catch (error) {
-    console.error('Error analyzing quiz results:', error);
+    console.error("Error analyzing quiz results:", error);
     return NextResponse.json(
-      { error: 'Failed to analyze quiz results' },
-      { status: 500 }
+      { error: "Failed to analyze quiz results" },
+      { status: 500 },
     );
   }
 }

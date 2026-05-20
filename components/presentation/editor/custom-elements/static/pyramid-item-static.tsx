@@ -1,9 +1,12 @@
-import { type SlateElementProps } from "platejs";
-
-import { NodeApi, PathApi, SlateElement } from "platejs";
+import {
+  NodeApi,
+  PathApi,
+  SlateElement,
+  type SlateElementProps,
+} from "platejs";
 
 import { cn } from "@/lib/utils";
-import { type TPyramidGroupElement } from "../../plugins/pyramid-plugin";
+import type { TPyramidGroupElement } from "../../plugins/pyramid-plugin";
 
 export function PyramidItemStatic(props: SlateElementProps) {
   const path = props.editor.api.findPath(props.element) ?? [-1];

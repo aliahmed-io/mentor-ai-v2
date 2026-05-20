@@ -1,16 +1,13 @@
 "use client";
 
-import type * as React from "react";
-
-import { type TColumnElement } from "platejs";
-import { type PlateElementProps } from "platejs/react";
-
 import { setColumns } from "@platejs/layout";
 import { useDebouncePopoverOpen } from "@platejs/layout/react";
 import { ResizableProvider } from "@platejs/resizable";
 import { type LucideProps, Trash2Icon } from "lucide-react";
+import type { TColumnElement } from "platejs";
 import {
   PlateElement,
+  type PlateElementProps,
   useComposedRef,
   useEditorRef,
   useElement,
@@ -18,6 +15,7 @@ import {
   useRemoveNodeButton,
   withHOC,
 } from "platejs/react";
+import type * as React from "react";
 
 import { Button } from "@/components/plate/ui/button";
 import {

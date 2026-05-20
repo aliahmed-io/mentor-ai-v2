@@ -1,11 +1,8 @@
 "use client";
 
-import type * as React from "react";
-
-import { type PlateEditor, type PlateElementProps } from "platejs/react";
-
 import { AIChatPlugin } from "@platejs/ai/react";
 import {
+  BrainCircuitIcon,
   CalendarIcon,
   ChevronRightIcon,
   Code2,
@@ -19,13 +16,17 @@ import {
   PilcrowIcon,
   Quote,
   RadicalIcon,
-  SparklesIcon,
   Square,
   Table,
   TableOfContentsIcon,
 } from "lucide-react";
-import { type TComboboxInputElement, KEYS } from "platejs";
-import { PlateElement } from "platejs/react";
+import { KEYS, type TComboboxInputElement } from "platejs";
+import {
+  type PlateEditor,
+  PlateElement,
+  type PlateElementProps,
+} from "platejs/react";
+import type * as React from "react";
 
 import {
   insertBlock,
@@ -63,7 +64,7 @@ const groups: Group[] = [
     items: [
       {
         focusEditor: false,
-        icon: <SparklesIcon />,
+        icon: <BrainCircuitIcon />,
         value: "AI",
         onSelect: (editor) => {
           editor.getApi(AIChatPlugin).aiChat.show();

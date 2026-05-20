@@ -1,15 +1,12 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: This use requires any */
 "use client";
 
-import * as React from "react";
-
-import { type Emoji } from "@emoji-mart/data";
-
+import type { Emoji } from "@emoji-mart/data";
 import {
   type EmojiCategoryList,
   type EmojiIconList,
-  type GridRow,
   EmojiSettings,
+  type GridRow,
 } from "@platejs/emoji";
 import {
   type EmojiDropdownMenuOptions,
@@ -30,6 +27,7 @@ import {
   StarIcon,
   XIcon,
 } from "lucide-react";
+import * as React from "react";
 
 import { Button } from "@/components/plate/ui/button";
 import { ToolbarButton } from "@/components/plate/ui/toolbar";
@@ -375,7 +373,6 @@ function EmojiPickerSearchBar({
           aria-label="Search"
           autoComplete="off"
           type="text"
-          autoFocus
         />
         {children}
       </div>

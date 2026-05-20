@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { type ThemeFormValues } from "./types";
+import type { ThemeFormValues } from "./types";
 
 interface ThemePreviewProps {
   colors: ThemeFormValues["colors"];

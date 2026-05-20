@@ -1,3 +1,6 @@
+import debounce from "lodash.debounce";
+import { Plus } from "lucide-react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,9 +14,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import debounce from "lodash.debounce";
-import { Plus } from "lucide-react";
-import React from "react";
 
 export const DEFAULT_COLORS = [
   {

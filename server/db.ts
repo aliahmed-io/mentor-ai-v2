@@ -26,7 +26,10 @@ export async function withDbRetry<T>(
     try {
       return await fn();
     } catch (err: unknown) {
-      const msg = typeof err === "object" && err && "message" in err ? String((err as any).message) : String(err);
+      const msg =
+        typeof err === "object" && err && "message" in err
+          ? String((err as any).message)
+          : String(err);
       // Match common transient connection messages
       const isTransient =
         msg.includes("ECONNRESET") ||

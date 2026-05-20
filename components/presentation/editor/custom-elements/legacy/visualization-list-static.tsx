@@ -1,10 +1,8 @@
-import { type SlateElementProps, type TElement } from "platejs";
-
-import { SlateElement } from "platejs";
+import { SlateElement, type SlateElementProps, type TElement } from "platejs";
 
 import { ARROW_LIST, PYRAMID_GROUP, TIMELINE_GROUP } from "../../lib";
-import { type TArrowListElement } from "../../plugins/arrow-plugin";
-import { type TTimelineGroupElement } from "../../plugins/timeline-plugin";
+import type { TArrowListElement } from "../../plugins/arrow-plugin";
+import type { TTimelineGroupElement } from "../../plugins/timeline-plugin";
 import ArrowListStatic from "../static/arrow-list-static";
 import PyramidStatic from "../static/pyramid-static";
 import TimelineStatic from "../static/timeline-static";

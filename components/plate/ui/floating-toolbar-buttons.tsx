@@ -2,11 +2,11 @@
 
 import {
   BoldIcon,
+  BrainCircuitIcon,
   Code2Icon,
   ItalicIcon,
   StrikethroughIcon,
   UnderlineIcon,
-  WandSparklesIcon,
 } from "lucide-react";
 import { KEYS } from "platejs";
 import { useEditorReadOnly } from "platejs/react";
@@ -29,7 +29,7 @@ export function FloatingToolbarButtons() {
         <>
           <ToolbarGroup>
             <AIToolbarButton tooltip="AI commands">
-              <WandSparklesIcon />
+              <BrainCircuitIcon />
               Ask AI
             </AIToolbarButton>
           </ToolbarGroup>

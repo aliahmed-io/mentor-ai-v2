@@ -1,5 +1,5 @@
+import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/server/auth";
-import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
   const session = await auth();
@@ -9,9 +9,12 @@ export async function middleware(request: NextRequest) {
 
   // Root landing: unauth -> signin; auth -> presentation
   if (pathname === "/") {
-    if (session) return NextResponse.redirect(new URL("/presentation", request.url));
+    if (session)
+      return NextResponse.redirect(new URL("/presentation", request.url));
     const cb = encodeURIComponent(request.url);
-    return NextResponse.redirect(new URL(`/auth/signin?callbackUrl=${cb}`, request.url));
+    return NextResponse.redirect(
+      new URL(`/auth/signin?callbackUrl=${cb}`, request.url),
+    );
   }
 
   // Allow auth routes
@@ -28,7 +31,9 @@ export async function middleware(request: NextRequest) {
   // Protect all other routes
   if (!session) {
     const cb = encodeURIComponent(request.url);
-    return NextResponse.redirect(new URL(`/auth/signin?callbackUrl=${cb}`, request.url));
+    return NextResponse.redirect(
+      new URL(`/auth/signin?callbackUrl=${cb}`, request.url),
+    );
   }
 
   return NextResponse.next();

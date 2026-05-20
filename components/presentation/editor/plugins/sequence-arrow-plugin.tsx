@@ -1,4 +1,4 @@
-import { type TElement } from "platejs";
+import type { TElement } from "platejs";
 import { createTPlatePlugin } from "platejs/react";
 import SequenceArrow from "../custom-elements/sequence-arrow";
 import { SequenceArrowItem } from "../custom-elements/sequence-arrow-item";

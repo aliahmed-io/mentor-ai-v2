@@ -1,4 +1,4 @@
-import { type TElement } from "platejs";
+import type { TElement } from "platejs";
 import { createTPlatePlugin } from "platejs/react";
 import { ConsItem } from "../custom-elements/cons-item";
 import ProsConsGroup from "../custom-elements/pros-cons";

@@ -1,6 +1,4 @@
-import { type SlateLeafProps } from "platejs";
-
-import { SlateLeaf } from "platejs";
+import { SlateLeaf, type SlateLeafProps } from "platejs";
 
 import { cn } from "@/lib/utils";
 

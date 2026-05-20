@@ -1,3 +1,7 @@
+import { Save, X } from "lucide-react";
+import type { TElement } from "platejs";
+import { useEditorRef } from "platejs/react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,12 +20,8 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { usePresentationState } from "@/states/presentation-state";
-import { Save, X } from "lucide-react";
-import { type TElement } from "platejs";
-import { useEditorRef } from "platejs/react";
-import { useEffect, useState } from "react";
-import { type RootImage as RootImageType } from "../../utils/parser";
-import { type ImageCropSettings } from "../../utils/types";
+import type { RootImage as RootImageType } from "../../utils/parser";
+import type { ImageCropSettings } from "../../utils/types";
 import {
   ActionButtons,
   ErrorDisplay,
@@ -53,7 +53,7 @@ export const PresentationImageEditor = ({
 
   useEffect(() => {
     console.log("Element on mount", element);
-  }, []);
+  }, [element]);
 
   // Local crop settings state - only saved when user clicks save
   const [localCropSettings, setLocalCropSettings] = useState<ImageCropSettings>(

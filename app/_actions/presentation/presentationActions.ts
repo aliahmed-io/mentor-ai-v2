@@ -1,9 +1,9 @@
 "use server";
 
-import { type PlateSlide } from "@/components/presentation/utils/parser";
+import type { InputJsonValue } from "@prisma/client/runtime/library";
+import type { PlateSlide } from "@/components/presentation/utils/parser";
 import { auth } from "@/server/auth";
 import { db, withDbRetry } from "@/server/db";
-import { type InputJsonValue } from "@prisma/client/runtime/library";
 
 export async function createPresentation({
   content,
@@ -33,29 +33,40 @@ export async function createPresentation({
   try {
     // Resolve a valid user id to satisfy FK: prefer id, else email, else create
     let effectiveUserId = userId;
-    const existingById = await withDbRetry(() => db.user.findUnique({ where: { id: userId }, select: { id: true } }));
+    const existingById = await withDbRetry(() =>
+      db.user.findUnique({ where: { id: userId }, select: { id: true } }),
+    );
     if (!existingById) {
       const email = session.user.email ?? undefined;
       if (email) {
-        const existingByEmail = await withDbRetry(() => db.user.findUnique({ where: { email }, select: { id: true } }));
+        const existingByEmail = await withDbRetry(() =>
+          db.user.findUnique({ where: { email }, select: { id: true } }),
+        );
         if (existingByEmail) {
           effectiveUserId = existingByEmail.id;
         } else {
           try {
-            const created = await withDbRetry(() => db.user.create({
-              data: {
-                id: userId,
-                email,
-                name: session.user.name ?? undefined,
-                image: session.user.image ?? undefined,
-              },
-              select: { id: true },
-            }));
+            const created = await withDbRetry(() =>
+              db.user.create({
+                data: {
+                  id: userId,
+                  email,
+                  name: session.user.name ?? undefined,
+                  image: session.user.image ?? undefined,
+                },
+                select: { id: true },
+              }),
+            );
             effectiveUserId = created.id;
           } catch {
             // As a last resort, try to read by email again (in case of race)
             const fallback = email
-              ? await withDbRetry(() => db.user.findUnique({ where: { email }, select: { id: true } }))
+              ? await withDbRetry(() =>
+                  db.user.findUnique({
+                    where: { email },
+                    select: { id: true },
+                  }),
+                )
               : null;
             effectiveUserId = fallback?.id ?? userId;
           }
@@ -63,37 +74,45 @@ export async function createPresentation({
       } else {
         // No email in session; create a minimal user row keyed by id
         try {
-          const created = await withDbRetry(() => db.user.create({
-            data: { id: userId, name: session.user.name ?? undefined, image: session.user.image ?? undefined },
-            select: { id: true },
-          }));
+          const created = await withDbRetry(() =>
+            db.user.create({
+              data: {
+                id: userId,
+                name: session.user.name ?? undefined,
+                image: session.user.image ?? undefined,
+              },
+              select: { id: true },
+            }),
+          );
           effectiveUserId = created.id;
         } catch {
           effectiveUserId = userId;
         }
       }
     }
-    const presentation = await withDbRetry(() => db.baseDocument.create({
-      data: {
-        type: "PRESENTATION",
-        documentType: "presentation",
-        title: title ?? "Untitled Presentation",
-        userId: effectiveUserId,
-        presentation: {
-          create: {
-            content: content as unknown as InputJsonValue,
-            theme: theme,
-            imageSource,
-            presentationStyle,
-            language,
-            outline: outline,
+    const presentation = await withDbRetry(() =>
+      db.baseDocument.create({
+        data: {
+          type: "PRESENTATION",
+          documentType: "presentation",
+          title: title ?? "Untitled Presentation",
+          userId: effectiveUserId,
+          presentation: {
+            create: {
+              content: content as unknown as InputJsonValue,
+              theme: theme,
+              imageSource,
+              presentationStyle,
+              language,
+              outline: outline,
+            },
           },
         },
-      },
-      include: {
-        presentation: true,
-      },
-    }));
+        include: {
+          presentation: true,
+        },
+      }),
+    );
 
     return {
       success: true,
@@ -393,12 +412,14 @@ export async function duplicatePresentation(id: string, newTitle?: string) {
 
   try {
     // Get the original presentation
-    const original = await withDbRetry(() => db.baseDocument.findUnique({
-      where: { id },
-      include: {
-        presentation: true,
-      },
-    }));
+    const original = await withDbRetry(() =>
+      db.baseDocument.findUnique({
+        where: { id },
+        include: {
+          presentation: true,
+        },
+      }),
+    );
 
     if (!original?.presentation) {
       return {
@@ -409,21 +430,37 @@ export async function duplicatePresentation(id: string, newTitle?: string) {
 
     // Resolve a valid user id for duplicate as well
     let effectiveUserId = session.user.id;
-    const byId = await withDbRetry(() => db.user.findUnique({ where: { id: session.user.id }, select: { id: true } }));
+    const byId = await withDbRetry(() =>
+      db.user.findUnique({
+        where: { id: session.user.id },
+        select: { id: true },
+      }),
+    );
     if (!byId) {
       const email = session.user.email ?? undefined;
       if (email) {
-        const byEmail = await withDbRetry(() => db.user.findUnique({ where: { email }, select: { id: true } }));
+        const byEmail = await withDbRetry(() =>
+          db.user.findUnique({ where: { email }, select: { id: true } }),
+        );
         if (byEmail) effectiveUserId = byEmail.id;
         else {
           try {
-            const created = await withDbRetry(() => db.user.create({
-              data: { id: session.user.id, email, name: session.user.name ?? undefined, image: session.user.image ?? undefined },
-              select: { id: true },
-            }));
+            const created = await withDbRetry(() =>
+              db.user.create({
+                data: {
+                  id: session.user.id,
+                  email,
+                  name: session.user.name ?? undefined,
+                  image: session.user.image ?? undefined,
+                },
+                select: { id: true },
+              }),
+            );
             effectiveUserId = created.id;
           } catch {
-            const fallback = await withDbRetry(() => db.user.findUnique({ where: { email }, select: { id: true } }));
+            const fallback = await withDbRetry(() =>
+              db.user.findUnique({ where: { email }, select: { id: true } }),
+            );
             effectiveUserId = fallback?.id ?? session.user.id;
           }
         }
@@ -431,24 +468,27 @@ export async function duplicatePresentation(id: string, newTitle?: string) {
     }
 
     // Create a new presentation with the same content
-    const duplicated = await withDbRetry(() => db.baseDocument.create({
-      data: {
-        type: "PRESENTATION",
-        documentType: "presentation",
-        title: newTitle ?? `${original.title} (Copy)`,
-        userId: effectiveUserId,
-        isPublic: false,
-        presentation: {
-          create: {
-            content: (original.presentation?.content ?? {}) as unknown as InputJsonValue,
-            theme: original.presentation?.theme ?? undefined,
+    const duplicated = await withDbRetry(() =>
+      db.baseDocument.create({
+        data: {
+          type: "PRESENTATION",
+          documentType: "presentation",
+          title: newTitle ?? `${original.title} (Copy)`,
+          userId: effectiveUserId,
+          isPublic: false,
+          presentation: {
+            create: {
+              content: (original.presentation?.content ??
+                {}) as unknown as InputJsonValue,
+              theme: original.presentation?.theme ?? undefined,
+            },
           },
         },
-      },
-      include: {
-        presentation: true,
-      },
-    }));
+        include: {
+          presentation: true,
+        },
+      }),
+    );
 
     return {
       success: true,

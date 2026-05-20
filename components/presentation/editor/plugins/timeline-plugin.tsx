@@ -1,4 +1,4 @@
-import { type TElement } from "platejs";
+import type { TElement } from "platejs";
 import { createTPlatePlugin } from "platejs/react";
 import Timeline from "../custom-elements/timeline";
 import { TimelineItem } from "../custom-elements/timeline-item";

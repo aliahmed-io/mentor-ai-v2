@@ -1,4 +1,4 @@
-import { type TElement } from "platejs";
+import type { TElement } from "platejs";
 import { createTPlatePlugin } from "platejs/react";
 import BeforeAfterGroup from "../custom-elements/before-after";
 import { BeforeAfterSide } from "../custom-elements/before-after-side";

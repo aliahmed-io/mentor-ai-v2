@@ -1,8 +1,8 @@
-import { type ImageModelList } from "@/app/_actions/image/generate";
-import { type PlateSlide } from "@/components/presentation/utils/parser";
-import { type ThemeProperties, type Themes } from "@/lib/presentation/themes";
-import { type TElement } from "platejs";
+import type { TElement } from "platejs";
 import { create } from "zustand";
+import type { ImageModelList } from "@/app/_actions/image/generate";
+import type { PlateSlide } from "@/components/presentation/utils/parser";
+import type { ThemeProperties, Themes } from "@/lib/presentation/themes";
 
 interface PresentationState {
   currentPresentationId: string | null;

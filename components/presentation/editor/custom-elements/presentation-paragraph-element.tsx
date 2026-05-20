@@ -1,8 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { PlateElement, withRef } from "platejs/react";
 import type React from "react";
+import { cn } from "@/lib/utils";
 
 export interface PresentationParagraphElementProps {
   className?: string;

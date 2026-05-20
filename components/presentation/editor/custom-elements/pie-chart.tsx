@@ -1,15 +1,15 @@
 "use client";
 
+import { PlateElement, type PlateElementProps } from "platejs/react";
+import { Cell, Legend, Pie, PieChart } from "recharts";
 import {
+  type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
 } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
-import { PlateElement, type PlateElementProps } from "platejs/react";
-import { Cell, Legend, Pie, PieChart } from "recharts";
-import { type TChartNode } from "../plugins/chart-plugin";
+import type { TChartNode } from "../plugins/chart-plugin";
 
 type AnyRecord = Record<string, unknown>;
 

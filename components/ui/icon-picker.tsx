@@ -1,4 +1,7 @@
 "use client";
+import { Loader2 } from "lucide-react";
+import React, { type ReactNode, useCallback, useEffect, useState } from "react";
+import type { IconType } from "react-icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -9,9 +12,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
-import React, { useEffect, useState, type ReactNode } from "react";
-import { type IconType } from "react-icons";
 
 // Define interfaces for type safety
 interface IconItem {
@@ -54,19 +54,119 @@ const IconPicker = ({
     lg: "h-12 w-12",
   };
 
-  // Load some initial popular icons when the sheet opens
-  useEffect(() => {
-    if (isOpen && availableIcons.length === 0) {
-      void loadPopularIcons();
-    }
-  }, [isOpen, availableIcons.length]);
+  // Function to load a specific icon component
+  const loadIconComponent = useCallback(
+    async (iconName: string): Promise<ReactNode> => {
+      setIsLoading(true);
+      try {
+        // Extract the library prefix
+        const prefix = iconName.slice(0, 2).toLowerCase();
+
+        // Dynamic import based on the prefix
+        let iconModule: IconModule;
+        switch (prefix) {
+          case "fa": {
+            const mod = await import("react-icons/fa");
+            iconModule = mod as unknown as IconModule;
+            break;
+          }
+          case "fi": {
+            const mod = await import("react-icons/fi");
+            iconModule = mod as unknown as IconModule;
+            break;
+          }
+          case "ai": {
+            const mod = await import("react-icons/ai");
+            iconModule = mod as unknown as IconModule;
+            break;
+          }
+          case "bs": {
+            const mod = await import("react-icons/bs");
+            iconModule = mod as unknown as IconModule;
+            break;
+          }
+          case "bi": {
+            const mod = await import("react-icons/bi");
+            iconModule = mod as unknown as IconModule;
+            break;
+          }
+          case "gi": {
+            const mod = await import("react-icons/gi");
+            iconModule = mod as unknown as IconModule;
+            break;
+          }
+          case "hi": {
+            const mod = await import("react-icons/hi");
+            iconModule = mod as unknown as IconModule;
+            break;
+          }
+          case "im": {
+            const mod = await import("react-icons/im");
+            iconModule = mod as unknown as IconModule;
+            break;
+          }
+          case "io": {
+            const mod = await import("react-icons/io");
+            iconModule = mod as unknown as IconModule;
+            break;
+          }
+          case "md": {
+            const mod = await import("react-icons/md");
+            iconModule = mod as unknown as IconModule;
+            break;
+          }
+          case "ri": {
+            const mod = await import("react-icons/ri");
+            iconModule = mod as unknown as IconModule;
+            break;
+          }
+          case "si": {
+            const mod = await import("react-icons/si");
+            iconModule = mod as unknown as IconModule;
+            break;
+          }
+          case "ti": {
+            const mod = await import("react-icons/ti");
+            iconModule = mod as unknown as IconModule;
+            break;
+          }
+          case "vsc": {
+            const mod = await import("react-icons/vsc");
+            iconModule = mod as unknown as IconModule;
+            break;
+          }
+          case "wi": {
+            const mod = await import("react-icons/wi");
+            iconModule = mod as unknown as IconModule;
+            break;
+          }
+          default: {
+            const mod = await import("react-icons/fa");
+            iconModule = mod as unknown as IconModule;
+            break;
+          }
+        }
+
+        const IconComponent = iconModule[iconName];
+        return IconComponent ? <IconComponent size={24} /> : null;
+      } catch (error) {
+        console.error("Error loading icon:", error);
+        return null;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [],
+  );
 
   // Function to load popular icons when the sheet first opens
-  const loadPopularIcons = async () => {
+  const loadPopularIcons = useCallback(async () => {
     setIsLoading(true);
     try {
       // Load a set of common icons from Font Awesome
-      const faModule = await import("react-icons/fa");
+      const faModule = (await import(
+        "react-icons/fa"
+      )) as unknown as IconModule;
       const popularIconNames = [
         "FaHome",
         "FaUser",
@@ -116,175 +216,86 @@ const IconPicker = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // Function to dynamically load icons based on search
-  const searchIcons = async (term: string) => {
-    if (!term || term.length < 2) {
-      setFilteredIcons(availableIcons);
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const termLower = term.toLowerCase();
-      const modules: IconModule[] = [];
-
-      // Try to load the most likely library based on prefix
-      if (termLower.startsWith("fa")) {
-        const mod = await import("react-icons/fa");
-        modules.push(mod as unknown as IconModule);
-      } else if (termLower.startsWith("fi")) {
-        const mod = await import("react-icons/fi");
-        modules.push(mod as unknown as IconModule);
-      } else if (termLower.startsWith("ai")) {
-        const mod = await import("react-icons/ai");
-        modules.push(mod as unknown as IconModule);
-      } else if (termLower.startsWith("bs")) {
-        const mod = await import("react-icons/bs");
-        modules.push(mod as unknown as IconModule);
-      } else if (termLower.startsWith("bi")) {
-        const mod = await import("react-icons/bi");
-        modules.push(mod as unknown as IconModule);
-      } else if (termLower.startsWith("md")) {
-        const mod = await import("react-icons/md");
-        modules.push(mod as unknown as IconModule);
-      } else {
-        // If no prefix match, search in common libraries
-        const [fa, md] = await Promise.all([
-          import("react-icons/fa"),
-          import("react-icons/md"),
-        ]);
-        modules.push(fa as unknown as IconModule, md as unknown as IconModule);
+  const searchIcons = useCallback(
+    async (term: string) => {
+      if (!term || term.length < 2) {
+        setFilteredIcons(availableIcons);
+        return;
       }
 
-      // Find icons that match the search term
-      let results: IconItem[] = [];
+      setIsLoading(true);
+      try {
+        const termLower = term.toLowerCase();
+        const modules: IconModule[] = [];
 
-      modules.forEach((module) => {
-        const matches = Object.keys(module)
-          .filter((key) => key.toLowerCase().includes(termLower))
-          .slice(0, 40) // Limit results to prevent too many icons
-          .map((name) => ({
-            name,
-            component: module[name]
-              ? React.createElement(module[name], { size: 24 })
-              : null,
-          }))
-          .filter((item) => item.component);
-
-        results = [...results, ...matches];
-      });
-
-      setFilteredIcons(results.slice(0, 60)); // Limit total results
-    } catch (error) {
-      console.error("Error searching icons:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Function to load a specific icon component
-  const loadIconComponent = async (iconName: string): Promise<ReactNode> => {
-    setIsLoading(true);
-    try {
-      // Extract the library prefix
-      const prefix = iconName.slice(0, 2).toLowerCase();
-
-      // Dynamic import based on the prefix
-      let iconModule: IconModule;
-      switch (prefix) {
-        case "fa": {
+        // Try to load the most likely library based on prefix
+        if (termLower.startsWith("fa")) {
           const mod = await import("react-icons/fa");
-          iconModule = mod as unknown as IconModule;
-          break;
-        }
-        case "fi": {
+          modules.push(mod as unknown as IconModule);
+        } else if (termLower.startsWith("fi")) {
           const mod = await import("react-icons/fi");
-          iconModule = mod as unknown as IconModule;
-          break;
-        }
-        case "ai": {
+          modules.push(mod as unknown as IconModule);
+        } else if (termLower.startsWith("ai")) {
           const mod = await import("react-icons/ai");
-          iconModule = mod as unknown as IconModule;
-          break;
-        }
-        case "bs": {
+          modules.push(mod as unknown as IconModule);
+        } else if (termLower.startsWith("bs")) {
           const mod = await import("react-icons/bs");
-          iconModule = mod as unknown as IconModule;
-          break;
-        }
-        case "bi": {
+          modules.push(mod as unknown as IconModule);
+        } else if (termLower.startsWith("bi")) {
           const mod = await import("react-icons/bi");
-          iconModule = mod as unknown as IconModule;
-          break;
-        }
-        case "gi": {
-          const mod = await import("react-icons/gi");
-          iconModule = mod as unknown as IconModule;
-          break;
-        }
-        case "hi": {
-          const mod = await import("react-icons/hi");
-          iconModule = mod as unknown as IconModule;
-          break;
-        }
-        case "im": {
-          const mod = await import("react-icons/im");
-          iconModule = mod as unknown as IconModule;
-          break;
-        }
-        case "io": {
-          const mod = await import("react-icons/io");
-          iconModule = mod as unknown as IconModule;
-          break;
-        }
-        case "md": {
+          modules.push(mod as unknown as IconModule);
+        } else if (termLower.startsWith("md")) {
           const mod = await import("react-icons/md");
-          iconModule = mod as unknown as IconModule;
-          break;
+          modules.push(mod as unknown as IconModule);
+        } else {
+          // If no prefix match, search in common libraries
+          const [fa, md] = await Promise.all([
+            import("react-icons/fa"),
+            import("react-icons/md"),
+          ]);
+          modules.push(
+            fa as unknown as IconModule,
+            md as unknown as IconModule,
+          );
         }
-        case "ri": {
-          const mod = await import("react-icons/ri");
-          iconModule = mod as unknown as IconModule;
-          break;
-        }
-        case "si": {
-          const mod = await import("react-icons/si");
-          iconModule = mod as unknown as IconModule;
-          break;
-        }
-        case "ti": {
-          const mod = await import("react-icons/ti");
-          iconModule = mod as unknown as IconModule;
-          break;
-        }
-        case "vsc": {
-          const mod = await import("react-icons/vsc");
-          iconModule = mod as unknown as IconModule;
-          break;
-        }
-        case "wi": {
-          const mod = await import("react-icons/wi");
-          iconModule = mod as unknown as IconModule;
-          break;
-        }
-        default: {
-          const mod = await import("react-icons/fa");
-          iconModule = mod as unknown as IconModule;
-          break;
-        }
-      }
 
-      const IconComponent = iconModule[iconName];
-      return IconComponent ? <IconComponent size={24} /> : null;
-    } catch (error) {
-      console.error("Error loading icon:", error);
-      return null;
-    } finally {
-      setIsLoading(false);
+        // Find icons that match the search term
+        let results: IconItem[] = [];
+
+        modules.forEach((module) => {
+          const matches = Object.keys(module)
+            .filter((key) => key.toLowerCase().includes(termLower))
+            .slice(0, 40) // Limit results to prevent too many icons
+            .map((name) => ({
+              name,
+              component: module[name]
+                ? React.createElement(module[name], { size: 24 })
+                : null,
+            }))
+            .filter((item) => item.component);
+
+          results = [...results, ...matches];
+        });
+
+        setFilteredIcons(results.slice(0, 60)); // Limit total results
+      } catch (error) {
+        console.error("Error searching icons:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [availableIcons],
+  );
+
+  // Load some initial popular icons when the sheet opens
+  useEffect(() => {
+    if (isOpen && availableIcons.length === 0) {
+      void loadPopularIcons();
     }
-  };
+  }, [isOpen, availableIcons.length, loadPopularIcons]);
 
   // Handle initializing with searchTerm or defaultIcon
   useEffect(() => {
@@ -353,7 +364,7 @@ const IconPicker = ({
     };
 
     void findAndSelectIcon();
-  }, [searchTerm, defaultIcon, onIconSelect]);
+  }, [searchTerm, defaultIcon, onIconSelect, loadIconComponent]);
 
   // Handle search input changes
   useEffect(() => {
@@ -367,7 +378,7 @@ const IconPicker = ({
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [internalSearchTerm, initialLoadDone]);
+  }, [internalSearchTerm, initialLoadDone, searchIcons, searchTerm]);
 
   const handleSelectIcon = async (selectedName: string) => {
     setIcon(selectedName);

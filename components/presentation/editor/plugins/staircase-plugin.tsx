@@ -1,4 +1,4 @@
-import { type TElement } from "platejs";
+import type { TElement } from "platejs";
 import { createTPlatePlugin } from "platejs/react";
 import Staircase from "../custom-elements/staircase";
 import { StairItem } from "../custom-elements/staircase-item";

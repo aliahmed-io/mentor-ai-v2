@@ -1,6 +1,7 @@
 "use client";
 
-import { type ImageModelList } from "@/app/_actions/image/generate";
+import { Image, Wand2 } from "lucide-react";
+import type { ImageModelList } from "@/app/_actions/image/generate";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -11,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Image, Wand2 } from "lucide-react";
 
 export const IMAGE_MODELS: { value: ImageModelList; label: string }[] = [
   { value: "black-forest-labs/FLUX.1-schnell-Free", label: "FLUX Fast" },

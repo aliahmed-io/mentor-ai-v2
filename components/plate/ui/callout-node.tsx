@@ -1,11 +1,10 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: This use requires any */
 "use client";
 
-import type * as React from "react";
-
 import { useCalloutEmojiPicker } from "@platejs/callout/react";
 import { useEmojiDropdownMenuState } from "@platejs/emoji/react";
 import { PlateElement } from "platejs/react";
+import type * as React from "react";
 
 import { Button } from "@/components/plate/ui/button";
 import { cn } from "@/lib/utils";

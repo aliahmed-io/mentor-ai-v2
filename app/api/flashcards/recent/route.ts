@@ -1,29 +1,36 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/server/db'
-import { auth } from '@/server/auth'
+import { type NextRequest, NextResponse } from "next/server";
+import { auth } from "@/server/auth";
+import { db } from "@/server/db";
 
 export async function GET(request: NextRequest) {
-  const session = await auth()
-  const url = new URL(request.url)
-  const limit = Math.max(1, Math.min(50, Number(url.searchParams.get('limit')) || 10))
-  const anyDb = db as any
+  const session = await auth();
+  const url = new URL(request.url);
+  const limit = Math.max(
+    1,
+    Math.min(50, Number(url.searchParams.get("limit")) || 10),
+  );
+  const anyDb = db as any;
   try {
     const sets = await anyDb.flashcardSet.findMany({
       where: session?.user?.id ? { userId: session.user.id } : {},
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: limit,
-      select: { id: true, topic: true, count: true, createdAt: true, thumbnailUrl: true },
-    })
-    return NextResponse.json(sets)
+      select: {
+        id: true,
+        topic: true,
+        count: true,
+        createdAt: true,
+        thumbnailUrl: true,
+      },
+    });
+    return NextResponse.json(sets);
   } catch {
     const sets = await anyDb.flashcardSet.findMany({
       where: session?.user?.id ? { userId: session.user.id } : {},
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: limit,
       select: { id: true, topic: true, count: true, createdAt: true },
-    })
-    return NextResponse.json(sets)
+    });
+    return NextResponse.json(sets);
   }
 }
-
-

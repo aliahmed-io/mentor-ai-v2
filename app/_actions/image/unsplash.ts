@@ -1,6 +1,6 @@
 "use server";
 
-import { type LayoutType } from "@/components/presentation/utils/parser";
+import type { LayoutType } from "@/components/presentation/utils/parser";
 import { env } from "@/env";
 import { auth } from "@/server/auth";
 

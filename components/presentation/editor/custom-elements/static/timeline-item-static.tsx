@@ -1,11 +1,11 @@
-import { cn } from "@/lib/utils";
 import {
-  type SlateElementProps,
   NodeApi,
   PathApi,
   SlateElement,
+  type SlateElementProps,
 } from "platejs";
-import { type TTimelineGroupElement } from "../../plugins/timeline-plugin";
+import { cn } from "@/lib/utils";
+import type { TTimelineGroupElement } from "../../plugins/timeline-plugin";
 import {
   circleVariants,
   containerVariants,

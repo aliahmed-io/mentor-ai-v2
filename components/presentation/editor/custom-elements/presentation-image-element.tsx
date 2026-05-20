@@ -1,9 +1,11 @@
 "use client";
 
+import { Image, ImagePlugin, useMediaState } from "@platejs/media/react";
+import { Resizable, ResizableProvider, ResizeHandle } from "@platejs/resizable";
+import type { TImageElement } from "platejs";
 import { PlateElement, useEditorRef, withHOC, withRef } from "platejs/react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
-
 import { generateImageAction } from "@/app/_actions/image/generate";
 import { getImageFromUnsplash } from "@/app/_actions/image/unsplash";
 import { MediaToolbar } from "@/components/plate/ui/media-toolbar";
@@ -12,11 +14,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { useDebouncedSave } from "@/hooks/presentation/useDebouncedSave";
 import { cn } from "@/lib/utils";
 import { usePresentationState } from "@/states/presentation-state";
-import { Image, ImagePlugin, useMediaState } from "@platejs/media/react";
-import { Resizable, ResizableProvider, ResizeHandle } from "@platejs/resizable";
-import { type TImageElement } from "platejs";
-import { type RootImage } from "../../utils/parser";
-import { type ImageCropSettings } from "../../utils/types";
+import type { RootImage } from "../../utils/parser";
+import type { ImageCropSettings } from "../../utils/types";
 import { useDraggable } from "../dnd/hooks/useDraggable";
 import { PresentationImageEditor } from "./presentation-image-editor";
 
@@ -133,12 +132,7 @@ export const PresentationImageElement = withHOC(
         if (props.element.query) {
           void generateImage(props.element.query);
         }
-      }, [
-        props.element.query,
-        props.element.url,
-        imageUrl,
-        props.element.setNodeValue,
-      ]);
+      }, [props.element.query, props.element.url, imageUrl, generateImage]);
 
       // Apply crop settings to the image
       const imageStyles: React.CSSProperties = {

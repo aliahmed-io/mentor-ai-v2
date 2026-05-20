@@ -1,5 +1,5 @@
 // plugins/pyramid-plugin.ts
-import { type TElement } from "platejs";
+import type { TElement } from "platejs";
 import { createTPlatePlugin } from "platejs/react";
 import Pyramid from "../custom-elements/pyramid";
 import { PyramidItem } from "../custom-elements/pyramid-item";

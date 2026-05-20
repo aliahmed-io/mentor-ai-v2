@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { PlateElement, withRef } from "platejs/react";
+import { cn } from "@/lib/utils";
 
 // Main bullets component with withRef pattern
 export const BulletsElement = withRef<typeof PlateElement>(

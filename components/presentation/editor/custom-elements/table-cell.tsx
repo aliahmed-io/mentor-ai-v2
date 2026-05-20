@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { PlateElement, type PlateElementProps } from "platejs/react";
+import { cn } from "@/lib/utils";
 
 export const TableCell = (props: PlateElementProps) => {
   return (

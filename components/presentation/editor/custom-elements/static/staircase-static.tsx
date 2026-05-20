@@ -1,6 +1,4 @@
-import { type SlateElementProps } from "platejs";
-
-import { SlateElement } from "platejs";
+import { SlateElement, type SlateElementProps } from "platejs";
 
 export default function StaircaseStatic(props: SlateElementProps) {
   return (

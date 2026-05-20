@@ -1,5 +1,5 @@
 import { FontFamilyPlugin } from "@platejs/basic-styles/react";
-import { type PlateEditor } from "platejs/react";
+import type { PlateEditor } from "platejs/react";
 
 export function extractFontsFromEditor(editor: PlateEditor) {
   const fontFamilies = new Set<string>();

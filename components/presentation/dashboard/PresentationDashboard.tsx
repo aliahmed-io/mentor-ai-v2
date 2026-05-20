@@ -1,12 +1,12 @@
 "use client";
 
-import { createEmptyPresentation } from "@/app/_actions/presentation/presentationActions";
-import { Button } from "@/components/ui/button";
-import { usePresentationState } from "@/states/presentation-state";
 import { Wand2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { createEmptyPresentation } from "@/app/_actions/presentation/presentationActions";
+import { Button } from "@/components/ui/button";
+import { usePresentationState } from "@/states/presentation-state";
 import { PresentationControls } from "./PresentationControls";
 import { PresentationInput } from "./PresentationInput";
 import { PresentationsSidebar } from "./PresentationsSidebar";
@@ -33,7 +33,11 @@ export function PresentationDashboard({
     // Make sure to reset any generation flags when landing on dashboard
     setIsGeneratingOutline(false);
     setShouldStartOutlineGeneration(false);
-  }, []);
+  }, [
+    setCurrentPresentation, // Make sure to reset any generation flags when landing on dashboard
+    setIsGeneratingOutline,
+    setShouldStartOutlineGeneration,
+  ]);
 
   const handleGenerate = async () => {
     if (!presentationInput.trim()) {

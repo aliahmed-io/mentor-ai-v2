@@ -1,6 +1,6 @@
-import { usePresentationState } from "@/states/presentation-state";
 import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { usePresentationState } from "@/states/presentation-state";
 
 export function PromptInput() {
   const {
@@ -31,7 +31,9 @@ export function PromptInput() {
       />
       <button
         className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${
-          isGeneratingOutline ? "text-primary/60" : "text-primary hover:text-primary/80"
+          isGeneratingOutline
+            ? "text-primary/60"
+            : "text-primary hover:text-primary/80"
         }`}
         onClick={handleGenerateOutline}
         disabled={isGeneratingOutline || !presentationInput.trim()}

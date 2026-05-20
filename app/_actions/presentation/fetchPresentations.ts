@@ -1,9 +1,9 @@
 "use server";
 import "server-only";
 
+import { DocumentType, type Prisma } from "@prisma/client";
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
-import { type Prisma, DocumentType } from "@prisma/client";
 
 export type PresentationDocument = Prisma.BaseDocumentGetPayload<{
   include: {

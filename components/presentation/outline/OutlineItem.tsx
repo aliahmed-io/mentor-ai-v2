@@ -1,9 +1,9 @@
-import ProseMirrorEditor from "@/components/prose-mirror/ProseMirrorEditor";
-import { cn } from "@/lib/utils";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, X } from "lucide-react";
 import { memo, useEffect, useState } from "react";
+import ProseMirrorEditor from "@/components/prose-mirror/ProseMirrorEditor";
+import { cn } from "@/lib/utils";
 
 interface OutlineItemProps {
   id: string;

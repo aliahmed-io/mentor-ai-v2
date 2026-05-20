@@ -1,8 +1,8 @@
 "use client";
 
-import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { HexColorPicker } from "react-colorful";
+import { Label } from "@/components/ui/label";
 
 interface ColorPickerProps {
   color: string;

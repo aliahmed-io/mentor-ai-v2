@@ -1,14 +1,14 @@
 "use client";
 
+import { SlateElement, type SlateElementProps } from "platejs";
+import { Cell, Legend, Pie, PieChart } from "recharts";
 import {
+  type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
 } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
-import { SlateElement, type SlateElementProps } from "platejs";
-import { Cell, Legend, Pie, PieChart } from "recharts";
 
 type AnyRecord = Record<string, unknown>;
 

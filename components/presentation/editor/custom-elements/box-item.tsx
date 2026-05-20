@@ -1,8 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { NodeApi, PathApi } from "platejs";
 import { PlateElement, type PlateElementProps } from "platejs/react";
+import { cn } from "@/lib/utils";
 
 export const BoxItem = (props: PlateElementProps) => {
   // Get parent element for color

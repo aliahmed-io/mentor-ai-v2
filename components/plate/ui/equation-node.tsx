@@ -1,25 +1,23 @@
 "use client";
 
-import * as React from "react";
-import TextareaAutosize, {
-  type TextareaAutosizeProps,
-} from "react-textarea-autosize";
-
-import { type TEquationElement } from "platejs";
-import { type PlateElementProps } from "platejs/react";
-
 import { useEquationElement, useEquationInput } from "@platejs/math/react";
 import { BlockSelectionPlugin } from "@platejs/selection/react";
 import { CornerDownLeftIcon, RadicalIcon } from "lucide-react";
+import type { TEquationElement } from "platejs";
 import {
   createPrimitiveComponent,
   PlateElement,
+  type PlateElementProps,
   useEditorRef,
   useEditorSelector,
   useElement,
   useReadOnly,
   useSelected,
 } from "platejs/react";
+import * as React from "react";
+import TextareaAutosize, {
+  type TextareaAutosizeProps,
+} from "react-textarea-autosize";
 
 import { Button } from "@/components/plate/ui/button";
 import {

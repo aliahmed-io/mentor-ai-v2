@@ -1,8 +1,6 @@
-import { type VariantProps } from "class-variance-authority";
-
-import { cn } from "@/lib/utils";
-import { cva } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import { PlateStatic, type PlateStaticProps } from "platejs";
+import { cn } from "@/lib/utils";
 
 export const editorVariants = cva(
   cn(

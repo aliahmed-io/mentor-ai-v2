@@ -1,4 +1,4 @@
-import { type Font, type FourFonts, type Variant } from "../types";
+import type { Font, FourFonts, Variant } from "../types";
 
 // Helper to get the sprite number for a given font index
 export function getSpriteNumber(index: number): number {
@@ -33,16 +33,16 @@ export const getFourVariants = (variants: string[]) => {
 
   const fourVariants: string[] = [];
   if (fourFonts.regular) {
-    fourVariants.push("0," + fourFonts.regular);
+    fourVariants.push(`0,${fourFonts.regular}`);
   }
   if (fourFonts.bold) {
-    fourVariants.push("0," + fourFonts.bold);
+    fourVariants.push(`0,${fourFonts.bold}`);
   }
   if (fourFonts.italic) {
-    fourVariants.push("1," + fourFonts.italic);
+    fourVariants.push(`1,${fourFonts.italic}`);
   }
   if (fourFonts.boldItalic) {
-    fourVariants.push("1," + fourFonts.boldItalic);
+    fourVariants.push(`1,${fourFonts.boldItalic}`);
   }
   return fourVariants;
 };
@@ -64,8 +64,8 @@ export const loadFontFromObject = (
     variants = getFourVariants(font.variants.map((v) => v.toString()));
   }
 
-  let cssId = "google-font-" + font.sane;
-  const cssIdAll = cssId + "-all";
+  let cssId = `google-font-${font.sane}`;
+  const cssIdAll = `${cssId}-all`;
   if (variants.length === font.variants.length) {
     cssId = cssIdAll;
   } else {

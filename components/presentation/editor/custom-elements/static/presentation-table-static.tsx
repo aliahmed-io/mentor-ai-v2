@@ -1,13 +1,11 @@
-import type * as React from "react";
-
+import { BaseTablePlugin } from "@platejs/table";
 import {
+  SlateElement,
   type SlateElementProps,
   type TTableCellElement,
   type TTableElement,
 } from "platejs";
-
-import { BaseTablePlugin } from "@platejs/table";
-import { SlateElement } from "platejs";
+import type * as React from "react";
 
 import { cn } from "@/lib/utils";
 

@@ -1,10 +1,8 @@
 "use client";
 
-import * as React from "react";
-
-import { type DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
-
 import { TablePlugin, useTableMergeState } from "@platejs/table/react";
+
+import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
 import {
   ArrowDown,
   ArrowLeft,
@@ -19,6 +17,7 @@ import {
 } from "lucide-react";
 import { KEYS } from "platejs";
 import { useEditorPlugin, useEditorSelector } from "platejs/react";
+import * as React from "react";
 
 import {
   DropdownMenu,
@@ -217,12 +216,14 @@ function TablePicker() {
   });
 
   const onCellMove = (rowIndex: number, colIndex: number) => {
-    const newGrid = [...tablePicker.grid];
+    const newGrid = tablePicker.grid.map((row) => [...row]);
 
     for (let i = 0; i < newGrid.length; i++) {
-      for (let j = 0; j < newGrid[i]!.length; j++) {
-        newGrid![i]![j] =
-          i >= 0 && i <= rowIndex && j >= 0 && j <= colIndex ? 1 : 0;
+      const row = newGrid[i];
+      if (row) {
+        for (let j = 0; j < row.length; j++) {
+          row[j] = i >= 0 && i <= rowIndex && j >= 0 && j <= colIndex ? 1 : 0;
+        }
       }
     }
 

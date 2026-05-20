@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { type Font } from "../types";
+import type { Font } from "../types";
 // Hook for paginated font loading with virtual scrolling
 export function usePaginatedFonts(
   fonts: Font[],
@@ -33,7 +33,7 @@ export function usePaginatedFonts(
 
   useEffect(() => {
     setVisibleCount(chunkSize);
-  }, [searchValue, chunkSize]);
+  }, [chunkSize]);
 
   const hasMore = visibleCount < filteredFonts.length;
 

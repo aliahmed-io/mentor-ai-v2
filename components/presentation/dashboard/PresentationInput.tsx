@@ -1,8 +1,8 @@
 "use client";
 
+import { LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePresentationState } from "@/states/presentation-state";
-import { Sparkles } from "lucide-react";
 import { WebSearchToggle } from "./WebSearchToggle";
 
 export function PresentationInput({
@@ -25,7 +25,7 @@ export function PresentationInput({
           onClick={() => setShowTemplates(true)}
           className="gap-2 shrink-0"
         >
-          <Sparkles className="h-3.5 w-3.5" />
+          <LayoutGrid className="h-3.5 w-3.5" />
           Templates
         </Button>
       </div>
@@ -56,7 +56,7 @@ export function PresentationInput({
             </kbd>{" "}
             to generate
           </p>
-          <WebSearchToggle/>
+          <WebSearchToggle />
         </div>
       </div>
     </div>

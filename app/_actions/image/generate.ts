@@ -1,11 +1,11 @@
 "use server";
 
+import Together from "together-ai";
+import { UTFile } from "uploadthing/server";
 import { utapi } from "@/app/api/uploadthing/core";
 import { env } from "@/env";
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
-import Together from "together-ai";
-import { UTFile } from "uploadthing/server";
 
 const together = new Together({ apiKey: env.TOGETHER_AI_API_KEY });
 

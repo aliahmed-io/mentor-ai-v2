@@ -11,15 +11,20 @@ type SaveDocBody = {
 
 export async function POST(req: Request) {
   try {
-    const { sessionId, title, content, wholeConversation } = (await req.json()) as SaveDocBody;
+    const { sessionId, title, content, wholeConversation } =
+      (await req.json()) as SaveDocBody;
     const session = await auth();
 
-    let finalTitle = title?.trim() || `Chat notes - ${new Date().toLocaleString()}`;
+    const finalTitle =
+      title?.trim() || `Chat notes - ${new Date().toLocaleString()}`;
     let finalContent = content?.trim() ?? "";
 
     if (!finalContent) {
       if (!sessionId) {
-        return NextResponse.json({ error: "Missing content or sessionId" }, { status: 400 });
+        return NextResponse.json(
+          { error: "Missing content or sessionId" },
+          { status: 400 },
+        );
       }
 
       // Build transcript when wholeConversation requested
@@ -28,14 +33,21 @@ export async function POST(req: Request) {
         include: { messages: { orderBy: { createdAt: "asc" } } },
       });
       if (!chatSession) {
-        return NextResponse.json({ error: "Session not found" }, { status: 404 });
+        return NextResponse.json(
+          { error: "Session not found" },
+          { status: 404 },
+        );
       }
 
-      const fileExcerpt = chatSession.fileText ? chatSession.fileText.slice(0, 800) : "";
+      const fileExcerpt = chatSession.fileText
+        ? chatSession.fileText.slice(0, 800)
+        : "";
       let transcript = "";
       if (wholeConversation) {
-        const lines = chatSession.messages.map((m) =>
-          (m.role === "user" ? "**User:** " : "**Assistant:** ") + (m.content || ""),
+        const lines = chatSession.messages.map(
+          (m) =>
+            (m.role === "user" ? "**User:** " : "**Assistant:** ") +
+            (m.content || ""),
         );
         transcript = lines.join("\n\n");
       }
@@ -66,7 +78,10 @@ export async function GET(req: Request) {
   try {
     const session = await auth();
     const url = new URL(req.url);
-    const limit = Math.max(1, Math.min(50, Number(url.searchParams.get("limit")) || 10));
+    const limit = Math.max(
+      1,
+      Math.min(50, Number(url.searchParams.get("limit")) || 10),
+    );
 
     const docs = await db.chatDocument.findMany({
       where: session?.user?.id ? { userId: session.user.id } : {},
@@ -75,8 +90,10 @@ export async function GET(req: Request) {
       select: { id: true, title: true, createdAt: true, thumbnailUrl: true },
     });
     return NextResponse.json(docs);
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to list documents" }, { status: 500 });
+  } catch (_error) {
+    return NextResponse.json(
+      { error: "Failed to list documents" },
+      { status: 500 },
+    );
   }
 }
-

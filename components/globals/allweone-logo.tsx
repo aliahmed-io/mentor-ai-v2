@@ -1,6 +1,7 @@
-import { cn } from "@/lib/utils";
 import LocalFont from "next/font/local";
 import type React from "react";
+import { cn } from "@/lib/utils";
+
 const AmericanTypewritter = LocalFont({
   src: "../../app/fonts/GeistMonoVF.woff",
 });

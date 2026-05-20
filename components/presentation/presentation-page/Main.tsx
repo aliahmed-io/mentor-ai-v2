@@ -1,12 +1,18 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import debounce from "lodash.debounce";
+import { useParams } from "next/navigation";
+import { useTheme } from "next-themes";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getPresentation,
   updatePresentation,
   updatePresentationTheme,
 } from "@/app/_actions/presentation/presentationActions";
 import { getCustomThemeById } from "@/app/_actions/presentation/theme-actions";
-import { type PlateSlide } from "@/components/presentation/utils/parser";
+import type { PlateSlide } from "@/components/presentation/utils/parser";
+import { Button } from "@/components/ui/button";
 import {
   setThemeVariables,
   type ThemeProperties,
@@ -14,12 +20,6 @@ import {
   themes,
 } from "@/lib/presentation/themes";
 import { usePresentationState } from "@/states/presentation-state";
-import { useQuery } from "@tanstack/react-query";
-import debounce from "lodash.debounce";
-import { useTheme } from "next-themes";
-import { useParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { LoadingState } from "./Loading";
 import { PresentationLayout } from "./PresentationLayout";
 import { PresentationSlidesView } from "./PresentationSlidesView";
@@ -42,7 +42,7 @@ export default function PresentationPage() {
     (s) => s.isGeneratingPresentation,
   );
   const setTheme = usePresentationState((s) => s.setTheme);
-  const setImageModel = usePresentationState((s) => s.setImageModel);
+  const _setImageModel = usePresentationState((s) => s.setImageModel);
   const setImageSource = usePresentationState((s) => s.setImageSource);
   const setPresentationStyle = usePresentationState(
     (s) => s.setPresentationStyle,
@@ -234,9 +234,10 @@ export default function PresentationPage() {
     setOutline,
     setSlides,
     setTheme,
-    setImageModel,
     setPresentationStyle,
     setLanguage,
+    setImageSource,
+    setThumbnailUrl,
   ]);
 
   // Fallback: if after a grace period there are still no slides, offer retry
@@ -311,7 +312,8 @@ export default function PresentationPage() {
             <div className="rounded-md border bg-muted/30 p-4 text-sm">
               <div className="mb-2 font-medium">No slides loaded yet</div>
               <div className="mb-3 text-muted-foreground">
-                If generation finished but slides didn’t load, retry generating to refresh the content.
+                If generation finished but slides didn’t load, retry generating
+                to refresh the content.
               </div>
               <Button
                 size="sm"

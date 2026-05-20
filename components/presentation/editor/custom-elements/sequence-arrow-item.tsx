@@ -1,9 +1,9 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { NodeApi, PathApi } from "platejs";
 import { PlateElement, type PlateElementProps } from "platejs/react";
-import { type TSequenceArrowGroupElement } from "../plugins/sequence-arrow-plugin";
+import { cn } from "@/lib/utils";
+import type { TSequenceArrowGroupElement } from "../plugins/sequence-arrow-plugin";
 
 export const SequenceArrowItem = (props: PlateElementProps) => {
   const parentPath = PathApi.parent(props.path);

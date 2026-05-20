@@ -1,21 +1,18 @@
 "use client";
-import { usePresentationState } from "@/states/presentation-state";
-import { ChevronRight } from "lucide-react";
+import * as motion from "framer-motion/client";
+import { ArrowLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import Image from "next/image";
-
 // Import our new components
 import AllweoneText from "@/components/globals/allweone-logo";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ArrowLeft } from "lucide-react";
-import * as motion from "framer-motion/client";
+import { usePresentationState } from "@/states/presentation-state";
 import { ExportButton } from "./buttons/ExportButton";
 import { PresentButton } from "./buttons/PresentButton";
 import { SaveStatus } from "./buttons/SaveStatus";
-import { ShareButton } from "./buttons/ShareButton";
 
 interface PresentationHeaderProps {
   title?: string;
@@ -53,7 +50,12 @@ export default function PresentationHeader({ title }: PresentationHeaderProps) {
 
           <Link href={"/presentation/create"}>
             <Button size={"icon"} className="rounded-full" variant={"ghost"}>
-              <Image src="/white-short-logo.svg" alt="Home" width={20} height={20} />
+              <Image
+                src="/white-short-logo.svg"
+                alt="Home"
+                width={20}
+                height={20}
+              />
             </Button>
           </Link>
 
@@ -85,10 +87,17 @@ export default function PresentationHeader({ title }: PresentationHeaderProps) {
           </Link>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Link href="/presentation" className="hover:text-foreground">
-              <Image src="/white-short-logo.svg" alt="Home" width={16} height={16} />
+              <Image
+                src="/white-short-logo.svg"
+                alt="Home"
+                width={16}
+                height={16}
+              />
             </Link>
             <ChevronRight className="h-4 w-4" />
-            <span className="font-medium text-foreground">{presentationTitle}</span>
+            <span className="font-medium text-foreground">
+              {presentationTitle}
+            </span>
           </div>
         </div>
 

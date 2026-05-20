@@ -1,9 +1,9 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import { PlateElement, type PlateElementProps } from "platejs/react";
 import React from "react";
+import { cn } from "@/lib/utils";
 
 export default function BeforeAfterGroup(props: PlateElementProps) {
   const childrenArray = React.Children.toArray(props.children);

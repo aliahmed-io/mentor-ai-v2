@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useChat } from "@ai-sdk/react";
 
 import {
   AIChatPlugin,
@@ -27,7 +27,7 @@ import {
   Wand,
   X,
 } from "lucide-react";
-import { type NodeEntry, type SlateEditor, isHotkey, NodeApi } from "platejs";
+import { isHotkey, NodeApi, type NodeEntry, type SlateEditor } from "platejs";
 import {
   type PlateEditor,
   useEditorPlugin,
@@ -35,7 +35,7 @@ import {
   useHotkeys,
   usePluginOption,
 } from "platejs/react";
-
+import * as React from "react";
 import { Button } from "@/components/plate/ui/button";
 import {
   Command,
@@ -49,8 +49,6 @@ import {
   PopoverContent,
 } from "@/components/plate/ui/popover";
 import { cn } from "@/lib/utils";
-
-import { useChat } from "@ai-sdk/react";
 import { AIChatEditor } from "./ai-chat-editor";
 
 export function AIMenu() {
@@ -75,11 +73,16 @@ export function AIMenu() {
     if (streaming) {
       const anchor = api.aiChat.node({ anchor: true });
       setTimeout(() => {
-        const anchorDom = editor.api.toDOMNode(anchor![0])!;
-        setAnchorElement(anchorDom);
+        const node = anchor?.[0];
+        if (node) {
+          const anchorDom = editor.api.toDOMNode(node);
+          if (anchorDom) {
+            setAnchorElement(anchorDom);
+          }
+        }
       }, 0);
     }
-  }, [streaming]);
+  }, [streaming, api.aiChat.node, editor.api.toDOMNode]);
 
   const setOpen = (open: boolean) => {
     if (open) {
@@ -97,7 +100,13 @@ export function AIMenu() {
   useEditorChat({
     chat,
     onOpenBlockSelection: (blocks: NodeEntry[]) => {
-      show(editor.api.toDOMNode(blocks.at(-1)![0])!);
+      const node = blocks.at(-1)?.[0];
+      if (node) {
+        const domNode = editor.api.toDOMNode(node);
+        if (domNode) {
+          show(domNode);
+        }
+      }
     },
     onOpenChange: (open) => {
       if (!open) {
@@ -106,18 +115,30 @@ export function AIMenu() {
       }
     },
     onOpenCursor: () => {
-      const [ancestor] = editor.api.block({ highest: true })!;
+      const block = editor.api.block({ highest: true });
+      if (block) {
+        const [ancestor] = block;
 
-      if (!editor.api.isAt({ end: true }) && !editor.api.isEmpty(ancestor)) {
-        editor
-          .getApi(BlockSelectionPlugin)
-          .blockSelection.set(ancestor.id as string);
+        if (!editor.api.isAt({ end: true }) && !editor.api.isEmpty(ancestor)) {
+          editor
+            .getApi(BlockSelectionPlugin)
+            .blockSelection.set(ancestor.id as string);
+        }
+
+        const domNode = editor.api.toDOMNode(ancestor);
+        if (domNode) {
+          show(domNode);
+        }
       }
-
-      show(editor.api.toDOMNode(ancestor)!);
     },
     onOpenSelection: () => {
-      show(editor.api.toDOMNode(editor.api.blocks().at(-1)![0])!);
+      const node = editor.api.blocks().at(-1)?.[0];
+      if (node) {
+        const domNode = editor.api.toDOMNode(node);
+        if (domNode) {
+          show(domNode);
+        }
+      }
     },
   });
 
@@ -474,7 +495,7 @@ export const AIMenuItems = ({
       menuGroups?.[0]?.items?.length &&
       menuGroups?.[0]?.items?.length > 0
     ) {
-      setValue(menuGroups[0]!.items[0]!.value);
+      setValue(menuGroups[0]?.items[0]?.value);
     }
   }, [menuGroups, setValue]);
 

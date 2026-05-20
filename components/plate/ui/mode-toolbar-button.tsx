@@ -1,14 +1,13 @@
 "use client";
 
-import * as React from "react";
-
 import { SuggestionPlugin } from "@platejs/suggestion/react";
 import {
-  type DropdownMenuProps,
   DropdownMenuItemIndicator,
+  type DropdownMenuProps,
 } from "@radix-ui/react-dropdown-menu";
 import { CheckIcon, EyeIcon, PencilLineIcon, PenIcon } from "lucide-react";
 import { useEditorRef, usePlateState, usePluginOption } from "platejs/react";
+import * as React from "react";
 
 import {
   DropdownMenu,
@@ -52,8 +51,8 @@ export function ModeToolbarButton(props: DropdownMenuProps) {
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
         <ToolbarButton pressed={open} tooltip="Editing mode" isDropdown>
-          {item[value]!.icon}
-          <span className="hidden lg:inline">{item[value]!.label}</span>
+          {item[value]?.icon}
+          <span className="hidden lg:inline">{item[value]?.label}</span>
         </ToolbarButton>
       </DropdownMenuTrigger>
 
@@ -89,8 +88,8 @@ export function ModeToolbarButton(props: DropdownMenuProps) {
             value="editing"
           >
             <Indicator />
-            {item.editing!.icon}
-            {item.editing!.label}
+            {item.editing?.icon}
+            {item.editing?.label}
           </DropdownMenuRadioItem>
 
           <DropdownMenuRadioItem
@@ -98,8 +97,8 @@ export function ModeToolbarButton(props: DropdownMenuProps) {
             value="viewing"
           >
             <Indicator />
-            {item.viewing!.icon}
-            {item.viewing!.label}
+            {item.viewing?.icon}
+            {item.viewing?.label}
           </DropdownMenuRadioItem>
 
           <DropdownMenuRadioItem
@@ -107,8 +106,8 @@ export function ModeToolbarButton(props: DropdownMenuProps) {
             value="suggestion"
           >
             <Indicator />
-            {item.suggestion!.icon}
-            {item.suggestion!.label}
+            {item.suggestion?.icon}
+            {item.suggestion?.label}
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>

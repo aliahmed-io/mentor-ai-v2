@@ -1,9 +1,9 @@
 "use client";
 
+import { PlateElement, type StyledPlateElementProps } from "platejs/react";
 // Import CycleItem and constants
 import { cn } from "@/lib/utils";
-import { PlateElement, type StyledPlateElementProps } from "platejs/react";
-import { type TCycleItemElement } from "../plugins/cycle-plugin";
+import type { TCycleItemElement } from "../plugins/cycle-plugin";
 
 // Main cycle component with withRef pattern
 export const CycleElement = ({

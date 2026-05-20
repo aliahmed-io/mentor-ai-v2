@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils";
 import { SlateElement, type SlateElementProps } from "platejs";
+import { cn } from "@/lib/utils";
 
 export default function ProsConsGroupStatic(props: SlateElementProps) {
   return (

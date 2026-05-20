@@ -1,7 +1,5 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   AudioWaveform,
   File,
@@ -13,6 +11,8 @@ import {
 } from "lucide-react";
 import { useCallback } from "react";
 import { type FileRejection, useDropzone } from "react-dropzone";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "./button";
 import { useToast } from "./use-toast";
 
@@ -134,7 +134,7 @@ export default function FileUpload({
         });
       }
     },
-    [],
+    [setFiles, toast],
   );
 
   const { getRootProps, getInputProps } = useDropzone({

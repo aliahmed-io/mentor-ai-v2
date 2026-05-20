@@ -1,8 +1,8 @@
 "use client";
 
+import { PlateElement, withRef } from "platejs/react";
 // Import IconItem and constants
 import { cn } from "@/lib/utils";
-import { PlateElement, withRef } from "platejs/react";
 
 // Main icons component with withRef pattern
 export const IconList = withRef<typeof PlateElement>(

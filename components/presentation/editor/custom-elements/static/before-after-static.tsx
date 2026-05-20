@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import {
   NodeApi,
@@ -6,6 +5,7 @@ import {
   SlateElement,
   type SlateElementProps,
 } from "platejs";
+import { cn } from "@/lib/utils";
 
 export default function BeforeAfterGroupStatic(props: SlateElementProps) {
   const parentPath = PathApi.parent(props.path);

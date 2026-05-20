@@ -1,14 +1,12 @@
 import * as React from "react";
-
-import {
-  type ClientUploadedFileData,
-  type UploadFilesOptions,
-} from "uploadthing/types";
-
-import { type OurFileRouter } from "@/app/api/uploadthing/core";
-import { uploadFiles } from "@/hooks/globals/useUploadthing";
 import { toast } from "sonner";
+import type {
+  ClientUploadedFileData,
+  UploadFilesOptions,
+} from "uploadthing/types";
 import { z } from "zod";
+import type { OurFileRouter } from "@/app/api/uploadthing/core";
+import { uploadFiles } from "@/hooks/globals/useUploadthing";
 
 export type UploadedFile<T = unknown> = ClientUploadedFileData<T>;
 

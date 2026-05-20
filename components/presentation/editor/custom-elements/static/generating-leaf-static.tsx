@@ -1,7 +1,5 @@
-import { type SlateLeafProps } from "platejs";
-
+import { SlateLeaf, type SlateLeafProps } from "platejs";
 import { usePresentationState } from "@/states/presentation-state";
-import { SlateLeaf } from "platejs";
 
 export function GeneratingLeafStatic(props: SlateLeafProps) {
   const { isGeneratingPresentation } = usePresentationState();

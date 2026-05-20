@@ -1,10 +1,9 @@
 "use client";
 
-import { PlateElement, type PlateElementProps } from "platejs/react";
-
-import { cn } from "@/lib/utils";
 import { NodeApi, PathApi } from "platejs";
-import { type TArrowListItemElement } from "../plugins/arrow-plugin";
+import { PlateElement, type PlateElementProps } from "platejs/react";
+import { cn } from "@/lib/utils";
+import type { TArrowListItemElement } from "../plugins/arrow-plugin";
 
 // ArrowItem component for individual items in the arrow visualization
 export const ArrowItem = (props: PlateElementProps<TArrowListItemElement>) => {

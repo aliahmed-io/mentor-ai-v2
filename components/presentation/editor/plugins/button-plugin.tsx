@@ -1,4 +1,4 @@
-import { type TElement } from "platejs";
+import type { TElement } from "platejs";
 import { createPlatePlugin } from "platejs/react";
 import ButtonElement from "../custom-elements/button";
 import { BUTTON_ELEMENT } from "../lib";

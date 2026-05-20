@@ -34,5 +34,3 @@ export default function SidebarShell({ children }: PropsWithChildren) {
     </div>
   );
 }
-
-

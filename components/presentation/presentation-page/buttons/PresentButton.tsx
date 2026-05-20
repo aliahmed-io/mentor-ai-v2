@@ -1,8 +1,8 @@
 "use client";
+import { Play, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { usePresentationState } from "@/states/presentation-state";
-import { Play, X } from "lucide-react";
 
 export function PresentButton() {
   const isPresenting = usePresentationState((s) => s.isPresenting);

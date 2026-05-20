@@ -1,8 +1,8 @@
 import { DndPlugin } from "@platejs/dnd";
 import {
   getSelectionBoundingClientRect,
-  useVirtualFloating,
   type UseVirtualFloatingOptions,
+  useVirtualFloating,
 } from "@platejs/floating";
 import { BlockSelectionPlugin } from "@platejs/selection/react";
 import { mergeProps, type TElement } from "platejs";
@@ -15,7 +15,7 @@ import {
   usePluginOption,
 } from "platejs/react";
 import React from "react";
-import { type MyEditor } from "../editor-kit";
+import type { MyEditor } from "../editor-kit";
 import { MultiDndPlugin } from "../plugins/dnd-kit";
 
 export type FloatingToolbarState = {
@@ -195,7 +195,7 @@ export const useFloatingToolbar = ({
       document.removeEventListener("mousedown", mousedown);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setMousedown]);
 
   // MODIFIED: Updated visibility logic to include block selections and hide during dragging/mouse down
   React.useEffect(() => {
@@ -224,8 +224,6 @@ export const useFloatingToolbar = ({
     }
   }, [
     setOpen,
-    editorId,
-    focusedEditorId,
     hideToolbar,
     showWhenReadOnly,
     selectionExpanded,
@@ -235,8 +233,8 @@ export const useFloatingToolbar = ({
     waitForCollapsedSelection,
     open,
     readOnly,
-    isDragging, // Add isDragging to dependencies
-    isDragMouseDown, // Add isDragMouseDown to dependencies
+    isDragging,
+    isDragMouseDown,
   ]);
 
   const { update } = floating;
