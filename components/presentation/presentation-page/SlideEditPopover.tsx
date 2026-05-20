@@ -157,32 +157,33 @@ export function SlideEditPopover({ index }: SlideEditPopoverProps) {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-80 rounded-md border border-border bg-background"
+        className="w-80 rounded-2xl border border-[#dcd7cd] bg-[#fdfcfb] p-5 shadow-xl text-[#221f1c]"
         side="bottom"
       >
-        <div className="space-y-2">
+        <div className="space-y-4">
           {/* Card Color */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="h-4 w-4 rounded-full bg-current" />
-              <span className="text-sm text-zinc-200">Card color</span>
+            <div className="flex items-center gap-2 text-[#221f1c]">
+              <div className="h-4 w-4 rounded-full border border-[#dcd7cd] bg-current" />
+              <span className="text-sm font-medium">Card color</span>
             </div>
             <ColorPicker
               value={currentBgColor}
               onChange={(color) => updateSlide({ bgColor: color })}
             />
           </div>
+
           {/* Accent Image */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-[#221f1c]">
               {/* eslint-disable-next-line jsx-a11y/alt-text */}
-              <Image className="h-4 w-4" />
-              <span className="text-sm text-zinc-200">Accent image</span>
+              <Image className="h-4 w-4 text-[#696257]" />
+              <span className="text-sm font-medium">Accent image</span>
             </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="link"
-                className="h-auto p-0 text-sm text-blue-500"
+                className="h-auto p-0 text-xs text-[#5a8b67] hover:text-[#4d7556] hover:underline font-semibold"
                 onClick={handleImageEdit}
               >
                 Edit
@@ -190,7 +191,7 @@ export function SlideEditPopover({ index }: SlideEditPopoverProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 text-red-500"
+                className="h-7 w-7 rounded-full text-[#bd4a4a] hover:bg-[#bd4a4a]/10 hover:text-[#bd4a4a]"
                 onClick={handleImageDelete}
                 disabled={!hasRootImage}
               >
@@ -198,62 +199,67 @@ export function SlideEditPopover({ index }: SlideEditPopoverProps) {
               </Button>
             </div>
           </div>
+
           {/* Content Alignment */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlignCenter className="h-4 w-4"></AlignCenter>
-              <span className="text-sm text-zinc-200">Content alignment</span>
+            <div className="flex items-center gap-2 text-[#221f1c]">
+              <AlignCenter className="h-4 w-4 text-[#696257]"></AlignCenter>
+              <span className="text-sm font-medium">Content alignment</span>
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1.5">
               <Button
                 variant="outline"
                 size="icon"
                 className={cn(
-                  "h-6 w-6 border-zinc-800 bg-zinc-900",
-                  currentAlignment === "start" && "bg-blue-600",
+                  "h-8 w-8 rounded-full border border-[#dcd7cd] bg-[#e6e2d8]/40 text-[#221f1c] hover:bg-[#e6e2d8]/80 transition-all",
+                  currentAlignment === "start" &&
+                    "bg-[#96c8a2] text-[#101612] hover:bg-[#85b991] border-[#85b991] shadow-sm",
                 )}
                 onClick={() => updateSlide({ alignment: "start" })}
               >
-                <ArrowUpFromLine className="h-3 w-3" />
+                <ArrowUpFromLine className="h-3.5 w-3.5" />
               </Button>
               <Button
                 variant="outline"
                 size="icon"
                 className={cn(
-                  "h-6 w-6 border-zinc-800 bg-zinc-900",
-                  currentAlignment === "center" && "bg-blue-600",
+                  "h-8 w-8 rounded-full border border-[#dcd7cd] bg-[#e6e2d8]/40 text-[#221f1c] hover:bg-[#e6e2d8]/80 transition-all",
+                  currentAlignment === "center" &&
+                    "bg-[#96c8a2] text-[#101612] hover:bg-[#85b991] border-[#85b991] shadow-sm",
                 )}
                 onClick={() => updateSlide({ alignment: "center" })}
               >
-                <FoldVertical className="h-3 w-3" />
+                <FoldVertical className="h-3.5 w-3.5" />
               </Button>
               <Button
                 variant="outline"
                 size="icon"
                 className={cn(
-                  "h-6 w-6 border-zinc-800 bg-zinc-900",
-                  currentAlignment === "end" && "bg-blue-600",
+                  "h-8 w-8 rounded-full border border-[#dcd7cd] bg-[#e6e2d8]/40 text-[#221f1c] hover:bg-[#e6e2d8]/80 transition-all",
+                  currentAlignment === "end" &&
+                    "bg-[#96c8a2] text-[#101612] hover:bg-[#85b991] border-[#85b991] shadow-sm",
                 )}
                 onClick={() => updateSlide({ alignment: "end" })}
               >
-                <ArrowUpFromLine className="h-3 w-3" />
+                <ArrowUpFromLine className="h-3.5 w-3.5 rotate-180" />
               </Button>
             </div>
           </div>
 
-          {/* Image Placement */}
+          {/* Card Layout */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <LayoutGrid className="h-4 w-4" />
-              <span className="text-sm text-zinc-200">Card layout</span>
+            <div className="flex items-center gap-2 text-[#221f1c]">
+              <LayoutGrid className="h-4 w-4 text-[#696257]" />
+              <span className="text-sm font-medium">Card layout</span>
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1.5">
               <Button
                 variant="outline"
                 size="icon"
                 className={cn(
-                  "h-6 w-6 border-zinc-800 bg-zinc-900",
-                  currentLayout === "vertical" && "bg-blue-600",
+                  "h-8 w-8 rounded-full border border-[#dcd7cd] bg-[#e6e2d8]/40 text-[#221f1c] hover:bg-[#e6e2d8]/80 transition-all",
+                  currentLayout === "vertical" &&
+                    "bg-[#96c8a2] text-[#101612] hover:bg-[#85b991] border-[#85b991] shadow-sm",
                 )}
                 onClick={() => updateSlide({ layoutType: "vertical" })}
               >
@@ -263,8 +269,9 @@ export function SlideEditPopover({ index }: SlideEditPopoverProps) {
                 variant="outline"
                 size="icon"
                 className={cn(
-                  "h-6 w-6 border-zinc-800 bg-zinc-900",
-                  currentLayout === "left" && "bg-blue-600",
+                  "h-8 w-8 rounded-full border border-[#dcd7cd] bg-[#e6e2d8]/40 text-[#221f1c] hover:bg-[#e6e2d8]/80 transition-all",
+                  currentLayout === "left" &&
+                    "bg-[#96c8a2] text-[#101612] hover:bg-[#85b991] border-[#85b991] shadow-sm",
                 )}
                 onClick={() => updateSlide({ layoutType: "left" })}
               >
@@ -274,8 +281,9 @@ export function SlideEditPopover({ index }: SlideEditPopoverProps) {
                 variant="outline"
                 size="icon"
                 className={cn(
-                  "h-6 w-6 border-zinc-800 bg-zinc-900",
-                  currentLayout === "right" && "bg-blue-600",
+                  "h-8 w-8 rounded-full border border-[#dcd7cd] bg-[#e6e2d8]/40 text-[#221f1c] hover:bg-[#e6e2d8]/80 transition-all",
+                  currentLayout === "right" &&
+                    "bg-[#96c8a2] text-[#101612] hover:bg-[#85b991] border-[#85b991] shadow-sm",
                 )}
                 onClick={() => updateSlide({ layoutType: "right" })}
               >
@@ -285,8 +293,9 @@ export function SlideEditPopover({ index }: SlideEditPopoverProps) {
                 variant="outline"
                 size="icon"
                 className={cn(
-                  "h-6 w-6 border-zinc-800 bg-zinc-900",
-                  currentLayout === "background" && "bg-blue-600",
+                  "h-8 w-8 rounded-full border border-[#dcd7cd] bg-[#e6e2d8]/40 text-[#221f1c] hover:bg-[#e6e2d8]/80 transition-all",
+                  currentLayout === "background" &&
+                    "bg-[#96c8a2] text-[#101612] hover:bg-[#85b991] border-[#85b991] shadow-sm",
                 )}
                 onClick={() => updateSlide({ layoutType: "background" })}
               >
@@ -295,25 +304,24 @@ export function SlideEditPopover({ index }: SlideEditPopoverProps) {
             </div>
           </div>
 
-          <div className="pt-2 border-t border-border space-y-3">
+          {/* AI Copilot */}
+          <div className="pt-3 border-t border-[#e6e2d8] space-y-3">
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-blue-400" />
-                <span className="text-sm font-medium text-zinc-200">
-                  AI Copilot
-                </span>
+              <div className="flex items-center gap-2 text-[#221f1c]">
+                <Sparkles className="h-4 w-4 text-[#5a8b67]" />
+                <span className="text-sm font-semibold">AI Copilot</span>
               </div>
               <Textarea
                 placeholder="e.g., Turn this into a timeline..."
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
-                className="text-xs h-16 resize-none bg-zinc-900 border-zinc-800"
+                className="w-full rounded-xl border border-[#dcd7cd] bg-[#fbfaf8] p-3 text-xs text-[#221f1c] placeholder-[#8c8273] focus:border-[#96c8a2] focus:ring-1 focus:ring-[#96c8a2] transition-all min-h-[72px] resize-none"
               />
               <Button
                 type="button"
                 variant="default"
                 size="sm"
-                className="w-full gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                className="w-full h-9 rounded-full bg-[#96c8a2] hover:bg-[#85b991] text-[#101612] font-semibold transition-all shadow-sm flex items-center justify-center gap-2"
                 disabled={isRegenerating || !customPrompt.trim()}
                 onClick={() => void handleRegenerateLayout(customPrompt)}
               >
@@ -325,30 +333,34 @@ export function SlideEditPopover({ index }: SlideEditPopoverProps) {
               type="button"
               variant="outline"
               size="sm"
-              className="w-full gap-2 border-zinc-800"
+              className="w-full h-9 rounded-full border border-[#dcd7cd] bg-transparent hover:bg-[#e6e2d8]/30 text-[#221f1c] font-semibold transition-all flex items-center justify-center gap-2"
               disabled={isRegenerating}
               onClick={() => void handleRegenerateLayout()}
             >
               <RefreshCw
-                className={cn("h-4 w-4", isRegenerating && "animate-spin")}
+                className={cn(
+                  "h-4 w-4 text-[#696257]",
+                  isRegenerating && "animate-spin",
+                )}
               />
               {isRegenerating ? "Regenerating…" : "Regenerate layout"}
             </Button>
           </div>
 
           {/* Card Width */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <MoveHorizontal className="h-4 w-4"></MoveHorizontal>
-              <span className="text-sm text-zinc-200">Card width</span>
+          <div className="pt-2 border-t border-[#e6e2d8] flex items-center justify-between">
+            <div className="flex items-center gap-2 text-[#221f1c]">
+              <MoveHorizontal className="h-4 w-4 text-[#696257]"></MoveHorizontal>
+              <span className="text-sm font-medium">Card width</span>
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1.5">
               <Button
                 variant="outline"
                 size="sm"
                 className={cn(
-                  "h-6 border-zinc-800 bg-zinc-900 px-2",
-                  currentWidth === "S" && "bg-blue-600",
+                  "h-7 w-7 p-0 rounded-full border border-[#dcd7cd] bg-[#e6e2d8]/40 text-[#221f1c] hover:bg-[#e6e2d8]/80 transition-all font-bold text-xs flex items-center justify-center",
+                  currentWidth === "S" &&
+                    "bg-[#96c8a2] text-[#101612] hover:bg-[#85b991] border-[#85b991] shadow-sm",
                 )}
                 onClick={() => updateSlide({ width: "S" })}
               >
@@ -358,8 +370,9 @@ export function SlideEditPopover({ index }: SlideEditPopoverProps) {
                 variant="outline"
                 size="sm"
                 className={cn(
-                  "h-6 border-zinc-800 bg-zinc-900 px-2",
-                  currentWidth === "M" && "bg-blue-600",
+                  "h-7 w-7 p-0 rounded-full border border-[#dcd7cd] bg-[#e6e2d8]/40 text-[#221f1c] hover:bg-[#e6e2d8]/80 transition-all font-bold text-xs flex items-center justify-center",
+                  currentWidth === "M" &&
+                    "bg-[#96c8a2] text-[#101612] hover:bg-[#85b991] border-[#85b991] shadow-sm",
                 )}
                 onClick={() => updateSlide({ width: "M" })}
               >
@@ -369,8 +382,9 @@ export function SlideEditPopover({ index }: SlideEditPopoverProps) {
                 variant="outline"
                 size="sm"
                 className={cn(
-                  "h-6 border-zinc-800 bg-zinc-900 px-2",
-                  currentWidth === "L" && "bg-blue-600",
+                  "h-7 w-7 p-0 rounded-full border border-[#dcd7cd] bg-[#e6e2d8]/40 text-[#221f1c] hover:bg-[#e6e2d8]/80 transition-all font-bold text-xs flex items-center justify-center",
+                  currentWidth === "L" &&
+                    "bg-[#96c8a2] text-[#101612] hover:bg-[#85b991] border-[#85b991] shadow-sm",
                 )}
                 onClick={() => updateSlide({ width: "L" })}
               >

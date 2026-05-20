@@ -130,7 +130,7 @@ export function ExportButton({
           Export
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Export Presentation</DialogTitle>
           <DialogDescription>
@@ -143,7 +143,7 @@ export function ExportButton({
             file, including all slides and elements.
           </p>
         </div>
-        <DialogFooter>
+        <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-2 sm:space-x-0">
           <Button
             type="button"
             variant="secondary"
