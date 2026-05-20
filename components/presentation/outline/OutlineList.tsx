@@ -147,14 +147,16 @@ export function OutlineList() {
         {showSkeletonPlaceholders && <Skeleton className="h-96 w-full" />}
 
         {showLoadingSkeletons &&
-          Array.from({ length: Math.min(remainingCount, 6) }).map((_, index) => (
-            <Skeleton key={`loading-${index}`} className="h-16 w-full" />
-          ))}
+          Array.from({ length: Math.min(remainingCount, 6) }).map(
+            (_, index) => (
+              <Skeleton key={`loading-${index}`} className="h-16 w-full" />
+            ),
+          )}
 
         {showEmptyState && (
           <p className="rounded-md border border-dashed border-muted-foreground/30 bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground">
-            No outline yet. Click &quot;Regenerate Outline&quot; above to generate
-            slide topics from your prompt.
+            No outline yet. Click &quot;Regenerate Outline&quot; above to
+            generate slide topics from your prompt.
           </p>
         )}
       </DndContext>

@@ -1,17 +1,17 @@
-import { generateText } from "ai";
 import type { LanguageModel } from "ai";
+import { generateText } from "ai";
 import { SlideParser } from "@/components/presentation/utils/parser";
-import {
-  getLayoutForSlide,
-  getRequiredComponent,
-  type RichComponent,
-} from "./layout-recipes";
 import {
   buildRepairSlidePrompt,
   buildSingleSlidePrompt,
   formatSearchResults,
   stripXmlFromResponse,
 } from "./generate-prompts";
+import {
+  getLayoutForSlide,
+  getRequiredComponent,
+  type RichComponent,
+} from "./layout-recipes";
 import { validateSlideContent, validateSlideXml } from "./slide-validator";
 
 const MAX_RETRIES = 2;

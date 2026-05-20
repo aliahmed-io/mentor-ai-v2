@@ -1,6 +1,12 @@
-import type { PlateNode, PlateSlide } from "@/components/presentation/utils/parser";
+import type {
+  PlateNode,
+  PlateSlide,
+} from "@/components/presentation/utils/parser";
 import type { RichComponent } from "./layout-recipes";
-import { RICH_XML_TAGS, slideXmlHasRichComponent } from "./xml-component-examples";
+import {
+  RICH_XML_TAGS,
+  slideXmlHasRichComponent,
+} from "./xml-component-examples";
 
 const RICH_PLATE_TYPES = new Set([
   "bullets",
@@ -62,7 +68,8 @@ export function validateSlideContent(
   if (!hasRichComponent(slide.content)) {
     return {
       valid: false,
-      reason: "Slide is missing a rich layout component (bullets, chart, table, icons, etc.)",
+      reason:
+        "Slide is missing a rich layout component (bullets, chart, table, icons, etc.)",
     };
   }
   if (requiredComponent) {

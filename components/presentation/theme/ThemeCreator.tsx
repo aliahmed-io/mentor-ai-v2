@@ -19,8 +19,8 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { useUploadThing } from "@/hooks/globals/useUploadthing";
+import { generateThemeFromBrand } from "@/lib/presentation/brand-theme-generator";
 import { themes } from "@/lib/presentation/themes";
-
 import { usePresentationState } from "@/states/presentation-state";
 import { ColorPicker } from "./ColorPicker";
 import { FontSelector } from "./FontSelector";
@@ -47,6 +47,7 @@ export function ThemeCreator({ children }: { children?: ReactNode }) {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [brandInput, setBrandInput] = useState("");
 
   const { startUpload } = useUploadThing("imageUploader");
 
@@ -112,8 +113,8 @@ export function ThemeCreator({ children }: { children?: ReactNode }) {
           button: "0 1px 2px rgba(0,0,0,0.03)",
         },
       });
-    } else {
-      const selectedTheme = themes[watchedThemeBase];
+    } else if (themes[watchedThemeBase as keyof typeof themes]) {
+      const selectedTheme = themes[watchedThemeBase as keyof typeof themes];
       setValue("colors", { ...selectedTheme.colors });
       setValue("fonts", { ...selectedTheme.fonts });
       setValue("borderRadius", selectedTheme.borderRadius);
@@ -121,6 +122,33 @@ export function ThemeCreator({ children }: { children?: ReactNode }) {
       setValue("shadows", { ...selectedTheme.shadows });
     }
   }, [watchedThemeBase, setValue]);
+
+  const handleBrandGenerate = () => {
+    if (!brandInput.trim()) return;
+    try {
+      const brandTheme = generateThemeFromBrand(brandInput);
+      setValue("colors", brandTheme.colors);
+      setValue("fonts", brandTheme.fonts);
+      setValue("borderRadius", brandTheme.borderRadius);
+      setValue("transitions", brandTheme.transitions);
+      setValue("shadows", brandTheme.shadows);
+      setValue("name", brandTheme.name);
+      setValue("description", brandTheme.description);
+      setValue("themeBase", "blank"); // Set theme base as custom/scratch
+
+      setCurrentStep(4); // Skip directly to review/finish step
+      toast({
+        title: "Brand Style Synthesised",
+        description: `Successfully created dynamic theme matching ${brandInput}!`,
+      });
+    } catch (e) {
+      toast({
+        title: "Generation Failed",
+        description: "Failed to parse brand color scheme.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -226,8 +254,35 @@ export function ThemeCreator({ children }: { children?: ReactNode }) {
             <div className="w-1/2 overflow-y-auto border-r p-6">
               {currentStep === 0 && (
                 <div className="h-full space-y-4">
+                  <div className="mb-6 rounded-xl border border-indigo-100 bg-indigo-50/20 p-4 dark:border-indigo-950 dark:bg-indigo-950/10">
+                    <Label className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">
+                      ⚡ AI Brand Theme Auto-Generator
+                    </Label>
+                    <p className="mt-1 text-xs text-muted-foreground leading-normal">
+                      Enter a company name or URL (e.g. Stripe, Apple, Airbnb,
+                      or your own brand) to instantly synthesise a matching
+                      premium palette.
+                    </p>
+                    <div className="mt-3 flex gap-2">
+                      <Input
+                        placeholder="e.g. stripe.com"
+                        value={brandInput}
+                        onChange={(e) => setBrandInput(e.target.value)}
+                        className="bg-background"
+                      />
+                      <Button
+                        type="button"
+                        onClick={handleBrandGenerate}
+                        disabled={!brandInput.trim()}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white shrink-0"
+                      >
+                        Generate Theme
+                      </Button>
+                    </div>
+                  </div>
+
                   <h2 className="mb-4 text-xl font-semibold">
-                    Choose a Base Theme
+                    Or, Choose a Base Theme
                   </h2>
                   <Controller
                     name="themeBase"

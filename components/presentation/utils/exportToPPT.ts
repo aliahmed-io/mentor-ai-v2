@@ -61,12 +61,10 @@ import type {
   TTimelineItemElement,
 } from "../editor/plugins/timeline-plugin";
 import {
-  type Frame,
   computeContentArea,
   computeRootImageFrame,
+  type Frame,
   layoutVerticalFlow,
-  SLIDE_HEIGHT_IN,
-  SLIDE_WIDTH_IN,
 } from "./layoutEngine";
 import type { PlateNode, PlateSlide } from "./parser";
 import type {
@@ -128,10 +126,6 @@ interface CustomChartElement extends TElement {
 export class PlateJSToPPTXConverter {
   private pptx: PptxGenJS;
   private currentSlide: PptxGenJS.Slide | null = null;
-
-  private readonly SLIDE_WIDTH = SLIDE_WIDTH_IN;
-  private readonly SLIDE_HEIGHT = SLIDE_HEIGHT_IN;
-  private readonly MARGIN = 0.5;
 
   // Theme defaults (mirror globals.css earthy workspace palette)
   private THEME: ThemeColors = {
@@ -267,7 +261,7 @@ export class PlateJSToPPTXConverter {
     const imagePath = rootImage.url as string;
     const frame = computeRootImageFrame(layoutType);
 
-    let imageOptions: PptxGenJS.ImageProps = {
+    const imageOptions: PptxGenJS.ImageProps = {
       path: imagePath,
       x: frame.x,
       y: frame.y,

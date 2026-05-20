@@ -17,13 +17,16 @@ export function getChatMessageText(message: {
   return "";
 }
 
-export function extractTitleFromOutlineContent(
-  content: string,
-): { title: string | null; cleanContent: string } {
+export function extractTitleFromOutlineContent(content: string): {
+  title: string | null;
+  cleanContent: string;
+} {
   const titleMatch = content.match(/<TITLE>\s*([\s\S]*?)\s*<\/TITLE>/i);
   if (titleMatch?.[1]) {
     const title = titleMatch[1].trim();
-    const cleanContent = content.replace(/<TITLE>[\s\S]*?<\/TITLE>/i, "").trim();
+    const cleanContent = content
+      .replace(/<TITLE>[\s\S]*?<\/TITLE>/i, "")
+      .trim();
     return { title, cleanContent };
   }
   return { title: null, cleanContent: content };

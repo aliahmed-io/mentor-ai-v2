@@ -101,8 +101,12 @@ export function SlideContainer({
       <div
         className={cn(
           "relative w-full transition-all duration-300",
-          !isPresenting && viewMode === "slides" && "aspect-video overflow-hidden border rounded-lg shadow-md max-w-5xl mx-auto",
-          !isPresenting && viewMode === "web" && "w-full mx-auto",
+          !isPresenting &&
+            viewMode === "slides" &&
+            "aspect-video overflow-hidden border rounded-lg shadow-md max-w-5xl mx-auto",
+          !isPresenting &&
+            viewMode === "web" &&
+            "w-full mx-auto min-h-[60vh] mb-8",
           !isPresenting &&
             (slideWidth ?? currentSlide?.width ?? "M") === "S" &&
             "[&_.presentation-slide]:text-sm",

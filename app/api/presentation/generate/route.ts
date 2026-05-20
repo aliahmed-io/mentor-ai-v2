@@ -2,12 +2,12 @@ import { streamText } from "ai";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { formatSearchResults } from "@/lib/presentation/generate-prompts";
-import { generateSingleSlide } from "@/lib/presentation/generate-slide";
 import {
   resolvePresentationModel,
   type TextModelTier,
 } from "@/lib/presentation/generate-model";
+import { formatSearchResults } from "@/lib/presentation/generate-prompts";
+import { generateSingleSlide } from "@/lib/presentation/generate-slide";
 import {
   getLayoutForSlide,
   getRequiredComponent,
@@ -23,7 +23,25 @@ const slidesRequestSchema = z.object({
   outlineItem: z.string().optional(),
   slideIndex: z.number().int().min(0).optional(),
   totalSlides: z.number().int().min(1).optional(),
-  requiredComponent: z.string().optional(),
+  requiredComponent: z
+    .enum([
+      "BULLETS",
+      "ICONS",
+      "CHART",
+      "TABLE",
+      "TIMELINE",
+      "CYCLE",
+      "COMPARE",
+      "COLUMNS",
+      "BOXES",
+      "BEFORE-AFTER",
+      "PROS-CONS",
+      "PYRAMID",
+      "STAIRCASE",
+      "ARROWS",
+      "ARROW-VERTICAL",
+    ])
+    .optional(),
   layout: z.string().optional(),
   language: z.string().min(1, "Language is required"),
   tone: z.string().optional().default("professional"),
@@ -309,9 +327,7 @@ export async function POST(req: Request) {
       const effectiveOutline = outline ?? [];
       const index = slideIndex ?? 0;
       const item =
-        outlineItem ??
-        effectiveOutline[index] ??
-        `Slide ${index + 1}`;
+        outlineItem ?? effectiveOutline[index] ?? `Slide ${index + 1}`;
       const total = totalSlides ?? (effectiveOutline.length || 1);
       const required = (requiredComponentRaw ??
         getRequiredComponent(tone, index)) as RichComponent;

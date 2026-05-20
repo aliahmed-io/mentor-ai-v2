@@ -131,7 +131,9 @@ export function stripXmlFromResponse(text: string): string {
     result = result.slice(0, -3).trimEnd();
   }
   if (!result.includes("<SECTION") && result.includes("<section")) {
-    result = result.replace(/<section/gi, "<SECTION").replace(/<\/section>/gi, "</SECTION>");
+    result = result
+      .replace(/<section/gi, "<SECTION")
+      .replace(/<\/section>/gi, "</SECTION>");
   }
   return result;
 }

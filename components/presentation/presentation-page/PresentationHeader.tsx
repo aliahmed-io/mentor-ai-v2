@@ -1,6 +1,6 @@
 "use client";
 import * as motion from "framer-motion/client";
-import { ArrowLeft, ChevronRight, Monitor, Layout } from "lucide-react";
+import { ArrowLeft, ChevronRight, Layout, Monitor } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -108,13 +108,19 @@ export default function PresentationHeader({ title }: PresentationHeaderProps) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setViewMode(viewMode === "slides" ? "web" : "slides")}
+              onClick={() =>
+                setViewMode(viewMode === "slides" ? "web" : "slides")
+              }
               className="text-muted-foreground hover:text-foreground transition-all duration-200 hover:scale-[1.02]"
             >
               {viewMode === "slides" ? (
-                <><Layout className="mr-1 h-4 w-4" /> Web View</>
+                <>
+                  <Layout className="mr-1 h-4 w-4" /> Web View
+                </>
               ) : (
-                <><Monitor className="mr-1 h-4 w-4" /> Slide View</>
+                <>
+                  <Monitor className="mr-1 h-4 w-4" /> Slide View
+                </>
               )}
             </Button>
             <ExportButton presentationId={currentPresentationId ?? ""} />

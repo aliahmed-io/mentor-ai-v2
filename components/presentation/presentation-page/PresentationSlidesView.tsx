@@ -5,7 +5,6 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import * as motion from "framer-motion/client";
 import { PlateController } from "platejs/react";
 import { useEffect } from "react";
 import { SlideContainer } from "@/components/presentation/presentation-page/SlideContainer";
@@ -90,55 +89,69 @@ export const PresentationSlidesView = ({
         <ThinkingDisplay
           thinking={usePresentationState.getState().presentationThinking}
           isGenerating={isGeneratingPresentation}
-          title="AI is thinking about your presentation..."
+          progress={usePresentationState.getState().generationProgress}
+          title="AI is generating your slides..."
         />
 
         <PlateController>
           <GlobalUndoRedoHandler />
 
-          <div className={cn(
-            "slides-view-container mx-auto",
-            viewMode === "web" && !isPresenting ? "flex flex-col gap-0 max-w-4xl py-12" : ""
-          )}>
+          <div
+            className={cn(
+              "slides-view-container mx-auto",
+              viewMode === "web" && !isPresenting
+                ? "flex flex-col gap-0 max-w-4xl py-12"
+                : "",
+            )}
+          >
             {items.map((slide, index) => (
               <div
                 key={slide.id}
                 className={cn(
                   `slide-wrapper slide-wrapper-${index} w-full`,
-                  viewMode === "web" && !isPresenting && "border-b border-muted/20 last:border-0"
+                  viewMode === "web" &&
+                    !isPresenting &&
+                    "border-b border-muted/20 last:border-0",
                 )}
               >
-              <SlideContainer
-                index={index}
-                id={slide.id}
-                slideWidth={slide.width}
-                slidesCount={items.length}
-              >
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: Math.min(index * 0.1, 1), duration: 0.5, ease: "easeOut" }}
-                  className={cn(
-                    `slide-container-${index}`,
-                    isPresenting ? "h-screen w-screen" : "h-full w-full",
-                  )}
+                <SlideContainer
+                  index={index}
+                  id={slide.id}
+                  slideWidth={slide.width}
+                  slidesCount={items.length}
+                  className={
+                    viewMode === "web" && !isPresenting ? "min-h-[60vh]" : ""
+                  }
                 >
-                  <PresentationEditor
-                    initialContent={slide}
+                  <div
                     className={cn(
-                      "h-full w-full border-none",
-                      isPresenting && "h-screen w-screen",
+                      `slide-container-${index}`,
+                      isPresenting ? "h-screen w-screen" : "h-full w-full",
+                      !isPresenting &&
+                        "animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-both",
                     )}
-                    id={slide.id}
-                    autoFocus={index === currentSlideIndex}
-                    slideIndex={index}
-                    isGenerating={isGeneratingPresentation}
-                    readOnly={isPresenting}
-                  />
-                </motion.div>
-              </SlideContainer>
-            </div>
-          ))}
+                    style={
+                      !isPresenting
+                        ? { animationDelay: `${Math.min(index * 100, 1000)}ms` }
+                        : undefined
+                    }
+                  >
+                    <PresentationEditor
+                      initialContent={slide}
+                      className={cn(
+                        "h-full w-full border-none",
+                        isPresenting && "h-screen w-screen",
+                      )}
+                      id={slide.id}
+                      autoFocus={index === currentSlideIndex}
+                      slideIndex={index}
+                      isGenerating={isGeneratingPresentation}
+                      readOnly={isPresenting}
+                    />
+                  </div>
+                </SlideContainer>
+              </div>
+            ))}
           </div>
         </PlateController>
       </SortableContext>

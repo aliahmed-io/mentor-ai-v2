@@ -206,7 +206,12 @@ export function PresentationGenerationManager() {
       currentPresentationTitle: activeTitle,
       theme: activeTheme,
       imageSource: activeImgSrc,
+      setNumSlides,
     } = usePresentationState.getState();
+
+    if (activeOutline && activeOutline.length > 0) {
+      setNumSlides(activeOutline.length);
+    }
 
     if (activeId) {
       void updatePresentation({
@@ -241,7 +246,10 @@ export function PresentationGenerationManager() {
   };
 
   const handleFinishOutline = useCallback(
-    (message: { content?: unknown; parts?: Array<{ type?: string; text?: string }> }) => {
+    (message: {
+      content?: unknown;
+      parts?: Array<{ type?: string; text?: string }>;
+    }) => {
       const messageText = getChatMessageText(message);
       if (messageText.length > 0) {
         applyOutlineFromText(messageText);
@@ -396,6 +404,7 @@ export function PresentationGenerationManager() {
     setIsGeneratingPresentation(true);
     setThumbnailUrl(undefined);
     setSlides([]);
+    state.setGenerationProgress({ current: 0, total: activeOutline.length });
 
     const accumulatedSlides: PlateSlide[] = [];
 
@@ -463,14 +472,16 @@ export function PresentationGenerationManager() {
               typography,
             ),
           );
+
+          usePresentationState.getState().setGenerationProgress({
+            current: i + 1,
+            total: activeOutline.length,
+          });
         }
       }
 
       const finalState = usePresentationState.getState();
-      if (
-        finalState.currentPresentationId &&
-        finalState.slides.length > 0
-      ) {
+      if (finalState.currentPresentationId && finalState.slides.length > 0) {
         await updatePresentation({
           id: finalState.currentPresentationId,
           content: { slides: finalState.slides, config: finalState.config },
@@ -486,11 +497,20 @@ export function PresentationGenerationManager() {
       if (signal.aborted) return;
       const message =
         error instanceof Error ? error.message : "Generation failed";
-      toast.error(`Failed to generate presentation: ${message}`);
-      resetGeneration();
+
+      const finalState = usePresentationState.getState();
+      if (finalState.slides.length > 0) {
+        toast.error(
+          `Generation stopped. ${finalState.slides.length} slides completed. Error: ${message}`,
+        );
+      } else {
+        toast.error(`Failed to generate presentation: ${message}`);
+        resetGeneration();
+      }
     } finally {
       setIsGeneratingPresentation(false);
       setShouldStartPresentationGeneration(false);
+      usePresentationState.getState().setGenerationProgress(null);
       presentationGenerationStartedRef.current = false;
     }
   }, [

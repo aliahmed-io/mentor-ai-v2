@@ -3,9 +3,9 @@ import {
   applyTypographyOverride,
   getThemeSnapshot,
   type PresentationColorMode,
+  type ThemeName,
   type ThemeProperties,
   themes,
-  type ThemeName,
 } from "./themes";
 
 export function bakeThemeIntoSlides(

@@ -32,7 +32,13 @@ const STYLE_COMPONENT_ROTATION: Record<PresentationStyle, RichComponent[]> = {
   elegant: ["TIMELINE", "COLUMNS", "BEFORE-AFTER", "TABLE", "BULLETS"],
 };
 
-const LAYOUT_ROTATION: LayoutType[] = ["vertical", "left", "right", "left", "vertical"];
+const LAYOUT_ROTATION: LayoutType[] = [
+  "vertical",
+  "left",
+  "right",
+  "left",
+  "vertical",
+];
 
 /** Default visual theme when user picks a presentation style */
 export const STYLE_DEFAULT_THEMES: Record<PresentationStyle, string> = {
@@ -46,10 +52,7 @@ export const STYLE_DEFAULT_THEMES: Record<PresentationStyle, string> = {
 export function normalizePresentationStyle(
   style: string | undefined,
 ): PresentationStyle {
-  if (
-    style &&
-    style in STYLE_COMPONENT_ROTATION
-  ) {
+  if (style && style in STYLE_COMPONENT_ROTATION) {
     return style as PresentationStyle;
   }
   return "professional";

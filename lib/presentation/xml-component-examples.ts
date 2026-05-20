@@ -76,15 +76,15 @@ export const COMPONENT_XML_EXAMPLES: Record<RichComponent, string> = {
 </ARROW-VERTICAL>`,
 };
 
-export const RICH_XML_TAGS = Object.keys(COMPONENT_XML_EXAMPLES) as RichComponent[];
+export const RICH_XML_TAGS = Object.keys(
+  COMPONENT_XML_EXAMPLES,
+) as RichComponent[];
 
 export function slideXmlHasRichComponent(
   xml: string,
   required?: RichComponent,
 ): boolean {
-  const tags = required
-    ? [required]
-    : (RICH_XML_TAGS as string[]);
+  const tags = required ? [required] : (RICH_XML_TAGS as string[]);
   return tags.some((tag) => {
     const open = `<${tag}`;
     const selfClose = `<${tag} `;

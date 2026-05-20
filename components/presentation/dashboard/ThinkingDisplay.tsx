@@ -15,12 +15,14 @@ interface ThinkingDisplayProps {
   thinking: string;
   isGenerating: boolean;
   title?: string;
+  progress?: { current: number; total: number } | null;
 }
 
 export function ThinkingDisplay({
   thinking,
-  isGenerating: _isGenerating,
+  isGenerating,
   title = "AI is thinking...",
+  progress,
 }: ThinkingDisplayProps) {
   const [open, setOpen] = useState(false);
 
@@ -34,8 +36,8 @@ export function ThinkingDisplay({
   const hasClosingTag = /<\/think>/i.test(thinking);
   const thinkingContent = extractThinkingContent(thinking);
 
-  // Only render when there is actual thinking content, not just loading
-  if (!thinkingContent) {
+  // Only render when there is actual thinking content or when generating with progress
+  if (!thinkingContent && !(isGenerating && progress)) {
     return null;
   }
 
@@ -50,14 +52,21 @@ export function ThinkingDisplay({
         <Collapsible open={open} onOpenChange={setOpen}>
           <CollapsibleTrigger className="flex w-full items-center justify-between">
             <div className="flex items-center gap-3">
-              {hasClosingTag ? (
+              {hasClosingTag && !isGenerating ? (
                 <Brain className="h-5 w-5 text-primary" />
               ) : (
                 <Loader2 className="h-5 w-5 animate-spin text-primary" />
               )}
-              <span className="text-sm font-medium text-foreground">
-                {title}
-              </span>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-foreground">
+                  {title}
+                </span>
+                {progress && (
+                  <span className="text-xs text-muted-foreground">
+                    Slide {progress.current} of {progress.total}
+                  </span>
+                )}
+              </div>
             </div>
 
             <ChevronDown

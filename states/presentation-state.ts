@@ -45,6 +45,10 @@ interface PresentationState {
   // Generation states
   generationStatus: GenerationStatus;
   setGenerationStatus: (status: GenerationStatus) => void;
+  generationProgress: { current: number; total: number } | null;
+  setGenerationProgress: (
+    progress: { current: number; total: number } | null,
+  ) => void;
   // Serial Image queue
   imageQueue: Array<{ slideId: string; query: string }>;
   pushImageToQueue: (slideId: string, query: string) => void;
@@ -192,6 +196,8 @@ export const usePresentationState = create<PresentationState>((set) => ({
       isGeneratingOutline: status === "generating_outline",
       isGeneratingPresentation: status === "generating_slides",
     }),
+  generationProgress: null,
+  setGenerationProgress: (progress) => set({ generationProgress: progress }),
   imageQueue: [],
   pushImageToQueue: (slideId, query) =>
     set((state) => ({
@@ -347,6 +353,7 @@ export const usePresentationState = create<PresentationState>((set) => ({
       isGeneratingPresentation: false,
       searchResults: [],
       generationStatus: "idle",
+      generationProgress: null,
       imageQueue: [],
     }),
 
@@ -360,8 +367,8 @@ export const usePresentationState = create<PresentationState>((set) => ({
       outlineThinking: "",
       presentationThinking: "",
       rootImageGeneration: {},
-      config: {},
       imageQueue: [],
+      generationProgress: null,
     })),
 
   setIsThemeCreatorOpen: (update) => set({ isThemeCreatorOpen: update }),

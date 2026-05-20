@@ -48,6 +48,9 @@ export function PresentationControls({
               Google Gemini (gemini-2.5-flash)
             </SelectItem>
             <SelectItem value="openai">OpenAI (gpt-4o-mini)</SelectItem>
+            <SelectItem value="quality">
+              Smart Model Choice (Highest Quality)
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>

@@ -226,33 +226,31 @@ h6.presentation-heading {
 }
 
 /* Presentation slide styling */
-.presentation-slide {
+.presentation-slide:not([data-use-slide-bg="true"]) {
   background-color: var(--presentation-background) !important;
+}
+
+.presentation-slide {
   border: 1px solid var(--presentation-accent);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   color: var(--presentation-text) !important;
 }
 
 /* Additional theme-specific slide styling */
-[data-theme="light"] [data-slide-content="true"],
-[data-theme="light"] .presentation-slide,
-.presentation-slide[style] {
+[data-theme="light"] [data-slide-content="true"]:not([data-use-slide-bg="true"]),
+[data-theme="light"] .presentation-slide:not([data-use-slide-bg="true"]),
+.presentation-slide[style]:not([data-use-slide-bg="true"]) {
   background-color: var(--presentation-background) !important;
 }
 
-[data-theme="dark"] [data-slide-content="true"],
-[data-theme="dark"] .presentation-slide,
-[data-theme="dark"] .presentation-slide[style] {
+[data-theme="dark"] [data-slide-content="true"]:not([data-use-slide-bg="true"]),
+[data-theme="dark"] .presentation-slide:not([data-use-slide-bg="true"]),
+[data-theme="dark"] .presentation-slide[style]:not([data-use-slide-bg="true"]) {
   background-color: var(--presentation-background) !important;
 }
 
 [data-theme="dark"] .presentation-slide {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-}
-
-/* Honor per-slide bgColor when explicitly set (matches export) */
-.presentation-slide[data-use-slide-bg="true"] {
-  background-color: inherit !important;
 }
 
 @media print {
@@ -267,10 +265,17 @@ h6.presentation-heading {
     position: absolute;
     left: 0;
     top: 0;
-    width: 100%;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
   }
   .presentation-slide {
+    break-inside: avoid;
+    page-break-inside: avoid;
     break-after: page;
     page-break-after: always;
+    margin-bottom: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 }

@@ -4,7 +4,6 @@
 import { Download } from "lucide-react";
 import { useState } from "react";
 import { exportPresentation } from "@/app/_actions/presentation/exportPresentationActions";
-import { getThemeSnapshot } from "@/lib/presentation/themes";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+import { getThemeSnapshot } from "@/lib/presentation/themes";
 import { usePresentationState } from "@/states/presentation-state";
 
 interface ExportPPTButtonProps {

@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getStyleDefaultTheme } from "@/lib/presentation/layout-recipes";
+import { bakeThemeIntoSlides } from "@/lib/presentation/apply-theme-to-slides";
 import {
   PRESENTATION_FONT_OPTIONS,
   type Themes,
@@ -19,11 +19,36 @@ import { ImageSourceSelector } from "./ImageSourceSelector";
 import { ThemeModal } from "./ThemeModal";
 
 const PRESENTATION_STYLES = [
-  { value: "professional", label: "Professional", desc: "Data-focused layouts with charts & tables.", icon: "📊" },
-  { value: "creative", label: "Creative", desc: "Storytelling workflows with icons & cycles.", icon: "🎨" },
-  { value: "minimal", label: "Minimal", desc: "High clarity, punchy items & crisp margins.", icon: "🔳" },
-  { value: "bold", label: "Bold", desc: "Impactful statements, pyramids & staircases.", icon: "⚡" },
-  { value: "elegant", label: "Elegant", desc: "Refined timelines & sophisticated structures.", icon: "✨" },
+  {
+    value: "professional",
+    label: "Professional",
+    desc: "Data-focused layouts with charts & tables.",
+    icon: "📊",
+  },
+  {
+    value: "creative",
+    label: "Creative",
+    desc: "Storytelling workflows with icons & cycles.",
+    icon: "🎨",
+  },
+  {
+    value: "minimal",
+    label: "Minimal",
+    desc: "High clarity, punchy items & crisp margins.",
+    icon: "🔳",
+  },
+  {
+    value: "bold",
+    label: "Bold",
+    desc: "Impactful statements, pyramids & staircases.",
+    icon: "⚡",
+  },
+  {
+    value: "elegant",
+    label: "Elegant",
+    desc: "Refined timelines & sophisticated structures.",
+    icon: "✨",
+  },
 ];
 
 export function ThemeSettings() {
@@ -36,6 +61,7 @@ export function ThemeSettings() {
     setImageSource,
     stockImageProvider,
     setStockImageProvider,
+    customThemeData,
   } = usePresentationState();
   const presentationColorMode = usePresentationState(
     (s) => s.presentationColorMode,
@@ -55,6 +81,26 @@ export function ThemeSettings() {
     heading?: string;
     body?: string;
   };
+  const slides = usePresentationState((s) => s.slides);
+  const setSlides = usePresentationState((s) => s.setSlides);
+
+  const applyThemeUpdate = (
+    newTheme: string,
+    newColorMode: "light" | "dark",
+    newTypography?: { heading?: string; body?: string },
+  ) => {
+    if (slides.length > 0) {
+      setSlides(
+        bakeThemeIntoSlides(
+          slides,
+          newTheme,
+          newColorMode,
+          customThemeData,
+          newTypography ?? typography,
+        ),
+      );
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -65,7 +111,10 @@ export function ThemeSettings() {
             type="button"
             variant={presentationColorMode === "light" ? "default" : "outline"}
             size="sm"
-            onClick={() => setPresentationColorMode("light")}
+            onClick={() => {
+              setPresentationColorMode("light");
+              applyThemeUpdate(theme as string, "light");
+            }}
           >
             Light slides
           </Button>
@@ -73,7 +122,10 @@ export function ThemeSettings() {
             type="button"
             variant={presentationColorMode === "dark" ? "default" : "outline"}
             size="sm"
-            onClick={() => setPresentationColorMode("dark")}
+            onClick={() => {
+              setPresentationColorMode("dark");
+              applyThemeUpdate(theme as string, "dark");
+            }}
           >
             Dark slides
           </Button>
@@ -87,20 +139,30 @@ export function ThemeSettings() {
         <Label className="text-sm font-medium">Typography</Label>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Heading font</Label>
+            <Label className="text-xs text-muted-foreground">
+              Heading font
+            </Label>
             <Select
-              value={typography.heading ?? ""}
-              onValueChange={(heading) =>
+              value={typography.heading ?? "default"}
+              onValueChange={(heading) => {
+                const newHeading = heading === "default" ? undefined : heading;
+                const newTypography = { ...typography, heading: newHeading };
                 setConfig({
                   ...config,
-                  typography: { ...typography, heading },
-                })
-              }
+                  typography: newTypography,
+                });
+                applyThemeUpdate(
+                  theme as string,
+                  presentationColorMode,
+                  newTypography,
+                );
+              }}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Theme default" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="default">Theme default</SelectItem>
                 {PRESENTATION_FONT_OPTIONS.map((font) => (
                   <SelectItem key={font} value={font}>
                     {font}
@@ -112,18 +174,26 @@ export function ThemeSettings() {
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Body font</Label>
             <Select
-              value={typography.body ?? ""}
-              onValueChange={(body) =>
+              value={typography.body ?? "default"}
+              onValueChange={(body) => {
+                const newBody = body === "default" ? undefined : body;
+                const newTypography = { ...typography, body: newBody };
                 setConfig({
                   ...config,
-                  typography: { ...typography, body },
-                })
-              }
+                  typography: newTypography,
+                });
+                applyThemeUpdate(
+                  theme as string,
+                  presentationColorMode,
+                  newTypography,
+                );
+              }}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Theme default" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="default">Theme default</SelectItem>
                 {PRESENTATION_FONT_OPTIONS.map((font) => (
                   <SelectItem key={font} value={font}>
                     {font}
@@ -153,7 +223,10 @@ export function ThemeSettings() {
             return (
               <button
                 key={key}
-                onClick={() => setTheme(key as Themes)}
+                onClick={() => {
+                  setTheme(key as Themes);
+                  applyThemeUpdate(key, presentationColorMode);
+                }}
                 className={cn(
                   "group relative space-y-3 rounded-lg border p-4 text-left transition-all hover:scale-[1.01] hover:shadow-md",
                   theme === key
@@ -210,14 +283,26 @@ export function ThemeSettings() {
                   style={{ color: modeColors.muted }}
                 >
                   <div className="min-w-0">
-                    <span className="block text-[9px] uppercase tracking-wider font-semibold opacity-75">Typography</span>
-                    <span className="block font-medium truncate" style={{ fontFamily: themeOption.fonts.heading }}>
-                      {themeOption.fonts.heading.split(',')[0]}
+                    <span className="block text-[9px] uppercase tracking-wider font-semibold opacity-75">
+                      Typography
+                    </span>
+                    <span
+                      className="block font-medium truncate"
+                      style={{ fontFamily: themeOption.fonts.heading }}
+                    >
+                      {themeOption.fonts.heading.split(",")[0]}
                     </span>
                   </div>
                   <div className="text-right shrink-0">
-                    <span className="block text-[9px] uppercase tracking-wider font-semibold opacity-75">Sample</span>
-                    <span className="block text-xs font-semibold" style={{ fontFamily: themeOption.fonts.heading }}>Aa</span>
+                    <span className="block text-[9px] uppercase tracking-wider font-semibold opacity-75">
+                      Sample
+                    </span>
+                    <span
+                      className="block text-xs font-semibold"
+                      style={{ fontFamily: themeOption.fonts.heading }}
+                    >
+                      Aa
+                    </span>
                   </div>
                 </div>
               </button>
@@ -245,7 +330,6 @@ export function ThemeSettings() {
               key={style.value}
               onClick={() => {
                 setPresentationStyle(style.value);
-                setTheme(getStyleDefaultTheme(style.value) as Themes);
               }}
               className={cn(
                 "group flex flex-col justify-between rounded-lg border p-4 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-sm",

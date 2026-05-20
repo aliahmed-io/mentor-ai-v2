@@ -23,7 +23,13 @@ export function computeRootImageFrame(
   };
   switch (layoutType) {
     case "left":
-      return { x: 0, y: 0, w: SLIDE_WIDTH_IN * ROOT_IMAGE_WIDTH_RATIO, h: SLIDE_HEIGHT_IN, layoutType };
+      return {
+        x: 0,
+        y: 0,
+        w: SLIDE_WIDTH_IN * ROOT_IMAGE_WIDTH_RATIO,
+        h: SLIDE_HEIGHT_IN,
+        layoutType,
+      };
     case "right":
       return {
         x: SLIDE_WIDTH_IN * (1 - ROOT_IMAGE_WIDTH_RATIO),

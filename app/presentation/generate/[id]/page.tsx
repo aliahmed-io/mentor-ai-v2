@@ -41,15 +41,15 @@ import {
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import {
-  type ThemeProperties,
-  type Themes,
-  themes,
-} from "@/lib/presentation/themes";
-import {
   clampSlideCount,
   MAX_PRESENTATION_SLIDES,
   MIN_PRESENTATION_SLIDES,
 } from "@/lib/presentation/constants";
+import {
+  type ThemeProperties,
+  type Themes,
+  themes,
+} from "@/lib/presentation/themes";
 import { cn } from "@/lib/utils";
 import { usePresentationState } from "@/states/presentation-state";
 

@@ -1,5 +1,5 @@
-import { SlideParser } from "@/components/presentation/utils/parser";
 import type { PlateSlide } from "@/components/presentation/utils/parser";
+import { SlideParser } from "@/components/presentation/utils/parser";
 import { bakeThemeIntoSlides } from "./apply-theme-to-slides";
 import {
   getLayoutForSlide,

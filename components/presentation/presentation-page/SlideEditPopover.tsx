@@ -11,15 +11,11 @@ import {
   PanelRight,
   PanelTop,
   RefreshCw,
-  Trash2,
   Sparkles,
+  Trash2,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import {
-  mergeRegeneratedSlide,
-  regenerateSlideFromApi,
-} from "@/lib/presentation/regenerate-slide-client";
 import { Button } from "@/components/ui/button";
 import ColorPicker from "@/components/ui/color-picker";
 import {
@@ -28,6 +24,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  mergeRegeneratedSlide,
+  regenerateSlideFromApi,
+} from "@/lib/presentation/regenerate-slide-client";
 import { cn } from "@/lib/utils";
 import { usePresentationState } from "@/states/presentation-state";
 import type { LayoutType } from "../utils/parser";
@@ -53,6 +53,8 @@ export function SlideEditPopover({ index }: SlideEditPopoverProps) {
     customThemeData,
     presentationColorMode,
     config,
+    startRootImageGeneration,
+    pushImageToQueue,
   } = usePresentationState();
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [customPrompt, setCustomPrompt] = useState("");
@@ -84,15 +86,8 @@ export function SlideEditPopover({ index }: SlideEditPopoverProps) {
   const hasRootImage = !!currentSlide?.rootImage;
 
   const handleImageEdit = () => {
-    // For demo purposes, just set a placeholder image
     // In production, this would open an image selector
-    updateSlide({
-      rootImage: {
-        query: "placeholder image",
-        url: "https://placehold.co/600x400",
-      },
-    });
-    alert("This would open the image selector in production");
+    toast.info("Image selector feature coming soon.");
   };
 
   const handleImageDelete = () => {
@@ -110,7 +105,7 @@ export function SlideEditPopover({ index }: SlideEditPopoverProps) {
       const promptToUse = overridePrompt?.trim()
         ? `[USER EDIT INSTRUCTION: ${overridePrompt.trim()}] Original context: ${presentationInput}`
         : presentationInput;
-        
+
       const newSlide = await regenerateSlideFromApi({
         slideIndex: index,
         outlineItem,
@@ -137,6 +132,13 @@ export function SlideEditPopover({ index }: SlideEditPopoverProps) {
           typography,
         ),
       );
+
+      // Re-queue the root image if the new layout requests one
+      if (newSlide.rootImage?.query && !newSlide.rootImage.url) {
+        startRootImageGeneration(newSlide.id, newSlide.rootImage.query);
+        pushImageToQueue(newSlide.id, newSlide.rootImage.query);
+      }
+
       toast.success("Slide layout regenerated");
     } catch (e) {
       toast.error(
@@ -297,9 +299,11 @@ export function SlideEditPopover({ index }: SlideEditPopoverProps) {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-blue-400" />
-                <span className="text-sm font-medium text-zinc-200">AI Copilot</span>
+                <span className="text-sm font-medium text-zinc-200">
+                  AI Copilot
+                </span>
               </div>
-              <Textarea 
+              <Textarea
                 placeholder="e.g., Turn this into a timeline..."
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
@@ -316,7 +320,7 @@ export function SlideEditPopover({ index }: SlideEditPopoverProps) {
                 {isRegenerating ? "Applying..." : "Apply Edit"}
               </Button>
             </div>
-            
+
             <Button
               type="button"
               variant="outline"

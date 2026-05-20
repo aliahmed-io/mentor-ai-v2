@@ -90,9 +90,7 @@ export function getThemeSnapshot(
 ): ThemeProperties & { activeColors: ThemeColors } {
   const base =
     customThemeData ??
-    (themeKey in themes
-      ? themes[themeKey as ThemeName]
-      : themes.mystique);
+    (themeKey in themes ? themes[themeKey as ThemeName] : themes.mystique);
   const withFonts = applyTypographyOverride(base, typography);
   const activeColors =
     colorMode === "dark" ? withFonts.colors.dark : withFonts.colors.light;
