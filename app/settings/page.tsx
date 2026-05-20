@@ -1,11 +1,11 @@
 "use client";
 
-import { Eye, EyeOff, Save, Key, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Key, Save, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 export default function SettingsPage() {
   const [geminiKey, setGeminiKey] = useState("");
@@ -32,7 +32,7 @@ export default function SettingsPage() {
     } else {
       document.cookie = "gemini_api_key=; path=/; max-age=0;";
     }
-    
+
     if (openaiKey.trim()) {
       document.cookie = `openai_api_key=${openaiKey.trim()}; path=/; max-age=${maxAge}; SameSite=Lax`;
     } else {
@@ -65,15 +65,21 @@ export default function SettingsPage() {
           <Card className="border-border/80 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[2rem] overflow-hidden">
             <CardContent className="p-6 md:p-8 space-y-6">
               <div>
-                <h2 className="text-xl font-serif font-extrabold text-foreground">API Keys</h2>
+                <h2 className="text-xl font-serif font-extrabold text-foreground">
+                  API Keys
+                </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Provide your own API keys to bypass default platform limits. These are stored locally on your device in cookies and sent securely to our servers during generation.
+                  Provide your own API keys to bypass default platform limits.
+                  These are stored locally on your device in cookies and sent
+                  securely to our servers during generation.
                 </p>
               </div>
-              
+
               <div className="space-y-4 pt-4 border-t border-border/40">
                 <div className="space-y-2">
-                  <label className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">Gemini API Key</label>
+                  <label className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+                    Gemini API Key
+                  </label>
                   <div className="relative">
                     <Input
                       type={showGemini ? "text" : "password"}
@@ -87,14 +93,22 @@ export default function SettingsPage() {
                       onClick={() => setShowGemini(!showGemini)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      {showGemini ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      {showGemini ? (
+                        <EyeOff className="size-4" />
+                      ) : (
+                        <Eye className="size-4" />
+                      )}
                     </button>
                   </div>
-                  <p className="text-[11px] text-muted-foreground">Required for Quizzes, Flashcards, and Presentations.</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Required for Quizzes, Flashcards, and Presentations.
+                  </p>
                 </div>
 
                 <div className="space-y-2 pt-2">
-                  <label className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">OpenAI API Key</label>
+                  <label className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+                    OpenAI API Key
+                  </label>
                   <div className="relative">
                     <Input
                       type={showOpenai ? "text" : "password"}
@@ -108,15 +122,24 @@ export default function SettingsPage() {
                       onClick={() => setShowOpenai(!showOpenai)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      {showOpenai ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      {showOpenai ? (
+                        <EyeOff className="size-4" />
+                      ) : (
+                        <Eye className="size-4" />
+                      )}
                     </button>
                   </div>
-                  <p className="text-[11px] text-muted-foreground">Required for the Tutor Chatbot.</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Required for the Tutor Chatbot.
+                  </p>
                 </div>
               </div>
 
               <div className="pt-4">
-                <Button onClick={saveKeys} className="gap-2 rounded-full px-8 py-6">
+                <Button
+                  onClick={saveKeys}
+                  className="gap-2 rounded-full px-8 py-6"
+                >
                   <Save className="size-4" /> Save Preferences
                 </Button>
               </div>
@@ -141,13 +164,17 @@ export default function SettingsPage() {
               </div>
               <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
                 <p>
-                  Your API keys are stored securely as HTTP cookies on your device. 
+                  Your API keys are stored securely as HTTP cookies on your
+                  device.
                 </p>
                 <p>
-                  When you initiate an AI generation, these keys are passed to our server and used strictly for that specific request. They are never saved to our database.
+                  When you initiate an AI generation, these keys are passed to
+                  our server and used strictly for that specific request. They
+                  are never saved to our database.
                 </p>
                 <p>
-                  You can clear your keys at any time by emptying the fields and clicking Save.
+                  You can clear your keys at any time by emptying the fields and
+                  clicking Save.
                 </p>
               </div>
             </CardContent>

@@ -19,18 +19,23 @@ export const useSlideChangeWatcher = (
 ) => {
   const { debounceDelay = 1000 } = options;
   const slides = usePresentationState((s) => s.slides);
-  const _isGeneratingPresentation = usePresentationState(
+  const isGeneratingPresentation = usePresentationState(
     (s) => s.isGeneratingPresentation,
   );
+  const generationStatus = usePresentationState((s) => s.generationStatus);
   const { save, saveImmediately } = useDebouncedSave({ delay: debounceDelay });
 
   // Watch for changes to the slides array and trigger save
   useEffect(() => {
     // Only save if we have slides and we're not generating
-    if (slides.length > 0) {
+    if (
+      slides.length > 0 &&
+      !isGeneratingPresentation &&
+      generationStatus === "idle"
+    ) {
       save();
     }
-  }, [slides, save]);
+  }, [slides, save, isGeneratingPresentation, generationStatus]);
 
   return {
     saveImmediately,

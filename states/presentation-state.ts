@@ -4,12 +4,21 @@ import type { ImageModelList } from "@/app/_actions/image/generate";
 import type { PlateSlide } from "@/components/presentation/utils/parser";
 import type { ThemeProperties, Themes } from "@/lib/presentation/themes";
 
+export type GenerationStatus =
+  | "idle"
+  | "generating_outline"
+  | "outline_completed"
+  | "generating_slides"
+  | "slides_completed"
+  | "failed";
+
 interface PresentationState {
   currentPresentationId: string | null;
   currentPresentationTitle: string | null;
   isGridView: boolean;
   isSheetOpen: boolean;
   numSlides: number;
+  textModel: "gemini" | "openai";
 
   theme: Themes | string;
   customThemeData: ThemeProperties | null;
@@ -29,6 +38,13 @@ interface PresentationState {
   config: Record<string, unknown>;
   setConfig: (config: Record<string, unknown>) => void;
   // Generation states
+  generationStatus: GenerationStatus;
+  setGenerationStatus: (status: GenerationStatus) => void;
+  // Serial Image queue
+  imageQueue: Array<{ slideId: string; query: string }>;
+  pushImageToQueue: (slideId: string, query: string) => void;
+  popImageFromQueue: () => { slideId: string; query: string } | null;
+
   shouldStartOutlineGeneration: boolean;
   shouldStartPresentationGeneration: boolean;
   isGeneratingOutline: boolean;
@@ -75,6 +91,7 @@ interface PresentationState {
   thumbnailUrl?: string;
   setThumbnailUrl: (url: string | undefined) => void;
   setLanguage: (lang: string) => void;
+  setTextModel: (model: "gemini" | "openai") => void;
   setPageStyle: (style: string) => void;
   setShowTemplates: (show: boolean) => void;
   setPresentationInput: (input: string) => void;
@@ -130,6 +147,7 @@ export const usePresentationState = create<PresentationState>((set) => ({
   setThumbnailUrl: (url) => set({ thumbnailUrl: url }),
   numSlides: 5,
   language: "en-US",
+  textModel: "gemini",
   pageStyle: "default",
   showTemplates: false,
   presentationInput: "",
@@ -160,6 +178,31 @@ export const usePresentationState = create<PresentationState>((set) => ({
   setIsRightPanelCollapsed: (update) => set({ isRightPanelCollapsed: update }),
 
   // Generation states
+  generationStatus: "idle",
+  setGenerationStatus: (status) =>
+    set({
+      generationStatus: status,
+      isGeneratingOutline: status === "generating_outline",
+      isGeneratingPresentation: status === "generating_slides",
+    }),
+  imageQueue: [],
+  pushImageToQueue: (slideId, query) =>
+    set((state) => ({
+      imageQueue: [...state.imageQueue, { slideId, query }],
+    })),
+  popImageFromQueue: () => {
+    let popped: { slideId: string; query: string } | null = null;
+    set((state) => {
+      if (state.imageQueue.length > 0) {
+        const [head, ...tail] = state.imageQueue;
+        popped = head || null;
+        return { imageQueue: tail };
+      }
+      return {};
+    });
+    return popped;
+  },
+
   shouldStartOutlineGeneration: false,
   shouldStartPresentationGeneration: false,
   isGeneratingOutline: false,
@@ -211,6 +254,7 @@ export const usePresentationState = create<PresentationState>((set) => ({
   setIsSheetOpen: (isOpen) => set({ isSheetOpen: isOpen }),
   setNumSlides: (num) => set({ numSlides: num }),
   setLanguage: (lang) => set({ language: lang }),
+  setTextModel: (model) => set({ textModel: model }),
   setTheme: (theme, customData = null) =>
     set({
       theme: theme,
@@ -250,9 +294,27 @@ export const usePresentationState = create<PresentationState>((set) => ({
   setShouldStartPresentationGeneration: (shouldStart) =>
     set({ shouldStartPresentationGeneration: shouldStart }),
   setIsGeneratingOutline: (isGenerating) =>
-    set({ isGeneratingOutline: isGenerating }),
+    set((state) => {
+      const nextStatus = isGenerating ? "generating_outline" : "idle";
+      return {
+        isGeneratingOutline: isGenerating,
+        generationStatus:
+          state.generationStatus === "generating_outline" && !isGenerating
+            ? "outline_completed"
+            : nextStatus,
+      };
+    }),
   setIsGeneratingPresentation: (isGenerating) =>
-    set({ isGeneratingPresentation: isGenerating }),
+    set((state) => {
+      const nextStatus = isGenerating ? "generating_slides" : "idle";
+      return {
+        isGeneratingPresentation: isGenerating,
+        generationStatus:
+          state.generationStatus === "generating_slides" && !isGenerating
+            ? "slides_completed"
+            : nextStatus,
+      };
+    }),
   startOutlineGeneration: () =>
     set({
       shouldStartOutlineGeneration: true,
@@ -260,11 +322,13 @@ export const usePresentationState = create<PresentationState>((set) => ({
       shouldStartPresentationGeneration: false,
       isGeneratingPresentation: false,
       outline: [],
+      generationStatus: "generating_outline",
     }),
   startPresentationGeneration: () =>
     set({
       shouldStartPresentationGeneration: true,
       isGeneratingPresentation: true,
+      generationStatus: "generating_slides",
     }),
   resetGeneration: () =>
     set({
@@ -273,6 +337,8 @@ export const usePresentationState = create<PresentationState>((set) => ({
       isGeneratingOutline: false,
       isGeneratingPresentation: false,
       searchResults: [],
+      generationStatus: "idle",
+      imageQueue: [],
     }),
 
   // Reset everything except ID and current input when starting new outline generation
@@ -286,6 +352,7 @@ export const usePresentationState = create<PresentationState>((set) => ({
       presentationThinking: "",
       rootImageGeneration: {},
       config: {},
+      imageQueue: [],
     })),
 
   setIsThemeCreatorOpen: (update) => set({ isThemeCreatorOpen: update }),

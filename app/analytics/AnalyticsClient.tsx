@@ -67,19 +67,60 @@ export default function AnalyticsClient({
               {!hasStudy ? (
                 <div className="rounded-2xl border border-border/80 bg-background/20 p-8 text-center text-xs text-muted-foreground flex flex-col items-center justify-center gap-2 min-h-[220px]">
                   <Sparkles className="size-5 text-primary/40 animate-pulse" />
-                  No focus intervals logged yet. Start a pomodoro timer to log metrics!
+                  No focus intervals logged yet. Start a pomodoro timer to log
+                  metrics!
                 </div>
               ) : (
                 <ChartContainer
-                  config={{ minutes: { label: "Minutes", color: "var(--primary)" } }}
+                  config={{
+                    minutes: { label: "Minutes", color: "var(--primary)" },
+                  }}
                   className="w-full h-[220px]"
                 >
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={studyTimeByDay} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                      <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                      <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                      <Line type="monotone" dataKey="minutes" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ stroke: "hsl(var(--primary))", strokeWidth: 2, r: 3, fill: "hsl(var(--card))" }} activeDot={{ r: 5, strokeWidth: 0, fill: "hsl(var(--foreground))" }} />
+                    <LineChart
+                      data={studyTimeByDay}
+                      margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="hsl(var(--border))"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="day"
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{
+                          fontSize: 10,
+                          fill: "hsl(var(--muted-foreground))",
+                        }}
+                      />
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{
+                          fontSize: 10,
+                          fill: "hsl(var(--muted-foreground))",
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="minutes"
+                        stroke="hsl(var(--primary))"
+                        strokeWidth={3}
+                        dot={{
+                          stroke: "hsl(var(--primary))",
+                          strokeWidth: 2,
+                          r: 3,
+                          fill: "hsl(var(--card))",
+                        }}
+                        activeDot={{
+                          r: 5,
+                          strokeWidth: 0,
+                          fill: "hsl(var(--foreground))",
+                        }}
+                      />
                       <ChartTooltip content={<ChartTooltipContent />} />
                     </LineChart>
                   </ResponsiveContainer>
@@ -103,15 +144,55 @@ export default function AnalyticsClient({
                 </div>
               ) : (
                 <ChartContainer
-                  config={{ count: { label: "Cards", color: "var(--primary)" } }}
+                  config={{
+                    count: { label: "Cards", color: "var(--primary)" },
+                  }}
                   className="w-full h-[220px]"
                 >
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={flashcardsByDay} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                      <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                      <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                      <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ stroke: "hsl(var(--primary))", strokeWidth: 2, r: 3, fill: "hsl(var(--card))" }} activeDot={{ r: 5, strokeWidth: 0, fill: "hsl(var(--foreground))" }} />
+                    <LineChart
+                      data={flashcardsByDay}
+                      margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="hsl(var(--border))"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="day"
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{
+                          fontSize: 10,
+                          fill: "hsl(var(--muted-foreground))",
+                        }}
+                      />
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{
+                          fontSize: 10,
+                          fill: "hsl(var(--muted-foreground))",
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="count"
+                        stroke="hsl(var(--primary))"
+                        strokeWidth={3}
+                        dot={{
+                          stroke: "hsl(var(--primary))",
+                          strokeWidth: 2,
+                          r: 3,
+                          fill: "hsl(var(--card))",
+                        }}
+                        activeDot={{
+                          r: 5,
+                          strokeWidth: 0,
+                          fill: "hsl(var(--foreground))",
+                        }}
+                      />
                       <ChartTooltip content={<ChartTooltipContent />} />
                     </LineChart>
                   </ResponsiveContainer>
@@ -125,7 +206,8 @@ export default function AnalyticsClient({
             <CardContent className="p-6 md:p-8 space-y-4">
               <div className="flex items-center justify-between pb-2 border-b border-border/40">
                 <h3 className="text-sm font-extrabold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                  <ListChecks className="size-4 text-primary" /> Quizzes Evaluated
+                  <ListChecks className="size-4 text-primary" /> Quizzes
+                  Evaluated
                 </h3>
               </div>
               {!hasQuizzes ? (
@@ -135,15 +217,55 @@ export default function AnalyticsClient({
                 </div>
               ) : (
                 <ChartContainer
-                  config={{ count: { label: "Quizzes", color: "var(--primary)" } }}
+                  config={{
+                    count: { label: "Quizzes", color: "var(--primary)" },
+                  }}
                   className="w-full h-[220px]"
                 >
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={quizzesByDay} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                      <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                      <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                      <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ stroke: "hsl(var(--primary))", strokeWidth: 2, r: 3, fill: "hsl(var(--card))" }} activeDot={{ r: 5, strokeWidth: 0, fill: "hsl(var(--foreground))" }} />
+                    <LineChart
+                      data={quizzesByDay}
+                      margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="hsl(var(--border))"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="day"
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{
+                          fontSize: 10,
+                          fill: "hsl(var(--muted-foreground))",
+                        }}
+                      />
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{
+                          fontSize: 10,
+                          fill: "hsl(var(--muted-foreground))",
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="count"
+                        stroke="hsl(var(--primary))"
+                        strokeWidth={3}
+                        dot={{
+                          stroke: "hsl(var(--primary))",
+                          strokeWidth: 2,
+                          r: 3,
+                          fill: "hsl(var(--card))",
+                        }}
+                        activeDot={{
+                          r: 5,
+                          strokeWidth: 0,
+                          fill: "hsl(var(--foreground))",
+                        }}
+                      />
                       <ChartTooltip content={<ChartTooltipContent />} />
                     </LineChart>
                   </ResponsiveContainer>
@@ -178,7 +300,9 @@ export default function AnalyticsClient({
                   </div>
                   <div className="text-xl font-extrabold text-foreground">
                     {totals.minutes.toLocaleString()}{" "}
-                    <span className="text-xs font-medium text-muted-foreground">m</span>
+                    <span className="text-xs font-medium text-muted-foreground">
+                      m
+                    </span>
                   </div>
                 </div>
               </div>
@@ -234,7 +358,8 @@ export default function AnalyticsClient({
             <div className="space-y-4">
               <div className="flex items-center justify-between pb-2 border-b border-border/40">
                 <h3 className="text-sm font-extrabold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                  <CalendarIcon className="size-4 text-primary" /> Calendar Alert
+                  <CalendarIcon className="size-4 text-primary" /> Calendar
+                  Alert
                 </h3>
               </div>
               {!nextEvent ? (
@@ -268,7 +393,8 @@ export default function AnalyticsClient({
 
             <div className="pt-4 border-t border-border/30 text-center">
               <p className="text-[10px] text-muted-foreground leading-relaxed">
-                Add study blocks in the Sanctuary Planner to keep metrics synchronized.
+                Add study blocks in the Sanctuary Planner to keep metrics
+                synchronized.
               </p>
             </div>
           </CardContent>

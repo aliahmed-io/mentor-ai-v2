@@ -13,6 +13,8 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
+  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -92,6 +94,10 @@ export function ThemeModal({ children }: { children?: ReactNode }) {
         shouldHaveClose={false}
         className="h-[60vh] max-w-5xl overflow-auto"
       >
+        <DialogTitle className="sr-only">Customize Theme</DialogTitle>
+        <DialogDescription className="sr-only">
+          Select or design a custom styling theme for the presentation cards.
+        </DialogDescription>
         <div className="flex h-full flex-col ">
           <Tabs
             defaultValue="my-themes"

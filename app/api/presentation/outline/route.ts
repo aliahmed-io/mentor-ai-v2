@@ -1,3 +1,4 @@
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
 import { cookies } from "next/headers";
@@ -55,8 +56,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { prompt, numberOfCards, language } =
-      (await req.json()) as OutlineRequest;
+    const { prompt, numberOfCards, language, textModel } =
+      (await req.json()) as OutlineRequest & {
+        textModel?: "gemini" | "openai";
+      };
 
     if (!prompt || !numberOfCards || !language) {
       return NextResponse.json(
@@ -79,14 +82,35 @@ export async function POST(req: Request) {
     });
 
     const cookieStore = await cookies();
-    const apiKey = cookieStore.get("openai_api_key")?.value || process.env.OPENAI_API_KEY;
-    if (!apiKey) {
+    const geminiKey =
+      cookieStore.get("gemini_api_key")?.value || process.env.GEMINI_API_KEY;
+    const openaiKey =
+      cookieStore.get("openai_api_key")?.value || process.env.OPENAI_API_KEY;
+
+    let model;
+    if (textModel === "openai" && openaiKey) {
+      const openai = createOpenAI({ apiKey: openaiKey });
+      model = openai("gpt-4o-mini");
+    } else if (textModel === "gemini" && geminiKey) {
+      const google = createGoogleGenerativeAI({ apiKey: geminiKey });
+      model = google("gemini-2.5-flash");
+    } else if (geminiKey) {
+      // Fallback: Gemini Key is present
+      const google = createGoogleGenerativeAI({ apiKey: geminiKey });
+      model = google("gemini-2.5-flash");
+    } else if (openaiKey) {
+      // Fallback: OpenAI Key is present
+      const openai = createOpenAI({ apiKey: openaiKey });
+      model = openai("gpt-4o-mini");
+    } else {
       return NextResponse.json(
-        { error: "OpenAI API key is not configured. Please add your key in Settings." },
+        {
+          error:
+            "No API key configured. Please add your Gemini or OpenAI API key in Settings.",
+        },
         { status: 500 },
       );
     }
-    const openai = createOpenAI({ apiKey });
 
     // Format the prompt with template variables
     const formattedPrompt = outlineTemplate
@@ -96,7 +120,7 @@ export async function POST(req: Request) {
       .replace(/{prompt}/g, prompt);
 
     const result = streamText({
-      model: openai("gpt-4o-mini"),
+      model,
       prompt: formattedPrompt,
     });
 

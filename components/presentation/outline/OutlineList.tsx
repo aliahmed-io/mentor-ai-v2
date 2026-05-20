@@ -14,7 +14,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Plus } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePresentationState } from "@/states/presentation-state";
 import { OutlineItem } from "./OutlineItem";
@@ -57,44 +57,60 @@ export function OutlineList() {
     }),
   );
 
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
 
-    if (over && active.id !== over.id) {
-      const oldIndex = items.findIndex((item) => item.id === active.id);
-      const newIndex = items.findIndex((item) => item.id === over.id);
-      const newItems = arrayMove(items, oldIndex, newIndex);
-      setItems(newItems);
+      if (over && active.id !== over.id) {
+        setItems((prevItems) => {
+          const oldIndex = prevItems.findIndex((item) => item.id === active.id);
+          const newIndex = prevItems.findIndex((item) => item.id === over.id);
+          const newItems = arrayMove(prevItems, oldIndex, newIndex);
+          setOutline(newItems.map((item) => item.title));
+          return newItems;
+        });
+      }
+    },
+    [setOutline],
+  );
+
+  const handleTitleChange = useCallback(
+    (id: string, newTitle: string) => {
+      setItems((prevItems) => {
+        const newItems = prevItems.map((item) =>
+          item.id === id ? { ...item, title: newTitle } : item,
+        );
+        setOutline(newItems.map((item) => item.title));
+        return newItems;
+      });
+    },
+    [setOutline],
+  );
+
+  const handleAddCard = useCallback(() => {
+    setItems((prevItems) => {
+      const newId =
+        prevItems.length > 0
+          ? (
+              Math.max(...prevItems.map((item) => parseInt(item.id, 10))) + 1
+            ).toString()
+          : "1";
+      const newItems = [...prevItems, { id: newId, title: "New Card" }];
       setOutline(newItems.map((item) => item.title));
-    }
-  }
+      return newItems;
+    });
+  }, [setOutline]);
 
-  const handleTitleChange = (id: string, newTitle: string) => {
-    const newItems = items.map((item) =>
-      item.id === id ? { ...item, title: newTitle } : item,
-    );
-    setItems(newItems);
-    setOutline(newItems.map((item) => item.title));
-  };
-
-  const handleAddCard = () => {
-    const newId =
-      items.length > 0
-        ? (
-            Math.max(...items.map((item) => parseInt(item.id, 10))) + 1
-          ).toString()
-        : "1";
-    const newItems = [...items, { id: newId, title: "New Card" }];
-    setItems(newItems);
-    // Update the outline in the store
-    setOutline(newItems.map((item) => item.title));
-  };
-
-  const handleDeleteCard = (id: string) => {
-    const newItems = items.filter((item) => item.id !== id);
-    setItems(newItems);
-    setOutline(newItems.map((item) => item.title));
-  };
+  const handleDeleteCard = useCallback(
+    (id: string) => {
+      setItems((prevItems) => {
+        const newItems = prevItems.filter((item) => item.id !== id);
+        setOutline(newItems.map((item) => item.title));
+        return newItems;
+      });
+    },
+    [setOutline],
+  );
 
   const content = useMemo(() => {
     const totalSlides = numSlides;

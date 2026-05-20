@@ -1,5 +1,12 @@
 "use client";
-import { Brain, FileText, HelpCircle, Sparkles, Upload, Layers } from "lucide-react";
+import {
+  Brain,
+  FileText,
+  HelpCircle,
+  Layers,
+  Sparkles,
+  Upload,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { RecentFlashcardsPanel } from "@/components/recent/RecentFlashcardsPanel";
@@ -93,7 +100,8 @@ export default function FlashcardPage() {
               {/* Card Title & Input */}
               <div className="space-y-3">
                 <label className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                  <FileText className="size-3.5 text-primary" /> Study Notes or Raw Material
+                  <FileText className="size-3.5 text-primary" /> Study Notes or
+                  Raw Material
                 </label>
                 <Textarea
                   value={material}
@@ -105,17 +113,18 @@ export default function FlashcardPage() {
 
               {/* Settings: Upload, Topic & Deck Size */}
               <div className="flex flex-col gap-6">
-                
                 {/* Upload File */}
                 <div className="space-y-3">
                   <label className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                    <Upload className="size-3.5 text-primary" /> Upload Academic File
+                    <Upload className="size-3.5 text-primary" /> Upload Academic
+                    File
                   </label>
                   <div className="rounded-[1.5rem] border border-dashed border-border p-4 bg-background/10 hover:bg-background/30 transition-all duration-200">
                     <UploadForm onUploaded={handleUploaded} />
                   </div>
                   <p className="text-[11px] text-muted-foreground/80 leading-relaxed font-light mt-2 px-1">
-                    Securely parses PDF, DOCX, PPTX, TXT, or images. Text contents will be appended to your editor above.
+                    Securely parses PDF, DOCX, PPTX, TXT, or images. Text
+                    contents will be appended to your editor above.
                   </p>
                 </div>
 
@@ -123,7 +132,8 @@ export default function FlashcardPage() {
                   {/* Optional Topic */}
                   <div className="space-y-3 flex-1">
                     <label className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                      <HelpCircle className="size-3.5 text-primary" /> Optional Deck Topic
+                      <HelpCircle className="size-3.5 text-primary" /> Optional
+                      Deck Topic
                     </label>
                     <Input
                       value={topic}
@@ -136,7 +146,8 @@ export default function FlashcardPage() {
                   {/* Deck Size Goal */}
                   <div className="space-y-3 flex-1">
                     <label className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                      <Layers className="size-3.5 text-primary" /> Deck Size Goal
+                      <Layers className="size-3.5 text-primary" /> Deck Size
+                      Goal
                     </label>
                     <div className="flex items-center gap-3">
                       <div className="flex flex-1 bg-background/40 p-1 border border-border rounded-xl">
@@ -163,7 +174,10 @@ export default function FlashcardPage() {
                           value={count}
                           onChange={(e) =>
                             setCount(
-                              Math.max(4, Math.min(50, Number(e.target.value) || 0)),
+                              Math.max(
+                                4,
+                                Math.min(50, Number(e.target.value) || 0),
+                              ),
                             )
                           }
                           className="w-full rounded-xl border-border bg-background/20 text-center font-bold text-sm pr-2"
@@ -172,7 +186,6 @@ export default function FlashcardPage() {
                     </div>
                   </div>
                 </div>
-
               </div>
 
               <div className="pt-2">

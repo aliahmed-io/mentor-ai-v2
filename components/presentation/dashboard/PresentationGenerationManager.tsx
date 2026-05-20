@@ -2,7 +2,7 @@
 
 import { useChat, useCompletion } from "@ai-sdk/react";
 import debounce from "lodash.debounce";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
 import { generateImageAction } from "@/app/_actions/image/generate";
 import { getImageFromUnsplash } from "@/app/_actions/image/unsplash";
@@ -26,6 +26,7 @@ export function PresentationGenerationManager() {
   const {
     numSlides,
     language,
+    textModel,
     presentationInput,
     shouldStartOutlineGeneration,
     shouldStartPresentationGeneration,
@@ -53,6 +54,9 @@ export function PresentationGenerationManager() {
     isGeneratingOutline,
     slides,
     outline,
+    imageQueue,
+    pushImageToQueue,
+    popImageFromQueue,
   } = usePresentationState();
 
   // Create a ref for the streaming parser to persist between renders
@@ -70,7 +74,15 @@ export function PresentationGenerationManager() {
   // Track if title has already been extracted to avoid unnecessary processing
   const titleExtractedRef = useRef<boolean>(false);
 
-  // Function to update slides using requestAnimationFrame
+  // UDG Ref Trackers for preventing duplicate streaming trigger loops
+  const outlineGenerationStartedRef = useRef<boolean>(false);
+  const presentationGenerationStartedRef = useRef<boolean>(false);
+
+  // UDG Ref Trackers for the Sequential Queue Worker
+  const isQueueWorkerBusy = useRef<boolean>(false);
+  const queuedSlideIds = useRef<Set<string>>(new Set());
+
+  // Function to update slides using requestAnimationFrame (Pure state-updater in UDG)
   const updateSlidesWithRAF = (): void => {
     // Extract thinking for presentation and parse only the remaining content
     const presentationThinkingExtract = extractThinking(presentationCompletion);
@@ -88,10 +100,11 @@ export function PresentationGenerationManager() {
     streamingParserRef.current.parseChunk(processedPresentationCompletion);
     streamingParserRef.current.finalize();
     const allSlides = streamingParserRef.current.getAllSlides();
+
     // Merge any completed root image URLs from state into streamed slides
     const mergedSlides = allSlides.map((slide) => {
       const gen = rootImageGeneration[slide.id];
-      if (gen?.status === "success" && slide.rootImage?.query) {
+      if (gen?.status === "success" && gen.url && slide.rootImage) {
         return {
           ...slide,
           rootImage: {
@@ -102,73 +115,7 @@ export function PresentationGenerationManager() {
       }
       return slide;
     });
-    // For any slide that has a rootImage query but no url, ensure generation is tracked/started
-    for (const slide of allSlides) {
-      const slideId = slide.id;
-      const rootImage = slide.rootImage;
-      if (rootImage?.query && !rootImage.url) {
-        const already = rootImageGeneration[slideId];
-        if (!already || already.status === "error") {
-          startRootImageGeneration(slideId, rootImage.query);
-          void (async () => {
-            try {
-              let result;
 
-              if (imageSource === "stock") {
-                // Use Unsplash for stock images
-                const unsplashResult = await getImageFromUnsplash(
-                  rootImage.query,
-                  rootImage.layoutType,
-                );
-                if (unsplashResult.success && unsplashResult.imageUrl) {
-                  result = { image: { url: unsplashResult.imageUrl } };
-                }
-              } else {
-                // Use AI generation
-                result = await generateImageAction(rootImage.query, imageModel);
-              }
-
-              if (result?.image?.url) {
-                completeRootImageGeneration(slideId, result.image.url);
-                // If we don't have a thumbnail yet, set it now and persist once
-                const stateNow = usePresentationState.getState();
-                if (!stateNow.thumbnailUrl && stateNow.currentPresentationId) {
-                  stateNow.setThumbnailUrl(result.image.url);
-                  try {
-                    await updatePresentation({
-                      id: stateNow.currentPresentationId,
-                      thumbnailUrl: result.image.url,
-                    });
-                  } catch {
-                    // Ignore persistence errors for thumbnail to avoid interrupting generation flow
-                  }
-                }
-                // Persist into slides state
-                usePresentationState.getState().setSlides(
-                  usePresentationState.getState().slides.map((s) =>
-                    s.id === slideId
-                      ? {
-                          ...s,
-                          rootImage: {
-                            query: rootImage.query,
-                            url: result.image.url,
-                          },
-                        }
-                      : s,
-                  ),
-                );
-              } else {
-                failRootImageGeneration(slideId, "No image url returned");
-              }
-            } catch (err) {
-              const message =
-                err instanceof Error ? err.message : "Image generation failed";
-              failRootImageGeneration(slideId, message);
-            }
-          })();
-        }
-      }
-    }
     setSlides(mergedSlides);
     slidesRafIdRef.current = null;
   };
@@ -302,58 +249,80 @@ export function PresentationGenerationManager() {
     outlineRafIdRef.current = null;
   };
 
+  const onFinishOutlineRef = useRef<() => void>(() => {});
+  onFinishOutlineRef.current = () => {
+    setIsGeneratingOutline(false);
+    setShouldStartOutlineGeneration(false);
+    setShouldStartPresentationGeneration(false);
+    outlineGenerationStartedRef.current = false;
+
+    const {
+      currentPresentationId: activeId,
+      outline: activeOutline,
+      searchResults: activeSearchResults,
+      currentPresentationTitle: activeTitle,
+      theme: activeTheme,
+      imageSource: activeImgSrc,
+    } = usePresentationState.getState();
+
+    if (activeId) {
+      void updatePresentation({
+        id: activeId,
+        outline: activeOutline,
+        searchResults: activeSearchResults,
+        prompt: presentationInput,
+        title: activeTitle ?? "",
+        theme: activeTheme,
+        imageSource: activeImgSrc,
+      });
+    }
+
+    // Cancel any pending outline animation frame
+    if (outlineRafIdRef.current !== null) {
+      cancelAnimationFrame(outlineRafIdRef.current);
+      outlineRafIdRef.current = null;
+    }
+  };
+
+  const onErrorOutlineRef = useRef<(error: Error) => void>(() => {});
+  onErrorOutlineRef.current = (error) => {
+    toast.error(`Failed to generate outline: ${error.message}`);
+    resetGeneration();
+    outlineGenerationStartedRef.current = false;
+
+    // Cancel any pending outline animation frame
+    if (outlineRafIdRef.current !== null) {
+      cancelAnimationFrame(outlineRafIdRef.current);
+      outlineRafIdRef.current = null;
+    }
+  };
+
+  const handleFinishOutline = useCallback(() => {
+    onFinishOutlineRef.current();
+  }, []);
+
+  const handleErrorOutline = useCallback((error: Error) => {
+    onErrorOutlineRef.current(error);
+  }, []);
+
+  const outlineBody = useMemo(
+    () => ({
+      prompt: presentationInput,
+      numberOfCards: numSlides,
+      language,
+      textModel,
+    }),
+    [presentationInput, numSlides, language, textModel],
+  );
+
   // Outline generation with or without web search
   const { messages: outlineMessages, append: appendOutlineMessage } = useChat({
     api: webSearchEnabled
       ? "/api/presentation/outline-with-search"
       : "/api/presentation/outline",
-    body: {
-      prompt: presentationInput,
-      numberOfCards: numSlides,
-      language,
-    },
-    onFinish: () => {
-      setIsGeneratingOutline(false);
-      setShouldStartOutlineGeneration(false);
-      setShouldStartPresentationGeneration(false);
-
-      const {
-        currentPresentationId,
-        outline,
-        searchResults,
-        currentPresentationTitle,
-        theme,
-        imageSource,
-      } = usePresentationState.getState();
-
-      if (currentPresentationId) {
-        void updatePresentation({
-          id: currentPresentationId,
-          outline,
-          searchResults,
-          prompt: presentationInput,
-          title: currentPresentationTitle ?? "",
-          theme,
-          imageSource,
-        });
-      }
-
-      // Cancel any pending outline animation frame
-      if (outlineRafIdRef.current !== null) {
-        cancelAnimationFrame(outlineRafIdRef.current);
-        outlineRafIdRef.current = null;
-      }
-    },
-    onError: (error) => {
-      toast.error(`Failed to generate outline: ${error.message}`);
-      resetGeneration();
-
-      // Cancel any pending outline animation frame
-      if (outlineRafIdRef.current !== null) {
-        cancelAnimationFrame(outlineRafIdRef.current);
-        outlineRafIdRef.current = null;
-      }
-    },
+    body: outlineBody,
+    onFinish: handleFinishOutline,
+    onError: handleErrorOutline,
   });
 
   // Stable refs for inline callbacks — prevents dependency array size changes
@@ -389,43 +358,56 @@ export function PresentationGenerationManager() {
   useEffect(() => {
     const startOutlineGeneration = async (): Promise<void> => {
       if (shouldStartOutlineGeneration) {
+        if (outlineGenerationStartedRef.current) return;
+        outlineGenerationStartedRef.current = true;
+        // Clear flag immediately to prevent duplicate trigger loops during async calls
+        setShouldStartOutlineGeneration(false);
         try {
           // Reset all state except ID and input when starting new generation
           resetForNewGeneration();
 
           // Reset processing refs for new generation
           titleExtractedRef.current = false;
+          queuedSlideIds.current.clear();
+          outlineGenerationStartedRef.current = true; // explicitly preserve state after reset
 
           setIsGeneratingOutline(true);
 
           // Get the current input after reset (it's preserved)
-          const { presentationInput, numSlides, language } = usePresentationState.getState();
+          const {
+            presentationInput: activeInput,
+            numSlides: activeNum,
+            language: activeLang,
+            textModel: activeTextModel,
+          } = usePresentationState.getState();
 
           // Start the RAF cycle for outline updates
           if (outlineRafIdRef.current === null) {
-            outlineRafIdRef.current =
-              requestAnimationFrame(() => updateOutlineWithRAFRef.current());
+            outlineRafIdRef.current = requestAnimationFrame(() =>
+              updateOutlineWithRAFRef.current(),
+            );
           }
 
           await appendOutlineMessage(
             {
               role: "user",
-              content: presentationInput,
+              content: activeInput,
             },
             {
               body: {
-                prompt: presentationInput,
-                numberOfCards: numSlides,
-                language,
+                prompt: activeInput,
+                numberOfCards: activeNum,
+                language: activeLang,
+                textModel: activeTextModel,
               },
             },
           );
         } catch (error) {
-          console.log(error);
+          console.error(error);
+          outlineGenerationStartedRef.current = false;
           // Error is handled by onError callback
         } finally {
           setIsGeneratingOutline(false);
-          setShouldStartOutlineGeneration(false);
         }
       }
     };
@@ -439,44 +421,65 @@ export function PresentationGenerationManager() {
     setShouldStartOutlineGeneration,
   ]);
 
+  const onFinishPresentationRef = useRef<
+    (_prompt: string, _completion: string) => Promise<void>
+  >(async () => {});
+  onFinishPresentationRef.current = async (_prompt, _completion) => {
+    setIsGeneratingPresentation(false);
+    setShouldStartPresentationGeneration(false);
+    presentationGenerationStartedRef.current = false;
+
+    // Persist final slides/content to DB to ensure /presentation/[id] hydrates correctly
+    try {
+      const state = usePresentationState.getState();
+      if (state.currentPresentationId && state.slides.length > 0) {
+        await updatePresentation({
+          id: state.currentPresentationId,
+          content: { slides: state.slides, config: state.config },
+          title: state.currentPresentationTitle ?? undefined,
+          outline: state.outline,
+          imageSource: state.imageSource,
+          presentationStyle: state.presentationStyle,
+          language: state.language,
+          thumbnailUrl: state.thumbnailUrl,
+        });
+      }
+    } catch (e) {
+      // Avoid interrupting UX if persistence fails
+      console.error("Persist final slides failed:", e);
+    }
+  };
+
+  const onErrorPresentationRef = useRef<(error: Error) => void>(() => {});
+  onErrorPresentationRef.current = (error) => {
+    toast.error(`Failed to generate presentation: ${error.message}`);
+    resetGeneration();
+    streamingParserRef.current.reset();
+    presentationGenerationStartedRef.current = false;
+
+    // Cancel any pending animation frame
+    if (slidesRafIdRef.current !== null) {
+      cancelAnimationFrame(slidesRafIdRef.current);
+      slidesRafIdRef.current = null;
+    }
+  };
+
+  const handleFinishPresentation = useCallback(
+    (prompt: string, completion: string) => {
+      void onFinishPresentationRef.current(prompt, completion);
+    },
+    [],
+  );
+
+  const handleErrorPresentation = useCallback((error: Error) => {
+    onErrorPresentationRef.current(error);
+  }, []);
+
   const { completion: presentationCompletion, complete: generatePresentation } =
     useCompletion({
       api: "/api/presentation/generate",
-      onFinish: async (_prompt, _completion) => {
-        setIsGeneratingPresentation(false);
-        setShouldStartPresentationGeneration(false);
-
-        // Persist final slides/content to DB to ensure /presentation/[id] hydrates correctly
-        try {
-          const state = usePresentationState.getState();
-          if (state.currentPresentationId && state.slides.length > 0) {
-            await updatePresentation({
-              id: state.currentPresentationId,
-              content: { slides: state.slides, config: state.config },
-              title: state.currentPresentationTitle ?? undefined,
-              outline: state.outline,
-              imageSource: state.imageSource,
-              presentationStyle: state.presentationStyle,
-              language: state.language,
-              thumbnailUrl: state.thumbnailUrl,
-            });
-          }
-        } catch (e) {
-          // Avoid interrupting UX if persistence fails; retries below will try again
-          console.error("Persist final slides failed:", e);
-        }
-      },
-      onError: (error) => {
-        toast.error(`Failed to generate presentation: ${error.message}`);
-        resetGeneration();
-        streamingParserRef.current.reset();
-
-        // Cancel any pending animation frame
-        if (slidesRafIdRef.current !== null) {
-          cancelAnimationFrame(slidesRafIdRef.current);
-          slidesRafIdRef.current = null;
-        }
-      },
+      onFinish: handleFinishPresentation,
+      onError: handleErrorPresentation,
     });
 
   useEffect(() => {
@@ -502,27 +505,36 @@ export function PresentationGenerationManager() {
     // when outline gets populated from the DB fetch
     if (!outline || outline.length === 0) return;
 
+    if (presentationGenerationStartedRef.current) return;
+    presentationGenerationStartedRef.current = true;
+
+    // Clear flag immediately to prevent duplicate trigger loops when generatePresentation reference updates
+    setShouldStartPresentationGeneration(false);
+
     const {
-      presentationInput,
-      language,
-      presentationStyle,
-      currentPresentationTitle,
+      presentationInput: activeInput,
+      language: activeLang,
+      presentationStyle: activeStyle,
+      currentPresentationTitle: activeTitle,
       searchResults: stateSearchResults,
+      textModel: activeTextModel,
       setThumbnailUrl,
     } = usePresentationState.getState();
 
-    // Reset the parser before starting a new generation
+    // Reset the parser and tracking refs before starting a new generation
     streamingParserRef.current.reset();
+    queuedSlideIds.current.clear();
     setIsGeneratingPresentation(true);
     setThumbnailUrl(undefined);
-    void generatePresentation(presentationInput ?? "", {
+    void generatePresentation(activeInput ?? "", {
       body: {
-        title: currentPresentationTitle ?? presentationInput ?? "",
-        prompt: presentationInput ?? "",
+        title: activeTitle ?? activeInput ?? "",
+        prompt: activeInput ?? "",
         outline,
         searchResults: stateSearchResults,
-        language,
-        tone: presentationStyle,
+        language: activeLang,
+        tone: activeStyle,
+        textModel: activeTextModel,
       },
     });
   }, [
@@ -532,7 +544,7 @@ export function PresentationGenerationManager() {
     setIsGeneratingPresentation,
   ]);
 
-  // Debounced incremental persistence while streaming
+  // Debounced incremental persistence while streaming text
   const debouncedStreamSaveRef = useRef(
     debounce(async () => {
       try {
@@ -559,63 +571,55 @@ export function PresentationGenerationManager() {
     }
   }, [slides, isGeneratingPresentation, currentPresentationId]);
 
-  // Listen for manual root image generation changes (when user manually triggers image generation)
+  // 1. Decoupled UDG Scanner Effect: monitors slides and enqueues completed slides for sequential generation
   useEffect(() => {
-    // Only process if we're not currently generating presentation or outline
-    if (isGeneratingPresentation || isGeneratingOutline) {
-      return;
-    }
+    if (!isGeneratingPresentation) return;
 
-    // Check for any pending root image generations that need to be processed
+    for (const slide of slides) {
+      const slideId = slide.id;
+      const rootImage = slide.rootImage;
+
+      // We only queue naturally completed slides (avoiding partial queries)
+      if (slide.isComplete && rootImage?.query && !rootImage.url) {
+        const already = rootImageGeneration[slideId];
+
+        // If not already success, error, or pending, and not already queued in this session
+        if (!already || already.status === "error") {
+          if (!queuedSlideIds.current.has(slideId)) {
+            queuedSlideIds.current.add(slideId);
+            startRootImageGeneration(slideId, rootImage.query);
+            pushImageToQueue(slideId, rootImage.query);
+            console.log(
+              `[UDG Scanner] Enqueued completed slide image fetch: ${slideId} (query: "${rootImage.query}")`,
+            );
+          }
+        }
+      }
+    }
+  }, [
+    slides,
+    isGeneratingPresentation,
+    rootImageGeneration,
+    startRootImageGeneration,
+    pushImageToQueue,
+  ]);
+
+  // 2. Manual listener effect: routes manual rootImageGeneration 'pending' requests into the serial UDG Queue
+  useEffect(() => {
+    if (isGeneratingPresentation || isGeneratingOutline) return;
+
     for (const [slideId, gen] of Object.entries(rootImageGeneration)) {
       if (gen.status === "pending") {
-        // Find the slide to get the rootImage query
-        const slide = slides.find((s) => s.id === slideId);
-        const query = slide?.rootImage?.query;
-        if (query) {
-          void (async () => {
-            try {
-              let result;
-
-              if (imageSource === "stock") {
-                // Use Unsplash for stock images
-                const unsplashResult = await getImageFromUnsplash(
-                  query,
-                  slide?.rootImage?.layoutType,
-                );
-                if (unsplashResult.success && unsplashResult.imageUrl) {
-                  result = { image: { url: unsplashResult.imageUrl } };
-                }
-              } else {
-                // Use AI generation
-                result = await generateImageAction(query, imageModel);
-              }
-
-              if (result?.image?.url) {
-                completeRootImageGeneration(slideId, result.image.url);
-                // Update the slide with the new image URL
-                setSlides(
-                  slides.map((s) =>
-                    s.id === slideId
-                      ? {
-                          ...s,
-                          rootImage: {
-                            ...s.rootImage!,
-                            url: result.image.url,
-                          },
-                        }
-                      : s,
-                  ),
-                );
-              } else {
-                failRootImageGeneration(slideId, "No image url returned");
-              }
-            } catch (err) {
-              const message =
-                err instanceof Error ? err.message : "Image generation failed";
-              failRootImageGeneration(slideId, message);
-            }
-          })();
+        if (!queuedSlideIds.current.has(slideId)) {
+          const slide = slides.find((s) => s.id === slideId);
+          const query = gen.query || slide?.rootImage?.query;
+          if (query) {
+            queuedSlideIds.current.add(slideId);
+            pushImageToQueue(slideId, query);
+            console.log(
+              `[UDG Manual] Enqueued manual slide image fetch: ${slideId} (query: "${query}")`,
+            );
+          }
         }
       }
     }
@@ -624,8 +628,137 @@ export function PresentationGenerationManager() {
     isGeneratingPresentation,
     isGeneratingOutline,
     slides,
-    imageSource,
-    imageModel,
+    pushImageToQueue,
+  ]);
+
+  // 3. Sequential UDG Queue Worker Effect: consumes imageQueue serial item by serial item
+  useEffect(() => {
+    const processQueue = async () => {
+      if (isQueueWorkerBusy.current) return;
+
+      const { imageQueue: currentQueue, popImageFromQueue } =
+        usePresentationState.getState();
+      if (currentQueue.length === 0) return;
+
+      isQueueWorkerBusy.current = true;
+      const item = popImageFromQueue();
+      if (!item) {
+        isQueueWorkerBusy.current = false;
+        return;
+      }
+
+      const { slideId, query } = item;
+      console.log(
+        `[UDG Worker] Processing image queue item for slide: ${slideId} (query: "${query}")`,
+      );
+
+      try {
+        const {
+          imageModel: currentImageModel,
+          imageSource: currentImageSource,
+          currentPresentationId: activePresId,
+          slides: activeSlides,
+          config: activeConfig,
+          currentPresentationTitle: activeTitle,
+        } = usePresentationState.getState();
+
+        const slide = activeSlides.find((s) => s.id === slideId);
+        let result;
+
+        if (currentImageSource === "stock") {
+          const unsplashResult = await getImageFromUnsplash(
+            query,
+            slide?.rootImage?.layoutType,
+          );
+          if (unsplashResult.success && unsplashResult.imageUrl) {
+            result = { image: { url: unsplashResult.imageUrl } };
+          }
+        } else {
+          result = await generateImageAction(query, currentImageModel);
+        }
+
+        if (result?.image?.url) {
+          const imageUrl = result.image.url;
+          completeRootImageGeneration(slideId, imageUrl);
+          console.log(
+            `[UDG Worker] Image fetched successfully for slide: ${slideId}`,
+          );
+
+          // Sync updated slide into Zustand slides array
+          const stateNow = usePresentationState.getState();
+          const updatedSlides = stateNow.slides.map((s) =>
+            s.id === slideId
+              ? {
+                  ...s,
+                  rootImage: {
+                    ...s.rootImage!,
+                    url: imageUrl,
+                  },
+                }
+              : s,
+          );
+          setSlides(updatedSlides);
+
+          // If thumbnail doesn't exist yet, save it
+          if (!stateNow.thumbnailUrl && activePresId) {
+            stateNow.setThumbnailUrl(imageUrl);
+            try {
+              await updatePresentation({
+                id: activePresId,
+                thumbnailUrl: imageUrl,
+              });
+            } catch (err) {
+              console.error(
+                "[UDG Worker] Failed to persist thumbnail to DB:",
+                err,
+              );
+            }
+          }
+
+          // PERSIST IMMEDIATELY TO THE DATABASE TO PREVENT LOSS ON RELOAD
+          if (activePresId) {
+            try {
+              await updatePresentation({
+                id: activePresId,
+                content: { slides: updatedSlides, config: activeConfig },
+                title: activeTitle ?? undefined,
+              });
+              console.log(
+                `[UDG Worker] Slide image persisted directly to DB for slide: ${slideId}`,
+              );
+            } catch (err) {
+              console.error(
+                `[UDG Worker] Failed to persist slide image to DB:`,
+                err,
+              );
+            }
+          }
+        } else {
+          failRootImageGeneration(slideId, "No image url returned");
+        }
+      } catch (err) {
+        console.error(
+          `[UDG Worker] Image generation failed for slide ${slideId}:`,
+          err,
+        );
+        const message =
+          err instanceof Error ? err.message : "Image generation failed";
+        failRootImageGeneration(slideId, message);
+      } finally {
+        // Clear from the tracked queued set so it can be re-generated if requested again manually
+        queuedSlideIds.current.delete(slideId);
+        isQueueWorkerBusy.current = false;
+
+        // Brief timeout to avoid starvation and ensure React updates states
+        setTimeout(() => {
+          void processQueue();
+        }, 100);
+      }
+    };
+
+    void processQueue();
+  }, [
+    imageQueue,
     completeRootImageGeneration,
     failRootImageGeneration,
     setSlides,

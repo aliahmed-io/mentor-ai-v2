@@ -1,3 +1,4 @@
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
 import { cookies } from "next/headers";
@@ -21,6 +22,7 @@ const slidesRequestSchema = z.object({
       }),
     )
     .optional(),
+  textModel: z.enum(["gemini", "openai"]).optional().default("gemini"),
 });
 
 // Use AI SDK types for proper type safety
@@ -32,6 +34,7 @@ interface SlidesRequest {
   language: string; // Language to use for the slides
   tone: string; // Style for image queries (optional)
   searchResults?: Array<{ query: string; results: unknown[] }>; // Search results for context
+  textModel?: "gemini" | "openai";
 }
 const slidesTemplate = `
 You are an expert presentation designer.Your task is to create an engaging presentation in XML format.
@@ -275,6 +278,7 @@ export async function POST(req: Request) {
       language,
       tone,
       searchResults,
+      textModel,
     } = validationResult.data;
 
     // Format search results
@@ -314,14 +318,35 @@ export async function POST(req: Request) {
     });
 
     const cookieStore = await cookies();
-    const apiKey = cookieStore.get("openai_api_key")?.value || process.env.OPENAI_API_KEY;
-    if (!apiKey) {
+    const geminiKey =
+      cookieStore.get("gemini_api_key")?.value || process.env.GEMINI_API_KEY;
+    const openaiKey =
+      cookieStore.get("openai_api_key")?.value || process.env.OPENAI_API_KEY;
+
+    let model;
+    if (textModel === "openai" && openaiKey) {
+      const openai = createOpenAI({ apiKey: openaiKey });
+      model = openai("gpt-4o-mini");
+    } else if (textModel === "gemini" && geminiKey) {
+      const google = createGoogleGenerativeAI({ apiKey: geminiKey });
+      model = google("gemini-2.5-flash");
+    } else if (geminiKey) {
+      // Fallback: Gemini Key is present
+      const google = createGoogleGenerativeAI({ apiKey: geminiKey });
+      model = google("gemini-2.5-flash");
+    } else if (openaiKey) {
+      // Fallback: OpenAI Key is present
+      const openai = createOpenAI({ apiKey: openaiKey });
+      model = openai("gpt-4o-mini");
+    } else {
       return NextResponse.json(
-        { error: "OpenAI API key is not configured. Please add your key in Settings." },
+        {
+          error:
+            "No API key configured. Please add your Gemini or OpenAI API key in Settings.",
+        },
         { status: 500 },
       );
     }
-    const openai = createOpenAI({ apiKey });
 
     // Format the prompt with template variables
     const formattedPrompt = slidesTemplate
@@ -335,7 +360,7 @@ export async function POST(req: Request) {
       .replace(/{SEARCH_RESULTS}/g, searchResultsText);
 
     const result = streamText({
-      model: openai("gpt-4o-mini"),
+      model,
       prompt: formattedPrompt,
     });
 

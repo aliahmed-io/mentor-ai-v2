@@ -51,6 +51,7 @@ export default function PresentationPage() {
   const currentSlideIndex = usePresentationState((s) => s.currentSlideIndex);
   const setLanguage = usePresentationState((s) => s.setLanguage);
   const theme = usePresentationState((s) => s.theme);
+  const generationStatus = usePresentationState((s) => s.generationStatus);
   // Track the theme value as it exists in the database to avoid redundant saves on hydration
   const dbThemeRef = useRef<string | null>(null);
 
@@ -96,8 +97,8 @@ export default function PresentationPage() {
 
   // Update presentation state when data is fetched
   useEffect(() => {
-    // Skip if fetch is disabled
-    if (!shouldFetchData) {
+    // Skip if fetch is disabled or generation is in progress
+    if (!shouldFetchData || generationStatus !== "idle") {
       return;
     }
 

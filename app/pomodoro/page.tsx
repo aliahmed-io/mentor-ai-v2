@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 export default function PomodoroPage() {
   const [focusMin, setFocusMin] = useState(25);
@@ -294,7 +294,7 @@ export default function PomodoroPage() {
       <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 pb-6 border-b border-border">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary-foreground/90 mb-3 select-none font-mono tracking-widest uppercase">
-             Time & Focus
+            Time & Focus
           </div>
           <h1 className="text-3xl sm:text-4xl font-serif font-extrabold tracking-tight text-foreground">
             Study Sanctuary Timer
@@ -422,179 +422,184 @@ export default function PomodoroPage() {
         <div className="lg:col-span-4 space-y-6">
           <Card className="overflow-hidden border-border/80 shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-[2rem]">
             <CardContent className="p-6 md:p-8 space-y-4">
-            <h2 className="text-lg font-serif font-extrabold text-foreground flex items-center gap-2 border-b border-border pb-3">
-              <svg
-                className="w-4 h-4 text-primary"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-              Timer Configuration
-            </h2>
+              <h2 className="text-lg font-serif font-extrabold text-foreground flex items-center gap-2 border-b border-border pb-3">
+                <svg
+                  className="w-4 h-4 text-primary"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+                Timer Configuration
+              </h2>
 
-            <div className="space-y-4">
-              <div className="flex justify-between items-center bg-background px-4 py-3 rounded-xl border border-border">
-                <div>
-                  <div className="text-xs font-bold text-foreground">
-                    Focus Interval
+              <div className="space-y-4">
+                <div className="flex justify-between items-center bg-background px-4 py-3 rounded-xl border border-border">
+                  <div>
+                    <div className="text-xs font-bold text-foreground">
+                      Focus Interval
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      Standard deep work blocks
+                    </div>
                   </div>
-                  <div className="text-[10px] text-muted-foreground">
-                    Standard deep work blocks
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min={1}
+                      max={120}
+                      value={focusMin}
+                      onChange={(e) =>
+                        setFocusMin(
+                          Math.max(
+                            1,
+                            Math.min(120, Number(e.target.value) || 0),
+                          ),
+                        )
+                      }
+                      disabled={running}
+                      className="w-20 text-right bg-background h-8 px-2 py-1 text-sm font-semibold text-foreground"
+                    />
+                    <span className="text-xs text-muted-foreground">m</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    min={1}
-                    max={120}
-                    value={focusMin}
-                    onChange={(e) =>
-                      setFocusMin(
-                        Math.max(1, Math.min(120, Number(e.target.value) || 0)),
-                      )
-                    }
-                    disabled={running}
-                    className="w-20 text-right bg-background h-8 px-2 py-1 text-sm font-semibold text-foreground"
-                  />
-                  <span className="text-xs text-muted-foreground">
-                    m
-                  </span>
+
+                <div className="flex justify-between items-center bg-background px-4 py-3 rounded-xl border border-border">
+                  <div>
+                    <div className="text-xs font-bold text-foreground">
+                      Short Break
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      Quick restorative pauses
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min={1}
+                      max={60}
+                      value={breakMin}
+                      onChange={(e) =>
+                        setBreakMin(
+                          Math.max(
+                            1,
+                            Math.min(60, Number(e.target.value) || 0),
+                          ),
+                        )
+                      }
+                      disabled={running}
+                      className="w-20 text-right bg-background h-8 px-2 py-1 text-sm font-semibold text-foreground"
+                    />
+                    <span className="text-xs text-muted-foreground">m</span>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center bg-background px-4 py-3 rounded-xl border border-border">
+                  <div>
+                    <div className="text-xs font-bold text-foreground">
+                      Long Break
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      Extended rest sequence
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min={1}
+                      max={60}
+                      value={longBreakMin}
+                      onChange={(e) =>
+                        setLongBreakMin(
+                          Math.max(
+                            1,
+                            Math.min(60, Number(e.target.value) || 0),
+                          ),
+                        )
+                      }
+                      disabled={running}
+                      className="w-20 text-right bg-background h-8 px-2 py-1 text-sm font-semibold text-foreground"
+                    />
+                    <span className="text-xs text-muted-foreground">m</span>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center bg-background px-4 py-3 rounded-xl border border-border">
+                  <div>
+                    <div className="text-xs font-bold text-foreground">
+                      Long Break Freq.
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      Trigger long break every
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min={2}
+                      max={12}
+                      value={longEvery}
+                      onChange={(e) =>
+                        setLongEvery(
+                          Math.max(
+                            2,
+                            Math.min(12, Number(e.target.value) || 0),
+                          ),
+                        )
+                      }
+                      disabled={running}
+                      className="w-20 text-right bg-background h-8 px-2 py-1 text-sm font-semibold text-foreground"
+                    />
+                    <span className="text-xs text-muted-foreground">c</span>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center bg-background px-4 py-3 rounded-xl border border-border">
+                  <div>
+                    <div className="text-xs font-bold text-foreground">
+                      Total Cycles
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      Target number of sessions
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min={1}
+                      max={12}
+                      value={totalCycles}
+                      onChange={(e) =>
+                        setTotalCycles(
+                          Math.max(
+                            1,
+                            Math.min(12, Number(e.target.value) || 0),
+                          ),
+                        )
+                      }
+                      disabled={running}
+                      className="w-20 text-right bg-background h-8 px-2 py-1 text-sm font-semibold text-foreground"
+                    />
+                    <span className="text-xs text-muted-foreground">c</span>
+                  </div>
                 </div>
               </div>
-
-              <div className="flex justify-between items-center bg-background px-4 py-3 rounded-xl border border-border">
-                <div>
-                  <div className="text-xs font-bold text-foreground">
-                    Short Break
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">
-                    Quick restorative pauses
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    min={1}
-                    max={60}
-                    value={breakMin}
-                    onChange={(e) =>
-                      setBreakMin(
-                        Math.max(1, Math.min(60, Number(e.target.value) || 0)),
-                      )
-                    }
-                    disabled={running}
-                    className="w-20 text-right bg-background h-8 px-2 py-1 text-sm font-semibold text-foreground"
-                  />
-                  <span className="text-xs text-muted-foreground">
-                    m
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex justify-between items-center bg-background px-4 py-3 rounded-xl border border-border">
-                <div>
-                  <div className="text-xs font-bold text-foreground">
-                    Long Break
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">
-                    Extended rest sequence
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    min={1}
-                    max={60}
-                    value={longBreakMin}
-                    onChange={(e) =>
-                      setLongBreakMin(
-                        Math.max(1, Math.min(60, Number(e.target.value) || 0)),
-                      )
-                    }
-                    disabled={running}
-                    className="w-20 text-right bg-background h-8 px-2 py-1 text-sm font-semibold text-foreground"
-                  />
-                  <span className="text-xs text-muted-foreground">
-                    m
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex justify-between items-center bg-background px-4 py-3 rounded-xl border border-border">
-                <div>
-                  <div className="text-xs font-bold text-foreground">
-                    Long Break Freq.
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">
-                    Trigger long break every
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    min={2}
-                    max={12}
-                    value={longEvery}
-                    onChange={(e) =>
-                      setLongEvery(
-                        Math.max(2, Math.min(12, Number(e.target.value) || 0)),
-                      )
-                    }
-                    disabled={running}
-                    className="w-20 text-right bg-background h-8 px-2 py-1 text-sm font-semibold text-foreground"
-                  />
-                  <span className="text-xs text-muted-foreground">
-                    c
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex justify-between items-center bg-background px-4 py-3 rounded-xl border border-border">
-                <div>
-                  <div className="text-xs font-bold text-foreground">
-                    Total Cycles
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">
-                    Target number of sessions
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    min={1}
-                    max={12}
-                    value={totalCycles}
-                    onChange={(e) =>
-                      setTotalCycles(
-                        Math.max(1, Math.min(12, Number(e.target.value) || 0)),
-                      )
-                    }
-                    disabled={running}
-                    className="w-20 text-right bg-background h-8 px-2 py-1 text-sm font-semibold text-foreground"
-                  />
-                  <span className="text-xs text-muted-foreground">
-                    c
-                  </span>
-                </div>
-              </div>
-            </div>
-            {running && (
-              <p className="text-[10px] text-center text-muted-foreground italic mt-2">
-                Configurations are locked while active.
-              </p>
-            )}
+              {running && (
+                <p className="text-[10px] text-center text-muted-foreground italic mt-2">
+                  Configurations are locked while active.
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>

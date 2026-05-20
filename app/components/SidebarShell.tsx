@@ -16,8 +16,6 @@ export default function SidebarShell({ children }: PropsWithChildren) {
     return <>{children}</>;
   }
 
-
-
   // Standard two-column shell for all other pages
   return (
     <div className="flex min-h-dvh">

@@ -44,10 +44,14 @@ export async function POST(request: NextRequest) {
     }
 
     const cookieStore = await cookies();
-    const apiKey = cookieStore.get("gemini_api_key")?.value || process.env.GEMINI_API_KEY;
+    const apiKey =
+      cookieStore.get("gemini_api_key")?.value || process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: "Gemini API key is not configured. Please add your key in Settings." },
+        {
+          error:
+            "Gemini API key is not configured. Please add your key in Settings.",
+        },
         { status: 500 },
       );
     }

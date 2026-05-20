@@ -21,20 +21,30 @@ export function PresentationControls({
     setLanguage,
     pageStyle,
     setPageStyle,
+    textModel,
+    setTextModel,
   } = usePresentationState();
 
   return (
     <div className="space-y-3">
-      {/* Static Model Display (GPT only) */}
+      {/* Dynamic Model Dropdown */}
       <div>
         {shouldShowLabel && (
           <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
             Text Model
           </label>
         )}
-        <div className="flex h-10 items-center rounded-md border bg-muted/50 px-3 text-sm text-muted-foreground">
-          GPT-4o-mini
-        </div>
+        <Select value={textModel} onValueChange={setTextModel}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select text model" />
+          </SelectTrigger>
+          <SelectContent className="z-50">
+            <SelectItem value="gemini">
+              Google Gemini (gemini-2.5-flash)
+            </SelectItem>
+            <SelectItem value="openai">OpenAI (gpt-4o-mini)</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid grid-cols-3 gap-4">

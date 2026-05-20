@@ -18,7 +18,8 @@ export default function Home() {
             Quiz Generator
           </h1>
           <p className="text-sm md:text-base text-muted-foreground mt-2 font-light max-w-2xl leading-relaxed">
-            Test your knowledge. Configure dynamic quizzes to evaluate your mastery over any study topic.
+            Test your knowledge. Configure dynamic quizzes to evaluate your
+            mastery over any study topic.
           </p>
         </div>
       </header>

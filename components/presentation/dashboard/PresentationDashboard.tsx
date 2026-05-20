@@ -76,7 +76,7 @@ export function PresentationDashboard({
   return (
     <div className="space-y-10 max-w-6xl mx-auto px-4 py-6 relative">
       <PresentationsSidebar side={sidebarSide ?? "right"} />
-      
+
       {/* Editorial Header */}
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-border/80">
         <div>
@@ -87,7 +87,8 @@ export function PresentationDashboard({
             Create Presentation
           </h1>
           <p className="text-sm md:text-base text-muted-foreground mt-2 font-light max-w-2xl leading-relaxed">
-            Describe your topic and customize the basics. Our AI will draft a complete outline and slide deck.
+            Describe your topic and customize the basics. Our AI will draft a
+            complete outline and slide deck.
           </p>
         </div>
       </header>
@@ -110,7 +111,9 @@ export function PresentationDashboard({
               ) : (
                 <Presentation className="h-4 w-4" />
               )}
-              {isGeneratingOutline ? "Generating Outline..." : "Generate Presentation"}
+              {isGeneratingOutline
+                ? "Generating Outline..."
+                : "Generate Presentation"}
             </Button>
           </div>
         </div>

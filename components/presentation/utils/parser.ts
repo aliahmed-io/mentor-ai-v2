@@ -134,6 +134,7 @@ export type PlateSlide = {
   alignment?: "start" | "center" | "end";
   bgColor?: string;
   width?: "S" | "M" | "L";
+  isComplete?: boolean;
 };
 
 // Simple XML node interface for our parser
@@ -204,6 +205,9 @@ export class SlideParser {
       // Extract any complete sections first
       this.extractCompleteSections();
 
+      // Process all naturally completed sections first
+      this.processSections();
+
       // Check if we still have a partial section
       let remainingBuffer = this.buffer.trim();
 
@@ -218,16 +222,19 @@ export class SlideParser {
       if (remainingBuffer.startsWith("<SECTION")) {
         // We have an incomplete section, force close it
         const fixedSection = `${remainingBuffer}</SECTION>`;
-        this.completedSections.push(fixedSection);
+        // Convert this incomplete section with isComplete = false
+        const incompleteSlide = this.convertSectionToPlate(
+          fixedSection,
+          this.parsedSlides.length,
+          false,
+        );
+        this.parsedSlides.push(incompleteSlide);
       }
-
-      // Process all sections
-      const finalSlides = this.processSections();
 
       // Clear the generating mark tracking for completed content
       this.latestContent = "";
 
-      return finalSlides;
+      return this.parsedSlides;
     } catch (e) {
       console.error("Error during finalization:", e);
       return [];
@@ -294,7 +301,9 @@ export class SlideParser {
       return [];
     }
 
-    const newSlides = this.completedSections.map(this.convertSectionToPlate);
+    const newSlides = this.completedSections.map((section, idx) =>
+      this.convertSectionToPlate(section, this.parsedSlides.length + idx, true),
+    );
     this.parsedSlides = [...this.parsedSlides, ...newSlides];
     this.completedSections = [];
 
@@ -397,65 +406,14 @@ export class SlideParser {
   }
 
   /**
-   * Generate a section identifier to track the same section across updates
-   * This helps maintain the same ID when the section is updated
-   */
-  private generateSectionIdentifier(sectionNode: XMLNode): string {
-    // Try to find a unique heading to identify the section
-    const h1Node = sectionNode.children.find(
-      (child) => child.tag.toUpperCase() === "H1",
-    );
-
-    // Use H1 content as a primary identifier if available
-    if (h1Node) {
-      const headingContent = this.getTextContent(h1Node);
-      if (headingContent.trim().length > 0) {
-        return `heading-${headingContent.trim()}`;
-      }
-    }
-
-    // No reliable heading found, use a combination of the first few child elements
-    // and any section attributes to create a fingerprint
-    let fingerprint = "";
-
-    // Add section attributes
-    const attrKeys = Object.keys(sectionNode.attributes).sort();
-    if (attrKeys.length > 0) {
-      fingerprint += attrKeys
-        .map((key) => `${key}=${sectionNode.attributes[key]}`)
-        .join(";");
-    }
-
-    // Add first few child element tags
-    const childTags = sectionNode.children
-      .slice(0, 3)
-      .map((child) => child.tag.toUpperCase());
-    if (childTags.length > 0) {
-      fingerprint += `|${childTags.join("-")}`;
-    }
-
-    // If we still don't have a usable fingerprint, use the full section content hash
-    // This is less stable for updates but better than nothing
-    if (fingerprint.length < 5) {
-      // Simple string hash function
-      let hash = 0;
-      const fullContent = sectionNode.originalTagContent ?? "";
-      for (let i = 0; i < fullContent.length; i++) {
-        const char = fullContent.charCodeAt(i);
-        hash = (hash << 5) - hash + char;
-        hash = hash & hash; // Convert to 32bit integer
-      }
-      fingerprint = `content-hash-${Math.abs(hash)}`;
-    }
-
-    return fingerprint;
-  }
-
-  /**
    * Convert an XML section string to Plate.js format
    * Modified to extract root-level images and layout type
    */
-  private convertSectionToPlate = (sectionString: string): PlateSlide => {
+  private convertSectionToPlate = (
+    sectionString: string,
+    index: number,
+    isComplete = true,
+  ): PlateSlide => {
     // Parse XML string into a structured XMLNode tree
     const rootNode = this.parseXML(sectionString);
 
@@ -474,7 +432,7 @@ export class SlideParser {
     }
 
     // Generate a section identifier to check if we've seen this section before
-    const sectionIdentifier = this.generateSectionIdentifier(sectionNode);
+    const sectionIdentifier = `slide-index-${index}`;
 
     // Check if we already have an ID for this section
     let slideId: string;
@@ -589,6 +547,7 @@ export class SlideParser {
       ...(rootImage ? { rootImage } : {}),
       ...(layoutType ? { layoutType: layoutType } : {}),
       alignment: "center",
+      isComplete,
     };
   };
 

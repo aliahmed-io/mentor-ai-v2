@@ -37,7 +37,9 @@ export function ThemeSettings() {
   const isDark = resolvedTheme === "dark";
 
   const presentationStyle = usePresentationState((s) => s.presentationStyle);
-  const setPresentationStyle = usePresentationState((s) => s.setPresentationStyle);
+  const setPresentationStyle = usePresentationState(
+    (s) => s.setPresentationStyle,
+  );
 
   return (
     <div className="space-y-8">
