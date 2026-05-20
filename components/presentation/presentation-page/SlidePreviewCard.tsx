@@ -15,36 +15,25 @@ export function SlidePreviewCard({
   children,
 }: SlidePreviewCardProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const contentRef = useRef<HTMLDivElement | null>(null);
   const [scale, setScale] = useState(0.2);
-  const [height, setHeight] = useState<number | undefined>(undefined);
 
   const BASE_WIDTH = 1024; // Logical slide width to scale from
+  const BASE_HEIGHT = 576; // Logical slide height to scale from (16:9)
 
   useEffect(() => {
-    if (!containerRef.current || !contentRef.current) return;
+    if (!containerRef.current) return;
 
     const container = containerRef.current;
-    const content = contentRef.current;
 
     const update = () => {
       const containerRect = container.getBoundingClientRect();
       const newScale =
         containerRect.width > 0 ? containerRect.width / BASE_WIDTH : 0.2;
       setScale(newScale);
-
-      // After scale is applied, measure scaled height
-      requestAnimationFrame(() => {
-        if (!contentRef.current) return;
-        const rect = contentRef.current.getBoundingClientRect();
-        setHeight(rect.height || undefined);
-      });
     };
 
     const resizeObserver = new ResizeObserver(() => update());
     resizeObserver.observe(container);
-    // also observe content in case fonts load and change height
-    resizeObserver.observe(content);
 
     update();
 
@@ -61,25 +50,22 @@ export function SlidePreviewCard({
       )}
       onClick={onClick}
     >
-      <div className="absolute left-2 top-1 z-10 rounded-sm bg-muted px-1 py-0.5 text-xs font-medium text-muted-foreground">
+      <div className="absolute left-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-background/90 backdrop-blur-sm shadow-sm border border-border text-xs font-semibold text-foreground">
         {index + 1}
       </div>
       <div
         ref={containerRef}
-        className="pointer-events-none w-full overflow-hidden bg-card"
-        style={{
-          height: height ?? undefined,
-          aspectRatio: height === undefined ? "16/9" : undefined,
-          // scale: height === undefined ? `${scale}` : undefined,
-          transition: "height 150ms ease-in-out",
-        }}
+        className="pointer-events-none w-full overflow-hidden bg-card aspect-video relative"
       >
         <div
-          ref={contentRef}
           style={{
             transform: `scale(${scale})`,
             transformOrigin: "top left",
             width: BASE_WIDTH,
+            height: BASE_HEIGHT,
+            position: "absolute",
+            top: 0,
+            left: 0,
           }}
         >
           {children}

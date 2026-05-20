@@ -182,7 +182,7 @@ const MemoPreviewItem = React.memo(
       <SlidePreviewCard index={index} isActive={isActive} onClick={handleClick}>
         <PresentationEditorStaticView
           initialContent={slide}
-          className="min-h-[300px] border"
+          className="h-full w-full border-none shadow-none bg-transparent"
           id={`preview-${slideId}`}
         />
       </SlidePreviewCard>

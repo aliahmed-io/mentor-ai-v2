@@ -236,6 +236,13 @@ h6.presentation-heading {
   color: var(--presentation-text) !important;
 }
 
+/* Remove borders and shadows from sidebar slide previews */
+.presentation-slide[id^="preview-"] {
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
 /* Additional theme-specific slide styling */
 [data-theme="light"] [data-slide-content="true"]:not([data-use-slide-bg="true"]),
 [data-theme="light"] .presentation-slide:not([data-use-slide-bg="true"]),
