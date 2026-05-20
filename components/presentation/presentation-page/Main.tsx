@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import debounce from "lodash.debounce";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -26,6 +26,7 @@ import { PresentationSlidesView } from "./PresentationSlidesView";
 
 export default function PresentationPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
   const { resolvedTheme } = useTheme();
   const [shouldFetchData, setSetShouldFetchData] = useState(true);
@@ -317,11 +318,7 @@ export default function PresentationPage() {
               </div>
               <Button
                 size="sm"
-                onClick={() =>
-                  usePresentationState
-                    .getState()
-                    .setShouldStartPresentationGeneration(true)
-                }
+                onClick={() => router.push(`/presentation/generate/${id}`)}
               >
                 Retry generation
               </Button>

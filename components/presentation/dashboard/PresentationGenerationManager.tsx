@@ -52,6 +52,7 @@ export function PresentationGenerationManager() {
     isGeneratingPresentation,
     isGeneratingOutline,
     slides,
+    outline,
   } = usePresentationState();
 
   // Create a ref for the streaming parser to persist between renders
@@ -355,22 +356,33 @@ export function PresentationGenerationManager() {
     },
   });
 
+  // Stable refs for inline callbacks — prevents dependency array size changes
+  // while always calling the latest version of each function
+  const updateSlidesWithRAFRef = useRef(updateSlidesWithRAF);
+  updateSlidesWithRAFRef.current = updateSlidesWithRAF;
+
+  const processMessagesRef = useRef(processMessages);
+  processMessagesRef.current = processMessages;
+
+  const updateOutlineWithRAFRef = useRef(updateOutlineWithRAF);
+  updateOutlineWithRAFRef.current = updateOutlineWithRAF;
+
   // Lightweight useEffect that only schedules RAF updates
   useEffect(() => {
-    console.log("outlineMessages", outlineMessages);
     // Only update if we have new messages
     if (outlineMessages.length > 1) {
       lastProcessedMessagesLength.current = outlineMessages.length;
 
       // Process messages and store in buffers (non-blocking)
-      processMessages(outlineMessages);
+      processMessagesRef.current(outlineMessages);
 
       // Only schedule a new frame if one isn't already pending
       if (outlineRafIdRef.current === null) {
-        outlineRafIdRef.current = requestAnimationFrame(updateOutlineWithRAF);
+        outlineRafIdRef.current = requestAnimationFrame(() =>
+          updateOutlineWithRAFRef.current(),
+        );
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [outlineMessages]);
 
   // Watch for outline generation start
@@ -392,7 +404,7 @@ export function PresentationGenerationManager() {
           // Start the RAF cycle for outline updates
           if (outlineRafIdRef.current === null) {
             outlineRafIdRef.current =
-              requestAnimationFrame(updateOutlineWithRAF);
+              requestAnimationFrame(() => updateOutlineWithRAFRef.current());
           }
 
           await appendOutlineMessage(
@@ -419,8 +431,13 @@ export function PresentationGenerationManager() {
     };
 
     void startOutlineGeneration();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldStartOutlineGeneration]);
+  }, [
+    shouldStartOutlineGeneration,
+    appendOutlineMessage,
+    resetForNewGeneration,
+    setIsGeneratingOutline,
+    setShouldStartOutlineGeneration,
+  ]);
 
   const { completion: presentationCompletion, complete: generatePresentation } =
     useCompletion({
@@ -467,45 +484,53 @@ export function PresentationGenerationManager() {
       try {
         // Only schedule a new frame if one isn't already pending
         if (slidesRafIdRef.current === null) {
-          slidesRafIdRef.current = requestAnimationFrame(updateSlidesWithRAF);
+          slidesRafIdRef.current = requestAnimationFrame(() =>
+            updateSlidesWithRAFRef.current(),
+          );
         }
       } catch (error) {
         console.error("Error processing presentation XML:", error);
         toast.error("Error processing presentation content");
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [presentationCompletion]);
 
   useEffect(() => {
-    if (shouldStartPresentationGeneration) {
-      const {
-        outline,
-        presentationInput,
-        language,
-        presentationStyle,
-        currentPresentationTitle,
-        searchResults: stateSearchResults,
-        setThumbnailUrl,
-      } = usePresentationState.getState();
+    if (!shouldStartPresentationGeneration) return;
 
-      // Reset the parser before starting a new generation
-      streamingParserRef.current.reset();
-      setIsGeneratingPresentation(true);
-      setThumbnailUrl(undefined);
-      void generatePresentation(presentationInput ?? "", {
-        body: {
-          title: currentPresentationTitle ?? presentationInput ?? "",
-          prompt: presentationInput ?? "",
-          outline,
-          searchResults: stateSearchResults,
-          language,
-          tone: presentationStyle,
-        },
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldStartPresentationGeneration]);
+    // Wait for outline to be hydrated — don't clear the flag so this re-runs
+    // when outline gets populated from the DB fetch
+    if (!outline || outline.length === 0) return;
+
+    const {
+      presentationInput,
+      language,
+      presentationStyle,
+      currentPresentationTitle,
+      searchResults: stateSearchResults,
+      setThumbnailUrl,
+    } = usePresentationState.getState();
+
+    // Reset the parser before starting a new generation
+    streamingParserRef.current.reset();
+    setIsGeneratingPresentation(true);
+    setThumbnailUrl(undefined);
+    void generatePresentation(presentationInput ?? "", {
+      body: {
+        title: currentPresentationTitle ?? presentationInput ?? "",
+        prompt: presentationInput ?? "",
+        outline,
+        searchResults: stateSearchResults,
+        language,
+        tone: presentationStyle,
+      },
+    });
+  }, [
+    shouldStartPresentationGeneration,
+    outline,
+    generatePresentation,
+    setIsGeneratingPresentation,
+  ]);
 
   // Debounced incremental persistence while streaming
   const debouncedStreamSaveRef = useRef(
