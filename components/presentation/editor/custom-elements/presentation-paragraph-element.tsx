@@ -13,16 +13,16 @@ export interface PresentationParagraphElementProps {
 export const PresentationParagraphElement = withRef<
   typeof PlateElement,
   PresentationParagraphElementProps
->(({ className, children, ...props }, ref) => {
+>(({ className, children, as: _as, ...props }, ref) => {
   return (
     <PlateElement
       ref={ref}
-      as="p"
+      {...(props as any)}
+      as="div"
       className={cn(
         "presentation-paragraph m-0 px-0 py-1 text-base",
         className,
       )}
-      {...props}
     >
       {children}
     </PlateElement>

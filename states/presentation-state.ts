@@ -166,7 +166,7 @@ export const usePresentationState = create<PresentationState>((set) => ({
   viewMode: "slides",
   theme: "mystique",
   customThemeData: null,
-  imageModel: "black-forest-labs/FLUX.1-schnell-Free",
+  imageModel: "gemini-3.1-flash-image-preview",
   imageSource: "stock",
   stockImageProvider: "unsplash",
   presentationStyle: "professional",

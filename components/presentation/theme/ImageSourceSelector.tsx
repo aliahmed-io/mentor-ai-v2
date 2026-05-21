@@ -14,9 +14,10 @@ import {
 } from "@/components/ui/select";
 
 export const IMAGE_MODELS: { value: ImageModelList; label: string }[] = [
-  { value: "black-forest-labs/FLUX.1-schnell-Free", label: "FLUX Fast" },
-  { value: "black-forest-labs/FLUX.1-dev", label: "FLUX Developer" },
-  { value: "black-forest-labs/FLUX1.1-pro", label: "FLUX Premium" },
+  {
+    value: "gemini-3.1-flash-image-preview",
+    label: "Gemini 3.1 Flash Image",
+  },
 ];
 
 interface ImageSourceSelectorProps {
@@ -48,7 +49,7 @@ export function ImageSourceSelector({
       <Select
         value={
           imageSource === "ai"
-            ? imageModel || "black-forest-labs/FLUX.1-schnell-Free"
+            ? imageModel || "gemini-3.1-flash-image-preview"
             : `stock-${stockImageProvider}`
         }
         onValueChange={(value) => {

@@ -331,7 +331,7 @@ export default function PresentationPage() {
       isLoading={isLoading}
       themeData={currentThemeData ?? undefined}
     >
-      <div className="mx-auto max-w-[90%] space-y-8 pt-16">
+      <div className="mx-auto w-full max-w-[95%] space-y-8 pt-16">
         <div className="space-y-8">
           {showEmptyNotice && slidesCount === 0 && (
             <div className="rounded-md border bg-muted/30 p-4 text-sm">

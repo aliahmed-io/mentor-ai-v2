@@ -421,7 +421,7 @@ export default function PresentationGenerateWithIdPage() {
                     )}
                   </div>
                   <span className="text-[9px] text-muted-foreground leading-tight">
-                    gemini-2.5-flash
+                    gemini-3.1-flash-lite-preview
                   </span>
                   <span className="mt-1 inline-block text-[8px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-medium">
                     100% Free / Stable
@@ -670,20 +670,14 @@ export default function PresentationGenerateWithIdPage() {
                   >
                     <div className="flex flex-col gap-0.5">
                       <span
-                        className="text-xs font-bold"
-                        style={{
-                          color: modeColors.heading,
-                          fontFamily: themeOption.fonts.heading,
-                        }}
+                        className="text-xs font-bold text-foreground"
+                        style={{ fontFamily: themeOption.fonts.heading }}
                       >
                         {themeOption.name}
                       </span>
                       <span
-                        className="text-[9px] line-clamp-1 opacity-70"
-                        style={{
-                          color: modeColors.text,
-                          fontFamily: themeOption.fonts.body,
-                        }}
+                        className="text-[9px] line-clamp-1 text-muted-foreground"
+                        style={{ fontFamily: themeOption.fonts.body }}
                       >
                         {themeOption.description}
                       </span>
@@ -800,7 +794,7 @@ export default function PresentationGenerateWithIdPage() {
                 <span>
                   Active engine initialized via{" "}
                   {textModel === "gemini"
-                    ? "Google Gemini flash-2.5"
+                    ? "Google Gemini 3.1 Flash Lite"
                     : "OpenAI gpt-4o-mini"}
                   .
                 </span>

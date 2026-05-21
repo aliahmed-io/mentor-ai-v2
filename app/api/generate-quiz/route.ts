@@ -86,7 +86,7 @@ FORMAT: Return a JSON object with a "questions" array containing the questions i
     }
 
     const response = await client.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.1-flash-lite-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",

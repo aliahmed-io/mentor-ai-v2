@@ -41,7 +41,7 @@ export function PresentationLayout({
         <div className="flex h-full">
           <SlidePreview showSidebar={showSidebar} />
           {/* Main Presentation Content - Scrollable */}
-          <div className="presentation-slides flex max-h-full flex-1 overflow-auto pb-20">
+          <div className="presentation-slides flex flex-col max-h-full flex-1 overflow-auto pb-20 w-full">
             {children}
           </div>
         </div>

@@ -98,10 +98,10 @@ export const PresentationSlidesView = ({
 
           <div
             className={cn(
-              "slides-view-container mx-auto",
+              "slides-view-container mx-auto w-full",
               viewMode === "web" && !isPresenting
                 ? "flex flex-col gap-0 max-w-4xl py-12"
-                : "",
+                : "max-w-5xl",
             )}
           >
             {items.map((slide, index) => (

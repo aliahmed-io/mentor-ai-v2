@@ -211,39 +211,37 @@ export default function QuizSetup({ onSetupComplete }: QuizSetupProps) {
 
             {/* Question Count */}
             <div className="space-y-2.5">
-              <Label
-                htmlFor="questionCount"
-                className="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)]"
-              >
-                Number of Questions
-              </Label>
-              <div className="flex flex-wrap items-center gap-3 bg-[var(--background)] p-2.5 rounded-xl border border-[var(--border)]">
+              <div className="flex items-center justify-between">
+                <Label
+                  htmlFor="questionCount"
+                  className="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)]"
+                >
+                  Number of Questions
+                </Label>
+                <span className="text-xs font-bold text-[var(--primary)] bg-[var(--primary)]/10 px-2.5 py-0.5 rounded-full">
+                  {questionCount}
+                </span>
+              </div>
+              <div className="space-y-2 px-0.5">
                 <input
                   id="questionCount"
-                  type="number"
+                  type="range"
                   min="5"
                   max="50"
+                  step="5"
                   value={questionCount}
                   onChange={(e) =>
-                    setQuestionCount(parseInt(e.target.value, 10) || 10)
+                    setQuestionCount(parseInt(e.target.value, 10))
                   }
-                  className="w-16 bg-background rounded-lg border border-[var(--border)] px-2 py-1.5 text-center text-xs font-bold text-[var(--foreground)]"
+                  className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-[var(--muted)] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--primary)] [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[var(--primary)] [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer accent-[var(--primary)]"
                 />
-                <div className="flex gap-1.5">
-                  {[5, 10, 15, 20].map((count) => (
-                    <button
-                      key={count}
-                      type="button"
-                      onClick={() => setQuestionCount(count)}
-                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${
-                        questionCount === count
-                          ? "bg-[var(--primary)] text-[var(--primary-foreground)] shadow-xs"
-                          : "hover:bg-[var(--muted)] text-[var(--muted-foreground)]"
-                      }`}
-                    >
-                      {count}
-                    </button>
-                  ))}
+                <div className="flex justify-between text-[10px] text-[var(--muted-foreground)] font-medium">
+                  <span>5</span>
+                  <span>10</span>
+                  <span>20</span>
+                  <span>30</span>
+                  <span>40</span>
+                  <span>50</span>
                 </div>
               </div>
             </div>

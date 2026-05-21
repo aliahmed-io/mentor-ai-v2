@@ -572,7 +572,9 @@ export function PresentationTableCellElement({
       <div
         className={cn(
           "relative z-20 box-border h-full rounded-md px-3 py-2",
-          isHeader ? "text-lg font-bold text-primary" : "presentation-text",
+          isHeader
+            ? "text-lg font-bold text-[var(--presentation-background)]"
+            : "presentation-text",
         )}
         style={{ minHeight }}
       >

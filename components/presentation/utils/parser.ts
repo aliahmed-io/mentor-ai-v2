@@ -1,4 +1,7 @@
-import { ColumnItemPlugin, ColumnPlugin } from "@platejs/layout/react";
+import {
+  BaseColumnItemPlugin as ColumnItemPlugin,
+  BaseColumnPlugin as ColumnPlugin,
+} from "@platejs/layout";
 import { nanoid } from "nanoid"; // Import nanoid for unique ID generation
 import type {
   Descendant,

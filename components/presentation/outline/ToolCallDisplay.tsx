@@ -27,27 +27,25 @@ export function ToolCallDisplay() {
     <div className="space-y-2">
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <CollapsibleTrigger asChild>
-          <button className="flex w-full items-center justify-between rounded-lg border bg-muted/30 p-3 text-left hover:bg-muted/50 transition-colors">
+          <button className="flex w-full items-center justify-between rounded-lg border border-white/10 bg-white/5 p-3 text-left hover:bg-white/10 transition-colors">
             <div className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-blue-500" />
-              <span className="text-sm font-medium">
+              {isGeneratingOutline ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-sky-400" />
+              ) : (
+                <Search className="h-3.5 w-3.5 text-sky-400" />
+              )}
+              <span className="text-xs font-semibold text-zinc-200 tracking-wide">
                 Web Search Results ({searchResults.length})
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              {isGeneratingOutline && (
-                <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-              )}
-              <span className="text-xs text-muted-foreground">
-                {isExpanded ? "Hide" : "Show"}
-              </span>
-            </div>
+            <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
+              {isExpanded ? "Hide" : "Show"}
+            </span>
           </button>
         </CollapsibleTrigger>
 
-        <CollapsibleContent className="space-y-2 pt-2 px-4">
+        <CollapsibleContent className="space-y-1.5 pt-2">
           {searchResults.map((searchItem, index) => {
-            // Convert our search results to the format expected by the Searched component
             const formattedResults: SearchResult[] = Array.isArray(
               searchItem.results,
             )
@@ -56,7 +54,7 @@ export function ToolCallDisplay() {
                   return {
                     url: (searchResult.url as string) || "",
                     title: (searchResult.title as string) || "No title",
-                    published_date: "", // Not available in our format
+                    published_date: "",
                     content: (searchResult.content as string) || "No content",
                   };
                 })
@@ -72,11 +70,11 @@ export function ToolCallDisplay() {
           })}
 
           {isGeneratingOutline && searchResults.length === 0 && (
-            <div className="rounded-lg border bg-muted/30 p-3">
+            <div className="rounded-lg border border-white/10 bg-white/5 p-3">
               <div className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                <span className="text-sm text-muted-foreground">
-                  AI is researching...
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-sky-400" />
+                <span className="text-xs text-zinc-400">
+                  AI is researching the web...
                 </span>
               </div>
             </div>

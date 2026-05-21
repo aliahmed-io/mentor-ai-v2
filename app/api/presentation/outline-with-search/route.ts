@@ -96,18 +96,18 @@ export async function POST(req: Request) {
     let model;
     if (textModel === "openai" && openaiKey) {
       const openai = createOpenAI({ apiKey: openaiKey });
-      model = openai("gpt-4o-mini");
+      model = openai("gpt-5.5");
     } else if (textModel === "gemini" && geminiKey) {
       const google = createGoogleGenerativeAI({ apiKey: geminiKey });
-      model = google("gemini-2.5-flash");
+      model = google("gemini-3.1-flash-lite-preview");
     } else if (geminiKey) {
       // Fallback: Gemini Key is present
       const google = createGoogleGenerativeAI({ apiKey: geminiKey });
-      model = google("gemini-2.5-flash");
+      model = google("gemini-3.1-flash-lite-preview");
     } else if (openaiKey) {
       // Fallback: OpenAI Key is present
       const openai = createOpenAI({ apiKey: openaiKey });
-      model = openai("gpt-4o-mini");
+      model = openai("gpt-5.5");
     } else {
       return NextResponse.json(
         {

@@ -184,28 +184,30 @@ export async function updatePresentation({
     const effectiveLanguage = language;
 
     // Update base document with all presentation data
-    const presentation = await db.baseDocument.update({
-      where: { id },
-      data: {
-        title: title,
-        thumbnailUrl,
-        presentation: {
-          update: {
-            prompt: prompt,
-            content: content as unknown as InputJsonValue,
-            theme: effectiveTheme,
-            imageSource: effectiveImageSource,
-            presentationStyle: effectivePresentationStyle,
-            language: effectiveLanguage,
-            outline,
-            searchResults: searchResults as unknown as InputJsonValue,
+    const presentation = await withDbRetry(() =>
+      db.baseDocument.update({
+        where: { id },
+        data: {
+          title: title,
+          thumbnailUrl,
+          presentation: {
+            update: {
+              prompt: prompt,
+              content: content as unknown as InputJsonValue,
+              theme: effectiveTheme,
+              imageSource: effectiveImageSource,
+              presentationStyle: effectivePresentationStyle,
+              language: effectiveLanguage,
+              outline,
+              searchResults: searchResults as unknown as InputJsonValue,
+            },
           },
         },
-      },
-      include: {
-        presentation: true,
-      },
-    });
+        include: {
+          presentation: true,
+        },
+      }),
+    );
 
     return {
       success: true,
@@ -309,12 +311,14 @@ export async function getPresentation(id: string) {
   }
 
   try {
-    const presentation = await db.baseDocument.findUnique({
-      where: { id },
-      include: {
-        presentation: true,
-      },
-    });
+    const presentation = await withDbRetry(() =>
+      db.baseDocument.findUnique({
+        where: { id },
+        include: {
+          presentation: true,
+        },
+      }),
+    );
 
     return {
       success: true,

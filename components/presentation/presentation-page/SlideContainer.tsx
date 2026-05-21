@@ -114,6 +114,8 @@ export function SlideContainer({
             (slideWidth ?? currentSlide?.width ?? "M") === "L" &&
             "[&_.presentation-slide]:text-lg",
           isPresenting && "h-full w-full",
+          (isPresenting || (!isPresenting && viewMode === "slides")) &&
+            "slide-container-aspect",
           className,
         )}
       >
@@ -164,7 +166,7 @@ export function SlideContainer({
         {children}
       </div>
 
-      {!isPresenting && !isReadOnly && viewMode === "slides" && (
+      {!isPresenting && !isReadOnly && viewMode === "slides" && index === 0 && (
         <div className="absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-200 group-hover/card-container:opacity-100">
           <Button
             variant="outline"

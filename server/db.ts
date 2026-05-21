@@ -15,11 +15,11 @@ export const db = globalForPrisma.prisma ?? createPrismaClient();
 
 if (env.NODE_ENV !== "production") globalForPrisma.prisma = db;
 
-// Generic retry helper for transient connection issues (e.g., ECONNRESET)
+// Generic retry helper for transient connection issues (e.g., ECONNRESET, P1001, P2024)
 export async function withDbRetry<T>(
   fn: () => Promise<T>,
   retries = 2,
-  delayMs = 250,
+  delayMs = 300,
 ): Promise<T> {
   let lastError: unknown;
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -28,21 +28,30 @@ export async function withDbRetry<T>(
     } catch (err: unknown) {
       const msg =
         typeof err === "object" && err && "message" in err
-          ? String((err as any).message)
+          ? String((err as { message: unknown }).message)
           : String(err);
-      // Match common transient connection messages
+      // Also check Prisma error code for P1001 / P2024
+      const code =
+        typeof err === "object" && err && "code" in err
+          ? String((err as { code: unknown }).code)
+          : "";
+      // Match common transient connection messages and Prisma pool/connectivity codes
       const isTransient =
         msg.includes("ECONNRESET") ||
         msg.includes("Connection reset") ||
         msg.includes("forcibly closed by the remote host") ||
-        msg.includes("Error in PostgreSQL connection");
+        msg.includes("Error in PostgreSQL connection") ||
+        msg.includes("Can't reach database server") ||
+        msg.includes("connection pool") ||
+        code === "P1001" || // Can't reach database server
+        code === "P2024"; // Connection pool timeout
       if (!isTransient || attempt === retries) {
         throw err;
       }
       lastError = err;
-      // Small backoff before retry
-      await new Promise((r) => setTimeout(r, delayMs * (attempt + 1)));
+      // Exponential backoff before retry
+      await new Promise((r) => setTimeout(r, delayMs * 2 ** attempt));
     }
   }
-  throw lastError as any;
+  throw lastError as Error;
 }

@@ -1,5 +1,4 @@
 import { Layout } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -59,22 +58,32 @@ export function PresentationControls({
         {/* Number of Slides */}
         <div>
           {shouldShowLabel && (
-            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Number of slides
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Number of slides
+              </label>
+              <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                {numSlides}
+              </span>
+            </div>
           )}
-          <Input
-            type="number"
-            min={MIN_PRESENTATION_SLIDES}
-            max={MAX_PRESENTATION_SLIDES}
-            step={1}
-            value={numSlides}
-            onChange={(e) => {
-              setNumSlides(clampSlideCount(Number(e.target.value)));
-            }}
-            placeholder={`${MIN_PRESENTATION_SLIDES}-${MAX_PRESENTATION_SLIDES}`}
-            className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-          />
+          <div className="space-y-1.5">
+            <input
+              type="range"
+              min={MIN_PRESENTATION_SLIDES}
+              max={MAX_PRESENTATION_SLIDES}
+              step={1}
+              value={numSlides}
+              onChange={(e) => {
+                setNumSlides(clampSlideCount(Number(e.target.value)));
+              }}
+              className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-muted [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:cursor-pointer accent-primary"
+            />
+            <div className="flex justify-between text-[10px] text-muted-foreground font-medium">
+              <span>{MIN_PRESENTATION_SLIDES}</span>
+              <span>{MAX_PRESENTATION_SLIDES}</span>
+            </div>
+          </div>
         </div>
 
         {/* Language */}

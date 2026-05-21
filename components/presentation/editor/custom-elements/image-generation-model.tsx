@@ -28,16 +28,8 @@ import {
 
 const MODEL_OPTIONS = [
   {
-    label: "FLUX Fast",
-    value: "black-forest-labs/FLUX.1-schnell-Free",
-  },
-  {
-    label: "FLUX Developer",
-    value: "black-forest-labs/FLUX.1-dev",
-  },
-  {
-    label: "FLUX Premium",
-    value: "black-forest-labs/FLUX1.1-pro",
+    label: "Gemini 3.1 Flash Image",
+    value: "gemini-3.1-flash-image-preview",
   },
 ];
 
@@ -53,7 +45,7 @@ export function GenerateImageDialogContent({
   const editor = useEditorRef();
   const [prompt, setPrompt] = useState("");
   const [selectedModel, setSelectedModel] = useState<ImageModelList>(
-    "black-forest-labs/FLUX.1-schnell-Free",
+    "gemini-3.1-flash-image-preview",
   );
 
   const generateImage = async () => {

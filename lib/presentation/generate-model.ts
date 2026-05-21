@@ -13,29 +13,29 @@ export function resolvePresentationModel(
   if (textModel === "quality") {
     if (openaiKey) {
       const openai = createOpenAI({ apiKey: openaiKey });
-      return openai("gpt-4o");
+      return openai("gpt-5.5");
     }
     if (geminiKey) {
       const google = createGoogleGenerativeAI({ apiKey: geminiKey });
-      return google("gemini-2.5-pro");
+      return google("gemini-3.1-flash-lite-preview");
     }
   }
 
   if (textModel === "openai" && openaiKey) {
     const openai = createOpenAI({ apiKey: openaiKey });
-    return openai("gpt-4o-mini");
+    return openai("gpt-5.5");
   }
   if ((textModel === "gemini" || textModel === "quality") && geminiKey) {
     const google = createGoogleGenerativeAI({ apiKey: geminiKey });
-    return google("gemini-2.5-flash");
+    return google("gemini-3.1-flash-lite-preview");
   }
   if (geminiKey) {
     const google = createGoogleGenerativeAI({ apiKey: geminiKey });
-    return google("gemini-2.5-flash");
+    return google("gemini-3.1-flash-lite-preview");
   }
   if (openaiKey) {
     const openai = createOpenAI({ apiKey: openaiKey });
-    return openai("gpt-4o-mini");
+    return openai("gpt-5.5");
   }
   return null;
 }

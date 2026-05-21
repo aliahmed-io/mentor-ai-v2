@@ -175,7 +175,7 @@ const PresentationEditor = React.memo(
               <Editor
                 className={cn(
                   className,
-                  "flex flex-col border-none !bg-transparent py-12 outline-none h-full",
+                  "flex-1 flex flex-col border-none !bg-transparent py-12 outline-none h-full",
                   (readOnly || isGenerating) && "px-16",
                   !initialContent?.alignment && "justify-center",
                   initialContent?.alignment === "start" && "justify-start",
