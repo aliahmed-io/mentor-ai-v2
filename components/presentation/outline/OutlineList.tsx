@@ -11,7 +11,7 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
+  rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -130,8 +130,8 @@ export function OutlineList() {
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
-        <SortableContext items={items} strategy={verticalListSortingStrategy}>
-          <div className="space-y-2">
+        <SortableContext items={items} strategy={rectSortingStrategy}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
             {items.map((item, index) => (
               <OutlineItem
                 key={item.id}
@@ -146,12 +146,15 @@ export function OutlineList() {
         </SortableContext>
         {showSkeletonPlaceholders && <Skeleton className="h-96 w-full" />}
 
-        {showLoadingSkeletons &&
-          Array.from({ length: Math.min(remainingCount, 6) }).map(
-            (_, index) => (
-              <Skeleton key={`loading-${index}`} className="h-16 w-full" />
-            ),
-          )}
+        {showLoadingSkeletons && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 mt-4">
+            {Array.from({ length: Math.min(remainingCount, 6) }).map(
+              (_, index) => (
+                <Skeleton key={`loading-${index}`} className="h-32 w-full" />
+              ),
+            )}
+          </div>
+        )}
 
         {showEmptyState && (
           <p className="rounded-md border border-dashed border-muted-foreground/30 bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground">

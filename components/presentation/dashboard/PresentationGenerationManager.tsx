@@ -421,6 +421,7 @@ export function PresentationGenerationManager() {
           tone: activeStyle,
           textModel: activeTextModel,
           searchResults: stateSearchResults,
+          slideOverrides: state.slideOverrides,
         }),
         signal,
       });

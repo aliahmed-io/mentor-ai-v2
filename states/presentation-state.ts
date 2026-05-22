@@ -63,6 +63,10 @@ interface PresentationState {
   webSearchEnabled: boolean; // Toggle for web search in outline generation
   slides: PlateSlide[]; // This now holds the new object structure
 
+  // Individual slide template/prompt overrides (Keyed by Slide ID)
+  slideOverrides: Record<string, { templateId?: string; customPrompt?: string }>;
+  setSlideOverride: (id: string, override: { templateId?: string; customPrompt?: string }) => void;
+
   // Thinking content from AI responses
   outlineThinking: string; // Thinking content from outline generation
   presentationThinking: string; // Thinking content from presentation generation
@@ -174,6 +178,7 @@ export const usePresentationState = create<PresentationState>((set) => ({
   presentationStyle: "professional",
   presentationColorMode: "dark",
   slides: [], // Now holds the new slide object structure
+  slideOverrides: {}, // Keyed by Outline ID
   outlineThinking: "",
   presentationThinking: "",
   rootImageGeneration: {},
@@ -226,6 +231,16 @@ export const usePresentationState = create<PresentationState>((set) => ({
   setSlides: (slides) => {
     set({ slides });
   },
+  setSlideOverride: (id, override) =>
+    set((state) => ({
+      slideOverrides: {
+        ...state.slideOverrides,
+        [id]: {
+          ...(state.slideOverrides[id] || {}),
+          ...override,
+        },
+      },
+    })),
   updateSlidePercentages: (slideIndex, percentages) =>
     set((state) => {
       const newSlides = [...state.slides];
@@ -379,6 +394,7 @@ export const usePresentationState = create<PresentationState>((set) => ({
       slides: [],
       outlineThinking: "",
       presentationThinking: "",
+      slideOverrides: {},
       rootImageGeneration: {},
       imageQueue: [],
       generationProgress: null,

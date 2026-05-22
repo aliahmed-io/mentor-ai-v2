@@ -33,10 +33,15 @@ const slidesRequestSchema = z.object({
     .enum(["gemini", "openai", "quality"])
     .optional()
     .default("gemini"),
-  // Fallbacks for direct slide generation if skipping orchestration
   templateId: z.string().optional(),
   creativeBrief: z.string().optional(),
   layout: z.string().optional(),
+  slideOverrides: z.record(
+    z.object({
+      templateId: z.string().optional(),
+      customPrompt: z.string().optional(),
+    })
+  ).optional(),
 });
 
 export async function POST(req: Request) {
@@ -74,6 +79,7 @@ export async function POST(req: Request) {
       templateId,
       creativeBrief,
       layout,
+      slideOverrides,
     } = validationResult.data;
 
     const cookieStore = await cookies();
@@ -120,19 +126,24 @@ export async function POST(req: Request) {
       console.log(`[generate/route] Starting Phase 2: Parallel Slot Filling...`);
 
       // Map into factory functions so they don't execute immediately
-      const slideTasks = orchestration.map((blueprint, index) => () =>
-        generateSingleSlide({
-          model,
-          title,
-          outlineItem: outline[index],
-          slideIndex: index,
-          totalSlides: outline.length,
-          language,
-          tone,
-          templateId: blueprint.templateId,
-          creativeBrief: blueprint.creativeBrief,
-        })
-      );
+      const slideTasks = orchestration.map((blueprint, index) => {
+        const override = slideOverrides?.[(index + 1).toString()];
+        const finalTemplateId = override?.templateId || blueprint.templateId;
+        const finalCreativeBrief = override?.customPrompt ? `${blueprint.creativeBrief}\nUSER INSTRUCTION: ${override.customPrompt}` : blueprint.creativeBrief;
+
+        return () =>
+          generateSingleSlide({
+            model,
+            title,
+            outlineItem: outline[index],
+            slideIndex: index,
+            totalSlides: outline.length,
+            language,
+            tone,
+            templateId: finalTemplateId,
+            creativeBrief: finalCreativeBrief,
+          });
+      });
 
       // Process in batches of 3 to avoid hitting Gemini free tier rate limits (429)
       const CONCURRENCY_LIMIT = 3;

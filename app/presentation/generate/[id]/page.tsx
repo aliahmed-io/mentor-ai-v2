@@ -18,11 +18,23 @@ import {
   Sparkles,
   Terminal,
   Tv,
+  Settings2,
+  Type,
+  X,
+  FileText,
+  Upload,
 } from "lucide-react";
+import UploadForm from "@/components/UploadForm";
 import { useParams, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { getPresentation } from "@/app/_actions/presentation/presentationActions";
 import { getCustomThemeById } from "@/app/_actions/presentation/theme-actions";
 import { ThinkingDisplay } from "@/components/presentation/dashboard/ThinkingDisplay";
@@ -125,7 +137,15 @@ export default function PresentationGenerateWithIdPage() {
 
     setShouldStartOutlineGeneration,
     generationStatus,
+    setIsGeneratingPresentation,
+    slides,
+    setSlides,
   } = usePresentationState();
+
+  const handleUploaded = (data: { sessionId: string; text: string }) => {
+    if (!data) return;
+    setPresentationInput((prev) => (prev ? `${prev}\n\n` : "") + data.text);
+  };
 
   // Track if this is a fresh navigation or a revisit
   const initialLoadComplete = useRef(false);
@@ -370,475 +390,327 @@ export default function PresentationGenerateWithIdPage() {
         </div>
       </header>
 
-      {/* 2. Main 12-Column Grid Layout */}
-      <main className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 md:p-6 lg:h-[calc(100vh-4.5rem)] lg:overflow-hidden flex-1 pb-32 lg:pb-6">
-        {/* Left Column (col-span-4) - Design Studio Controls */}
-        <section className="lg:col-span-4 flex flex-col gap-5 lg:h-full lg:overflow-y-auto pr-0 lg:pr-2 pb-2 scrollbar-thin">
-          {/* Box 1: Core Parameters & Engine Swapper */}
-          <div className="rounded-3xl border border-border/40 bg-card/45 backdrop-blur-xl shadow-xl p-5 space-y-6 relative overflow-hidden transition-all duration-300 hover:shadow-2xl">
-            <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
-
-            <div className="flex items-center gap-2">
-              <Sliders className="h-4.5 w-4.5 text-primary" />
+      {/* 2. Main Layout (Sidebar + Canvas) */}
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-4.5rem)] w-full overflow-hidden p-4 md:p-6 gap-6">
+        {/* Left Sidebar - Settings & Themes */}
+        <aside className="w-full lg:w-80 shrink-0 flex flex-col gap-4 h-full overflow-y-auto pr-2 pb-32 lg:pb-2 scrollbar-thin">
+          
+          {/* Quick Settings Card */}
+          <div className="rounded-2xl border border-border/30 bg-card/30 backdrop-blur-md p-4 space-y-5">
+            <div className="flex items-center gap-2 mb-2">
+              <Settings2 className="h-4 w-4 text-primary" />
               <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
-                Creative Parameters
+                Document Settings
               </h2>
             </div>
+            
+            {/* Upload File */}
+            <div className="space-y-3">
+              <label className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
+                <Upload className="h-3.5 w-3.5 text-primary" /> Upload Knowledge Source
+              </label>
+              <div className="rounded-xl border border-dashed border-border/50 p-3 bg-background/20 hover:bg-background/40 transition-all duration-200">
+                <UploadForm onUploaded={handleUploaded} />
+              </div>
+            </div>
 
-            {/* Cognitive Engine (Model Selector) */}
-            <div className="space-y-2.5">
+            {/* Slider for number of slides */}
+            <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                  <Cpu className="h-3.5 w-3.5 text-primary" />
-                  Cognitive AI Model
+                <span className="text-xs font-semibold text-muted-foreground">
+                  Slide Density
                 </span>
-                <span className="text-[10px] text-emerald-500 font-medium flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
-                  API Active
+                <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                  {numSlides} Cards
                 </span>
               </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                {/* Gemini Engine Toggle */}
-                <button
+              <div className="flex items-center gap-3">
+                <Button
                   type="button"
-                  onClick={() => setTextModel("gemini")}
-                  className={cn(
-                    "relative flex flex-col items-start gap-1 p-3.5 rounded-2xl border text-left transition-all duration-300",
-                    textModel === "gemini"
-                      ? "border-primary bg-primary/5 shadow-md shadow-primary/5"
-                      : "border-border/60 bg-background/40 hover:border-primary/45 hover:bg-muted/40",
-                  )}
+                  variant="outline"
+                  size="icon"
+                  aria-label="Decrease slides"
+                  className="h-7 w-7 rounded-md"
+                  onClick={handleDecrementSlides}
+                  disabled={numSlides <= MIN_PRESENTATION_SLIDES}
                 >
-                  <div className="flex items-center justify-between w-full">
-                    <span className="text-xs font-bold text-foreground">
-                      Google Gemini
-                    </span>
-                    {textModel === "gemini" && (
-                      <span className="h-4 w-4 rounded-full bg-primary flex items-center justify-center">
-                        <Check className="h-2.5 w-2.5 text-primary-foreground stroke-[3]" />
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[9px] text-muted-foreground leading-tight">
-                    gemini-3.1-flash-lite-preview
-                  </span>
-                  <span className="mt-1 inline-block text-[8px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-medium">
-                    100% Free / Stable
-                  </span>
-                </button>
-
-                {/* OpenAI Engine Toggle */}
-                <button
+                  -
+                </Button>
+                <input
+                  type="range"
+                  aria-label="Number of slides"
+                  title="Slide density slider"
+                  min={MIN_PRESENTATION_SLIDES}
+                  max={MAX_PRESENTATION_SLIDES}
+                  value={numSlides}
+                  onChange={(e) =>
+                    setNumSlides(clampSlideCount(Number(e.target.value)))
+                  }
+                  className="w-full accent-primary h-1 rounded bg-muted cursor-pointer"
+                />
+                <Button
                   type="button"
-                  onClick={() => setTextModel("openai")}
-                  className={cn(
-                    "relative flex flex-col items-start gap-1 p-3.5 rounded-2xl border text-left transition-all duration-300",
-                    textModel === "openai"
-                      ? "border-primary bg-primary/5 shadow-md shadow-primary/5"
-                      : "border-border/60 bg-background/40 hover:border-primary/45 hover:bg-muted/40",
-                  )}
+                  variant="outline"
+                  size="icon"
+                  aria-label="Increase slides"
+                  className="h-7 w-7 rounded-md"
+                  onClick={handleIncrementSlides}
+                  disabled={numSlides >= MAX_PRESENTATION_SLIDES}
                 >
-                  <div className="flex items-center justify-between w-full">
-                    <span className="text-xs font-bold text-foreground">
-                      OpenAI GPT
-                    </span>
-                    {textModel === "openai" && (
-                      <span className="h-4 w-4 rounded-full bg-primary flex items-center justify-center">
-                        <Check className="h-2.5 w-2.5 text-primary-foreground stroke-[3]" />
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[9px] text-muted-foreground leading-tight">
-                    gpt-4o-mini
-                  </span>
-                  <span className="mt-1 inline-block text-[8px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/25 font-medium">
-                    Rate limits apply
-                  </span>
-                </button>
+                  +
+                </Button>
               </div>
             </div>
 
-            <div className="h-px bg-border/40" />
+            {/* Advanced Settings Accordion */}
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="advanced" className="border-border/30">
+                <AccordionTrigger className="text-xs font-semibold text-muted-foreground hover:text-foreground py-2">
+                  Advanced Parameters
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-2">
+                  {/* Cognitive Engine (Model Selector) */}
+                  <div className="space-y-2.5">
+                    <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                      <Cpu className="h-3 w-3" /> Engine
+                    </span>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setTextModel("gemini")}
+                        className={cn(
+                          "relative flex flex-col items-start p-2 rounded-lg border text-left transition-all",
+                          textModel === "gemini" ? "border-primary bg-primary/5" : "border-border/40 hover:bg-muted/40"
+                        )}
+                      >
+                        <span className="text-[10px] font-bold">Google Gemini</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTextModel("openai")}
+                        className={cn(
+                          "relative flex flex-col items-start p-2 rounded-lg border text-left transition-all",
+                          textModel === "openai" ? "border-primary bg-primary/5" : "border-border/40 hover:bg-muted/40"
+                        )}
+                      >
+                        <span className="text-[10px] font-bold">OpenAI GPT</span>
+                      </button>
+                    </div>
+                  </div>
 
-            {/* Layout, Slides & Web Search settings */}
-            <div className="space-y-4">
-              {/* Web Search Controls */}
-              <div className="flex items-center justify-between p-3.5 rounded-2xl border border-border/40 bg-background/30">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                    <Globe className="h-3.5 w-3.5 text-sky-500" />
-                    Web Search Research
-                  </span>
-                  <span className="text-[9px] text-muted-foreground">
-                    Fetches real-time web context
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  disabled={isGeneratingOutline}
-                  onClick={() => setWebSearchEnabled(!webSearchEnabled)}
-                  className={cn(
-                    "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50",
-                    webSearchEnabled ? "bg-primary" : "bg-muted-foreground/35",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow ring-0 transition duration-200 ease-in-out",
-                      webSearchEnabled ? "translate-x-5" : "translate-x-0",
-                    )}
-                  />
-                </button>
-              </div>
+                  {/* Web Search Controls */}
+                  <div className="flex items-center justify-between p-2 rounded-lg border border-border/30 bg-background/30">
+                    <span className="text-[10px] font-bold text-foreground flex items-center gap-1.5">
+                      <Globe className="h-3 w-3 text-sky-500" />
+                      Web Search Research
+                    </span>
+                    <button
+                      type="button"
+                      aria-label="Toggle web search research"
+                      title="Toggle web search research"
+                      disabled={isGeneratingOutline}
+                      onClick={() => setWebSearchEnabled(!webSearchEnabled)}
+                      className={cn(
+                        "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none disabled:opacity-50",
+                        webSearchEnabled ? "bg-primary" : "bg-muted-foreground/35"
+                      )}
+                    >
+                      <span className={cn(
+                        "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-background shadow transition",
+                        webSearchEnabled ? "translate-x-4" : "translate-x-0"
+                      )} />
+                    </button>
+                  </div>
 
-              {/* Slider for number of slides */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                    <LayoutGrid className="h-3.5 w-3.5 text-primary" />
-                    Slide Density
-                  </span>
-                  <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">
-                    {numSlides} Cards
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8 rounded-lg"
-                    onClick={handleDecrementSlides}
-                    disabled={numSlides <= MIN_PRESENTATION_SLIDES}
-                  >
-                    -
-                  </Button>
-                  <input
-                    type="range"
-                    min={MIN_PRESENTATION_SLIDES}
-                    max={MAX_PRESENTATION_SLIDES}
-                    value={numSlides}
-                    onChange={(e) =>
-                      setNumSlides(clampSlideCount(Number(e.target.value)))
-                    }
-                    className="w-full accent-primary h-1.5 rounded-lg bg-muted cursor-pointer"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8 rounded-lg"
-                    onClick={handleIncrementSlides}
-                    disabled={numSlides >= MAX_PRESENTATION_SLIDES}
-                  >
-                    +
-                  </Button>
-                </div>
-              </div>
-
-              {/* Language Selection */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                    <Languages className="h-3 w-3" />
-                    Language
-                  </span>
-                  <Select value={language} onValueChange={setLanguage}>
-                    <SelectTrigger className="w-full rounded-xl text-xs h-9 bg-background/40">
-                      <SelectValue placeholder="Language" />
-                    </SelectTrigger>
-                    <SelectContent className="z-50">
-                      <SelectItem value="en-US">English</SelectItem>
-                      <SelectItem value="fr">French</SelectItem>
-                      <SelectItem value="ar">Arabic</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                    <FileSpreadsheet className="h-3 w-3" />
-                    Page Format
-                  </span>
-                  <Select value={pageStyle} onValueChange={setPageStyle}>
-                    <SelectTrigger className="w-full rounded-xl text-xs h-9 bg-background/40">
-                      <SelectValue placeholder="Page Style" />
-                    </SelectTrigger>
-                    <SelectContent className="z-50">
-                      <SelectItem value="default">Default Ratio</SelectItem>
-                      <SelectItem value="traditional">Traditional</SelectItem>
-                      <SelectItem value="tall">Tall Book</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Presentational Style and Image Model Selector */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                    <Tv className="h-3 w-3" />
-                    Vibe Vibe
-                  </span>
-                  <Select
-                    value={presentationStyle}
-                    onValueChange={setPresentationStyle}
-                  >
-                    <SelectTrigger className="w-full rounded-xl text-xs h-9 bg-background/40">
-                      <SelectValue placeholder="Select style" />
-                    </SelectTrigger>
-                    <SelectContent className="z-50">
-                      {PRESENTATION_STYLES.map((style) => (
-                        <SelectItem key={style.value} value={style.value}>
-                          {style.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                    <Palette className="h-3 w-3" />
-                    Visual Assets
-                  </span>
-                  <ImageSourceSelector
-                    imageSource={imageSource}
-                    imageModel={imageModel}
-                    stockImageProvider={stockImageProvider}
-                    onImageSourceChange={setImageSource}
-                    onImageModelChange={setImageModel}
-                    onStockImageProviderChange={setStockImageProvider}
-                    showLabel={false}
-                  />
-                </div>
-              </div>
-            </div>
+                  {/* Selectors Grid */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Language</span>
+                      <Select value={language} onValueChange={setLanguage}>
+                        <SelectTrigger className="w-full rounded-md text-[10px] h-7 bg-background/40">
+                          <SelectValue placeholder="Language" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="en-US">English</SelectItem>
+                          <SelectItem value="fr">French</SelectItem>
+                          <SelectItem value="ar">Arabic</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Format</span>
+                      <Select value={pageStyle} onValueChange={setPageStyle}>
+                        <SelectTrigger className="w-full rounded-md text-[10px] h-7 bg-background/40">
+                          <SelectValue placeholder="Format" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="default">Default Ratio</SelectItem>
+                          <SelectItem value="traditional">Traditional</SelectItem>
+                          <SelectItem value="tall">Tall Book</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Vibe</span>
+                      <Select value={presentationStyle} onValueChange={setPresentationStyle}>
+                        <SelectTrigger className="w-full rounded-md text-[10px] h-7 bg-background/40">
+                          <SelectValue placeholder="Vibe" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PRESENTATION_STYLES.map((style) => (
+                            <SelectItem key={style.value} value={style.value}>
+                              {style.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Visuals</span>
+                      <ImageSourceSelector
+                        imageSource={imageSource}
+                        imageModel={imageModel}
+                        stockImageProvider={stockImageProvider}
+                        onImageSourceChange={setImageSource}
+                        onImageModelChange={setImageModel}
+                        onStockImageProviderChange={setStockImageProvider}
+                        showLabel={false}
+                      />
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
 
-          {/* Box 2: Visual Style Gallery */}
-          <div className="rounded-3xl border border-border/40 bg-card/45 backdrop-blur-xl shadow-xl p-5 flex-1 flex flex-col gap-4 min-h-[300px]">
+          {/* Box 2: Visual Style Swatch Grid */}
+          <div className="rounded-2xl border border-border/30 bg-card/30 backdrop-blur-md p-4 flex-1 flex flex-col gap-3 min-h-[300px]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Palette className="h-4.5 w-4.5 text-primary" />
+                <Palette className="h-4 w-4 text-primary" />
                 <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
                   Brand Systems
                 </h2>
               </div>
               <ThemeModal>
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="h-auto p-0 text-xs text-primary font-bold"
-                >
-                  Custom Studio
+                <Button variant="link" size="sm" className="h-auto p-0 text-[10px] text-primary">
+                  Custom
                 </Button>
               </ThemeModal>
             </div>
 
-            <div className="text-[10px] text-muted-foreground leading-snug">
-              Select a visual system design grid. Press Custom Studio above to
-              design bespoke CSS layouts.
-            </div>
-
-            {/* Theme Scroller Grid */}
-            <div className="flex-1 overflow-y-auto pr-1 space-y-2.5 max-h-[350px] lg:max-h-[none] scrollbar-thin">
+            {/* Compact Swatch Grid */}
+            <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-3 gap-2 max-h-[350px] lg:max-h-[none] scrollbar-thin content-start">
               {Object.entries(themes).map(([key, themeOption]) => {
                 const isSelected = theme === key;
-                const modeColors = isDark
-                  ? themeOption.colors.dark
-                  : themeOption.colors.light;
-                const modeShadows = isDark
-                  ? themeOption.shadows.dark
-                  : themeOption.shadows.light;
+                const modeColors = isDark ? themeOption.colors.dark : themeOption.colors.light;
 
                 return (
                   <button
                     key={key}
                     onClick={() => setTheme(key as Themes)}
                     className={cn(
-                      "w-full flex items-center justify-between gap-4 p-3 rounded-2xl border text-left transition-all duration-300 hover:-translate-y-0.5",
+                      "flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl border transition-all hover:scale-105",
                       isSelected
-                        ? "border-primary bg-primary/5 shadow-md shadow-primary/5"
-                        : "border-border/50 bg-background/30 hover:border-primary/40 hover:bg-muted/40",
+                        ? "border-primary bg-primary/10 shadow-sm"
+                        : "border-border/40 bg-background/20 hover:border-primary/30"
                     )}
-                    style={{
-                      borderRadius: themeOption.borderRadius,
-                      boxShadow: isSelected ? modeShadows.card : undefined,
-                    }}
                   >
-                    <div className="flex flex-col gap-0.5">
-                      <span
-                        className="text-xs font-bold text-foreground"
-                        style={{ fontFamily: themeOption.fonts.heading }}
-                      >
-                        {themeOption.name}
-                      </span>
-                      <span
-                        className="text-[9px] line-clamp-1 text-muted-foreground"
-                        style={{ fontFamily: themeOption.fonts.body }}
-                      >
-                        {themeOption.description}
-                      </span>
+                    <div className="flex -space-x-1">
+                      {[modeColors.primary, modeColors.secondary, modeColors.accent].map((color, i) => (
+                        <div
+                          key={i}
+                          className="h-3.5 w-3.5 rounded-full ring-1 ring-background"
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
                     </div>
-
-                    <div className="flex items-center gap-3">
-                      {/* Swatch Strip */}
-                      <div className="flex -space-x-1.5">
-                        {[
-                          modeColors.primary,
-                          modeColors.secondary,
-                          modeColors.accent,
-                        ].map((color, i) => (
-                          <div
-                            key={i}
-                            className="h-3.5 w-3.5 rounded-full ring-2 ring-background border border-white/10"
-                            style={{ backgroundColor: color }}
-                          />
-                        ))}
-                      </div>
-
-                      {isSelected ? (
-                        <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center">
-                          <Check className="h-3 w-3 text-primary-foreground stroke-[3]" />
-                        </div>
-                      ) : (
-                        <ChevronRight className="h-4 w-4 text-muted-foreground/60" />
-                      )}
-                    </div>
+                    <span className="text-[9px] font-semibold truncate w-full text-center" style={{ fontFamily: themeOption.fonts.heading }}>
+                      {themeOption.name}
+                    </span>
                   </button>
                 );
               })}
             </div>
           </div>
-        </section>
+        </aside>
 
-        {/* Right Column (col-span-8) - Editor Studio Canvas */}
-        <section className="lg:col-span-8 flex flex-col gap-6 lg:h-full lg:overflow-y-auto pb-16 pr-0 lg:pr-1 scrollbar-thin">
-          {/* Box 1: Creative Directive console (Prompt editing) */}
-          <div className="rounded-3xl border border-border/40 bg-card/45 backdrop-blur-xl shadow-xl p-5 space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-                <Brain className="h-4 w-4 text-primary" />
-                Creative Directive Prompt
-              </span>
-              <span className="text-[10px] text-muted-foreground">
-                Edit theme topic details below
-              </span>
-            </div>
-
-            <div className="relative">
-              <textarea
+        {/* Right Canvas - Prompt & Outline Grid */}
+        <main className="flex-1 flex flex-col gap-6 h-full overflow-y-auto pb-32 lg:pb-16 pr-1 scrollbar-thin">
+          
+          {/* Refine Outline Prompt (Top Bar) */}
+          <div className="rounded-xl border border-border/30 bg-card/30 backdrop-blur-md p-4 shadow-sm">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-foreground mb-3 flex items-center gap-1.5">
+              <Brain className="h-4 w-4 text-primary" />
+              Refine Outline Prompt
+            </h2>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
                 value={presentationInput}
                 onChange={(e) => setPresentationInput(e.target.value)}
-                className="w-full min-h-[90px] rounded-2xl border border-border/50 bg-background/55 p-4 pr-12 text-sm text-foreground placeholder:text-muted-foreground/70 outline-none focus:ring-2 focus:ring-primary/45 focus:border-primary transition-all duration-300 resize-none"
+                className="flex-1 rounded-lg border border-border/50 bg-background/55 px-4 py-2.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/45 transition-all"
                 placeholder="Describe your presentation slide deck topic here..."
                 disabled={isGeneratingOutline}
               />
-              <button
+              <Button
                 type="button"
                 onClick={handleGenerateOutline}
                 disabled={isGeneratingOutline || !presentationInput.trim()}
                 className={cn(
-                  "absolute right-3.5 bottom-3.5 h-9 px-4 rounded-xl flex items-center gap-1.5 text-xs font-bold transition-all duration-300",
-                  isGeneratingOutline
-                    ? "bg-muted text-muted-foreground"
-                    : "bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/20",
+                  "shrink-0 h-10 px-6 font-bold shadow-md",
+                  isGeneratingOutline ? "opacity-70" : "hover:shadow-lg"
                 )}
               >
                 {isGeneratingOutline ? (
-                  <Spinner className="h-3.5 w-3.5 text-muted-foreground" />
+                  <Spinner className="h-4 w-4 mr-2" />
                 ) : (
-                  <Sparkles className="h-3.5 w-3.5 animate-pulse" />
+                  <Sparkles className="h-4 w-4 mr-2" />
                 )}
-                <span>Regenerate Outline</span>
-              </button>
+                Regenerate Outline
+              </Button>
             </div>
           </div>
 
-          {/* Box 2: Retro-Futuristic Cognitive Diagnostics Terminal */}
-          <div className="rounded-3xl border border-border/40 bg-slate-950/95 shadow-2xl p-5 relative overflow-hidden font-mono">
-            {/* Blurry glow */}
-            <div className="absolute -top-12 -left-12 h-36 w-36 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-12 -right-12 h-36 w-36 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-
-            <div className="flex items-center justify-between border-b border-white/5 pb-3 mb-4">
+          {/* Minimalist Cognitive Processing Terminal */}
+          <div className={cn(
+            "rounded-xl border border-border/20 bg-slate-950 shadow-md relative overflow-hidden font-mono transition-all duration-300",
+            (isGeneratingOutline || outlineThinking) ? "p-4" : "p-3 hidden"
+          )}>
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Terminal className="h-4 w-4 text-emerald-500" />
-                <span className="text-xs font-bold text-zinc-300 uppercase tracking-widest">
-                  Cognitive Processing Terminal
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className={cn(
-                    "h-2 w-2 rounded-full",
-                    isGeneratingOutline
-                      ? "bg-emerald-500 animate-pulse"
-                      : "bg-zinc-600",
-                  )}
-                />
-                <span className="text-[10px] text-zinc-400 uppercase">
-                  {isGeneratingOutline
-                    ? "Inferencing..."
-                    : "Awaiting directives"}
+                <Terminal className="h-3.5 w-3.5 text-emerald-500" />
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                  Terminal Processing...
                 </span>
               </div>
             </div>
 
-            <div className="space-y-3 min-h-[100px] max-h-[220px] overflow-y-auto pr-1 text-xs scrollbar-thin">
-              {/* Static System line */}
-              <div className="text-zinc-500 flex gap-2">
-                <span>[system]</span>
-                <span>
-                  Active engine initialized via{" "}
-                  {textModel === "gemini"
-                    ? "Google Gemini 3.1 Flash Lite"
-                    : "OpenAI gpt-4o-mini"}
-                  .
-                </span>
-              </div>
-
-              {/* Show thinking stream inside the terminal */}
-              {outlineThinking ? (
-                <div className="text-sky-400 space-y-2">
-                  <div className="text-zinc-400 border-l-2 border-primary/30 pl-2 py-0.5 text-[11px] leading-relaxed">
+            {(isGeneratingOutline || outlineThinking) && (
+              <div className="mt-3 space-y-2 max-h-[150px] overflow-y-auto pr-1 text-[10px] scrollbar-thin border-t border-white/5 pt-3">
+                <div className="text-zinc-500 flex gap-1.5">
+                  <span>&gt;</span>
+                  <span>Active engine: {textModel}</span>
+                </div>
+                {outlineThinking && (
+                  <div className="text-zinc-400 border-l border-primary/30 pl-2 py-0.5 text-[10px] leading-relaxed">
                     <ThinkingDisplay
                       thinking={outlineThinking}
                       isGenerating={isGeneratingOutline}
-                      title="AI Neural Thinking Console Log"
+                      title="AI Thought Stream"
                     />
                   </div>
-                </div>
-              ) : null}
-
-              {/* Show Tool Search Calls */}
-              <ToolCallDisplay />
-
-              {/* Idle State / Completion state logs */}
-              {!isGeneratingOutline && !outlineThinking && (
-                <div className="text-zinc-400 py-3 text-center text-xs flex flex-col items-center justify-center gap-2">
-                  <span className="text-zinc-600 font-mono tracking-wide">
-                    $ cat system_status.log
-                  </span>
-                  <span className="text-zinc-500 text-[11px] max-w-md">
-                    CONSOLES_IDLE: Awaiting creative directives. Outline system
-                    is online and ready. Modify parameter inputs on the left,
-                    edit prompt directives above, or modify the slide deck card
-                    outlines below.
-                  </span>
-                </div>
-              )}
-            </div>
+                )}
+                <ToolCallDisplay />
+              </div>
+            )}
           </div>
 
-          {/* Box 3: Slide Card Canvas deck */}
-          <div className="rounded-3xl border border-border/40 bg-card/25 backdrop-blur-xl shadow-xl p-6 flex-1 flex flex-col">
+          {/* Outline Grid Wrapper */}
+          <div className="flex-1">
             <OutlineList />
           </div>
-        </section>
-      </main>
+        </main>
+      </div>
 
       {/* 3. Floating Glassmorphic Action Bar (Bottom Center) */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-2xl px-1">
