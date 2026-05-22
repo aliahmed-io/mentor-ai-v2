@@ -38,7 +38,7 @@ export default function AreaChartElement(props: PlateElementProps<TChartNode>) {
   const chartConfig: ChartConfig = {
     [valueKey]: {
       label: "Value",
-      color: "hsl(var(--chart-1))",
+      color: "var(--presentation-primary)",
     },
   };
 
@@ -51,7 +51,7 @@ export default function AreaChartElement(props: PlateElementProps<TChartNode>) {
         style={{
           backgroundColor: "var(--presentation-background)",
           color: "var(--presentation-text)",
-          borderColor: "hsl(var(--border))",
+          borderColor: "var(--presentation-accent)",
         }}
         contentEditable={false}
       >
@@ -61,12 +61,12 @@ export default function AreaChartElement(props: PlateElementProps<TChartNode>) {
               <linearGradient id="fillArea" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--color-value)"
+                  stopColor="var(--presentation-primary)"
                   stopOpacity={0.8}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--color-value)"
+                  stopColor="var(--presentation-primary)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
@@ -77,7 +77,7 @@ export default function AreaChartElement(props: PlateElementProps<TChartNode>) {
             <Area
               type="monotone"
               dataKey={valueKey}
-              stroke={`var(--color-${valueKey})`}
+              stroke="var(--presentation-primary)"
               fill="url(#fillArea)"
             />
             <Legend />

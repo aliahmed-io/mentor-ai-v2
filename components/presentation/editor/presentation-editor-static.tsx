@@ -27,6 +27,7 @@ function slideSignature(slide?: PlateSlide): string {
       width: slide?.width,
       rootImage: slide?.rootImage,
       bgColor: slide?.bgColor,
+      themeStyles: slide?.themeStyles,
     });
   } catch {
     return String(slide?.id ?? "");
@@ -63,13 +64,12 @@ const PresentationEditorStaticView = React.memo(
           "relative text-foreground",
           "focus-within:ring-2 focus-within:ring-primary focus-within:ring-opacity-50",
           className,
-          initialContent?.layoutType === "right" && "flex-row",
-          initialContent?.layoutType === "vertical" && "flex-col-reverse",
-          initialContent?.layoutType === "left" && "flex-row-reverse",
+          !initialContent?.layoutType && "flex-col",
           initialContent?.layoutType === "background" && "flex-col",
           "presentation-slide",
         )}
         style={{
+          ...(initialContent?.themeStyles as React.CSSProperties),
           borderRadius: "var(--presentation-border-radius, 0.5rem)",
           backgroundColor: initialContent?.bgColor || undefined,
           backgroundImage:
@@ -85,27 +85,73 @@ const PresentationEditorStaticView = React.memo(
         data-slide-content="true"
         data-use-slide-bg={initialContent?.bgColor ? "true" : undefined}
       >
-        <EditorStatic
-          className={cn(
-            className,
-            "flex flex-col border-none !bg-transparent p-12 outline-none h-full",
-            initialContent?.alignment === "start" && "justify-start",
-            initialContent?.alignment === "center" && "justify-center",
-            initialContent?.alignment === "end" && "justify-end",
-          )}
-          id={id}
-          editor={editor}
-        />
+        {(() => {
+          const isSplitLayout =
+            initialContent?.rootImage &&
+            initialContent.layoutType !== undefined &&
+            initialContent.layoutType !== "background";
 
-        {initialContent?.rootImage &&
-          initialContent.layoutType !== undefined &&
-          initialContent.layoutType !== "background" && (
-            <RootImageStatic
-              image={initialContent.rootImage}
-              layoutType={initialContent.layoutType}
-              slideId={initialContent.id}
+          const editorNode = (
+            <EditorStatic
+              className={cn(
+                className,
+                "flex flex-col border-none !bg-transparent p-12 outline-none h-full",
+                !isSplitLayout && "flex-1",
+                initialContent?.alignment === "start" && "justify-start",
+                initialContent?.alignment === "center" && "justify-center",
+                initialContent?.alignment === "end" && "justify-end",
+              )}
+              id={id}
+              editor={editor}
             />
-          )}
+          );
+
+          const rootImageNode = initialContent?.rootImage ? (
+            <div className={cn("relative overflow-hidden", !isSplitLayout && "flex-1")}>
+              <RootImageStatic
+                image={initialContent.rootImage}
+                layoutType={initialContent.layoutType}
+                slideId={initialContent.id}
+              />
+            </div>
+          ) : null;
+
+          if (isSplitLayout) {
+            const isImageFirst =
+              initialContent.layoutType === "left" ||
+              initialContent.layoutType === "vertical";
+
+            const defaultPercentages = initialContent.layoutPercentages || [
+              50, 50,
+            ];
+
+            const firstFlex = defaultPercentages[0];
+            const secondFlex = defaultPercentages[1];
+            
+            const firstPanelStyle = { flex: `${firstFlex} ${firstFlex} 0%` };
+            const secondPanelStyle = { flex: `${secondFlex} ${secondFlex} 0%` };
+
+            const isVertical = initialContent.layoutType === "vertical";
+
+            return (
+              <div className={cn("flex h-full w-full", isVertical ? "flex-col" : "flex-row")}>
+                <div style={firstPanelStyle} className="h-full relative overflow-hidden">
+                  {isImageFirst ? rootImageNode : editorNode}
+                </div>
+                <div style={secondPanelStyle} className="h-full relative overflow-hidden">
+                  {isImageFirst ? editorNode : rootImageNode}
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <>
+              {editorNode}
+              {rootImageNode}
+            </>
+          );
+        })()}
       </div>
     );
   },

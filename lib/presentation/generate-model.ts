@@ -17,7 +17,7 @@ export function resolvePresentationModel(
     }
     if (geminiKey) {
       const google = createGoogleGenerativeAI({ apiKey: geminiKey });
-      return google("gemini-3.1-flash-lite-preview");
+      return google("gemini-2.5-flash");
     }
   }
 
@@ -27,11 +27,11 @@ export function resolvePresentationModel(
   }
   if ((textModel === "gemini" || textModel === "quality") && geminiKey) {
     const google = createGoogleGenerativeAI({ apiKey: geminiKey });
-    return google("gemini-3.1-flash-lite-preview");
+    return google("gemini-2.5-flash");
   }
   if (geminiKey) {
     const google = createGoogleGenerativeAI({ apiKey: geminiKey });
-    return google("gemini-3.1-flash-lite-preview");
+    return google("gemini-2.5-flash");
   }
   if (openaiKey) {
     const openai = createOpenAI({ apiKey: openaiKey });

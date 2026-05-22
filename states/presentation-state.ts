@@ -143,6 +143,8 @@ interface PresentationState {
   // Palette → Editor communication
   pendingInsertNode: TElement | null;
   setPendingInsertNode: (node: TElement | null) => void;
+
+  updateSlidePercentages: (slideIndex: number, percentages: number[]) => void;
 }
 
 export const usePresentationState = create<PresentationState>((set) => ({
@@ -224,6 +226,17 @@ export const usePresentationState = create<PresentationState>((set) => ({
   setSlides: (slides) => {
     set({ slides });
   },
+  updateSlidePercentages: (slideIndex, percentages) =>
+    set((state) => {
+      const newSlides = [...state.slides];
+      if (newSlides[slideIndex]) {
+        newSlides[slideIndex] = {
+          ...newSlides[slideIndex],
+          layoutPercentages: percentages,
+        };
+      }
+      return { slides: newSlides };
+    }),
   setPendingInsertNode: (node) => set({ pendingInsertNode: node }),
   setConfig: (config) => set({ config }),
   startRootImageGeneration: (slideId, query) =>

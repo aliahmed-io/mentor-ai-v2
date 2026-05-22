@@ -38,7 +38,7 @@ export default function LineGraphElement(props: PlateElementProps<TChartNode>) {
   const chartConfig: ChartConfig = {
     [valueKey]: {
       label: "Value",
-      color: "hsl(var(--chart-1))",
+      color: "var(--presentation-primary)",
     },
   };
 
@@ -51,7 +51,7 @@ export default function LineGraphElement(props: PlateElementProps<TChartNode>) {
         style={{
           backgroundColor: "var(--presentation-background)",
           color: "var(--presentation-text)",
-          borderColor: "hsl(var(--border))",
+          borderColor: "var(--presentation-accent)",
         }}
         contentEditable={false}
       >
@@ -63,7 +63,7 @@ export default function LineGraphElement(props: PlateElementProps<TChartNode>) {
             <Line
               type="monotone"
               dataKey={valueKey}
-              stroke={`var(--color-${valueKey})`}
+              stroke="var(--presentation-primary)"
               strokeWidth={2}
               dot={false}
             />

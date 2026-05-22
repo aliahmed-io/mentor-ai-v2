@@ -9,6 +9,11 @@ import { Editor } from "@/components/plate/ui/editor";
 import { TooltipProvider } from "@/components/plate/ui/tooltip";
 import { extractFontsFromEditor } from "@/components/plate/utils/extractFontsFromEditor";
 import { FontLoader } from "@/components/plate/utils/font-loader";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 import { cn } from "@/lib/utils";
 import { usePresentationState } from "@/states/presentation-state";
 import "@/styles/presentation.css";
@@ -30,6 +35,7 @@ function slideSignature(slide?: PlateSlide): string {
       width: slide?.width,
       rootImage: slide?.rootImage,
       bgColor: slide?.bgColor,
+      themeStyles: slide?.themeStyles,
     });
   } catch {
     return String(slide?.id ?? "");
@@ -60,6 +66,9 @@ const PresentationEditor = React.memo(
     const isPresenting = usePresentationState((s) => s.isPresenting);
     const setCurrentSlideIndex = usePresentationState(
       (s) => s.setCurrentSlideIndex,
+    );
+    const updateSlidePercentages = usePresentationState(
+      (s) => s.updateSlidePercentages,
     );
     const editor = usePlateEditor({
       plugins: presentationPlugins,
@@ -127,13 +136,12 @@ const PresentationEditor = React.memo(
             "relative text-foreground",
             "focus-within:ring-2 focus-within:ring-primary focus-within:ring-opacity-50",
             className,
-            initialContent?.layoutType === "right" && "flex-row",
-            initialContent?.layoutType === "vertical" && "flex-col-reverse",
-            initialContent?.layoutType === "left" && "flex-row-reverse",
+            !initialContent?.layoutType && "flex-col",
             initialContent?.layoutType === "background" && "flex-col",
             "presentation-slide",
           )}
           style={{
+            ...(initialContent?.themeStyles as React.CSSProperties),
             borderRadius: "var(--presentation-border-radius, 0.5rem)",
             backgroundColor: initialContent?.bgColor || undefined,
             backgroundImage:
@@ -172,38 +180,90 @@ const PresentationEditor = React.memo(
               {!readOnly && (
                 <LayoutImageDrop slideIndex={slideIndex}></LayoutImageDrop>
               )}
-              <Editor
-                className={cn(
-                  className,
-                  "flex-1 flex flex-col border-none !bg-transparent py-12 outline-none h-full",
-                  (readOnly || isGenerating) && "px-16",
-                  !initialContent?.alignment && "justify-center",
-                  initialContent?.alignment === "start" && "justify-start",
-                  initialContent?.alignment === "center" && "justify-center",
-                  initialContent?.alignment === "end" && "justify-end",
-                )}
-                id={id}
-                autoFocus={autoFocus && !readOnly}
-                variant="ghost"
-                readOnly={isPreview || isGenerating || readOnly}
-                onFocus={() => {
-                  // Update current slide index when editor receives focus
-                  if (!readOnly && !isGenerating && !isPresenting) {
-                    setCurrentSlideIndex(slideIndex);
-                  }
-                }}
-              />
+              {/* Layout Content Rendering */}
+              {(() => {
+                const isSplitLayout =
+                  initialContent?.rootImage &&
+                  initialContent.layoutType !== undefined &&
+                  initialContent.layoutType !== "background";
 
-              {initialContent?.rootImage &&
-                initialContent.layoutType !== undefined &&
-                initialContent.layoutType !== "background" && (
+                const editorNode = (
+                  <Editor
+                    className={cn(
+                      className,
+                      "flex-1 flex flex-col border-none !bg-transparent py-12 outline-none h-full",
+                      (readOnly || isGenerating) && "px-16",
+                      !initialContent?.alignment && "justify-center",
+                      initialContent?.alignment === "start" && "justify-start",
+                      initialContent?.alignment === "center" && "justify-center",
+                      initialContent?.alignment === "end" && "justify-end",
+                    )}
+                    id={id}
+                    autoFocus={autoFocus && !readOnly}
+                    variant="ghost"
+                    readOnly={isPreview || isGenerating || readOnly}
+                    onFocus={() => {
+                      if (!readOnly && !isGenerating && !isPresenting) {
+                        setCurrentSlideIndex(slideIndex);
+                      }
+                    }}
+                  />
+                );
+
+                const rootImageNode = initialContent?.rootImage ? (
                   <RootImage
                     image={initialContent.rootImage}
                     slideIndex={slideIndex}
                     layoutType={initialContent.layoutType}
                     slideId={initialContent.id}
                   />
-                )}
+                ) : null;
+
+                if (isSplitLayout) {
+                  const direction =
+                    initialContent.layoutType === "vertical"
+                      ? "vertical"
+                      : "horizontal";
+
+                  // Define the visual order of panels based on layoutType
+                  const isImageFirst =
+                    initialContent.layoutType === "left" ||
+                    initialContent.layoutType === "vertical";
+
+                  const firstPanelNode = isImageFirst ? rootImageNode : editorNode;
+                  const secondPanelNode = isImageFirst ? editorNode : rootImageNode;
+
+                  const defaultPercentages = initialContent.layoutPercentages || [
+                    50, 50,
+                  ];
+
+                  return (
+                    <ResizablePanelGroup
+                      direction={direction}
+                      className="w-full h-full"
+                      onLayout={(sizes) => {
+                        updateSlidePercentages(slideIndex, sizes);
+                      }}
+                    >
+                      <ResizablePanel defaultSize={defaultPercentages[0]}>
+                        {firstPanelNode}
+                      </ResizablePanel>
+                      <ResizableHandle withHandle={!readOnly} />
+                      <ResizablePanel defaultSize={defaultPercentages[1]}>
+                        {secondPanelNode}
+                      </ResizablePanel>
+                    </ResizablePanelGroup>
+                  );
+                }
+
+                // Normal layout without splits
+                return (
+                  <>
+                    {editorNode}
+                    {rootImageNode}
+                  </>
+                );
+              })()}
               {!readOnly && <ImageGenerationModel></ImageGenerationModel>}
             </Plate>
           )}

@@ -113,7 +113,7 @@ INSTRUCTIONS:
 Return analysis in the exact JSON format specified.`;
 
     const response = await client.models.generateContent({
-      model: "gemini-3.1-flash-lite-preview",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         responseMimeType: "application/json",

@@ -99,11 +99,11 @@ export async function POST(req: Request) {
       model = openai("gpt-5.5");
     } else if (textModel === "gemini" && geminiKey) {
       const google = createGoogleGenerativeAI({ apiKey: geminiKey });
-      model = google("gemini-3.1-flash-lite-preview");
+      model = google("gemini-2.5-flash");
     } else if (geminiKey) {
       // Fallback: Gemini Key is present
       const google = createGoogleGenerativeAI({ apiKey: geminiKey });
-      model = google("gemini-3.1-flash-lite-preview");
+      model = google("gemini-2.5-flash");
     } else if (openaiKey) {
       // Fallback: OpenAI Key is present
       const openai = createOpenAI({ apiKey: openaiKey });

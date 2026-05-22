@@ -47,7 +47,7 @@ export default function RadarChartElement(
   const chartConfig: ChartConfig = {
     [valueKey]: {
       label: "Value",
-      color: "hsl(var(--chart-1))",
+      color: "var(--presentation-primary)",
     },
   };
 
@@ -60,7 +60,7 @@ export default function RadarChartElement(
         style={{
           backgroundColor: "var(--presentation-background)",
           color: "var(--presentation-text)",
-          borderColor: "hsl(var(--border))",
+          borderColor: "var(--presentation-accent)",
         }}
         contentEditable={false}
       >
@@ -71,8 +71,8 @@ export default function RadarChartElement(
             <PolarRadiusAxis />
             <Radar
               dataKey={valueKey}
-              stroke={`var(--color-${valueKey})`}
-              fill={`var(--color-${valueKey})`}
+              stroke="var(--presentation-primary)"
+              fill="var(--presentation-primary)"
               fillOpacity={0.2}
             />
             <Legend />

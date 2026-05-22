@@ -161,7 +161,7 @@ export function ExportButton({
             disabled={isExporting}
             onClick={() => {
               setIsExportDialogOpen(false);
-              window.print();
+              window.open(`/presentation-export?id=${presentationId}`, "_blank");
             }}
           >
             Export PDF (Print)

@@ -293,215 +293,92 @@ h6.presentation-heading {
   container-name: slide;
 }
 
-@container slide (min-width: 0px) {
-  /* Set standard base font size for scaling */
-  .presentation-slide {
-    font-size: 1.5625cqw !important;
-  }
+.presentation-slide {
+  font-size: clamp(12px, 1.5625cqw, 32px);
+}
 
-  /* Dynamically scale down base font size when slide contains complex, high-density elements to prevent cropping! */
-  .presentation-slide:has(table),
-  .presentation-slide:has(.grid-cols-3),
-  .presentation-slide:has([data-slate-type="column_group"]),
-  .presentation-slide:has(.group\/bullet-item),
-  .presentation-slide:has(.group\/cycle-item) {
-    font-size: 1.35cqw !important;
-  }
+/* ==========================================================================
+   Phase 7: Clean Template Grid / Flex Layouts
+   ========================================================================== */
 
-  .presentation-slide:has(.grid-cols-2),
-  .presentation-slide:has(.max-w-\[520px\]) {
-    font-size: 1.45cqw !important;
-  }
+/* Full Bleed / Centered Hero Layouts */
+.template-title-hero,
+.template-closing-cta,
+.template-quote-spotlight,
+.template-big-number {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
 
-  /* Scale editor padding proportionally based on slide container query width */
-  .presentation-slide .group\/editor {
-    padding-top: 4.5cqw !important;
-    padding-bottom: 4.5cqw !important;
-    padding-left: 6.25cqw !important;
-    padding-right: 6.25cqw !important;
-  }
+/* 50/50 Split Layouts (Image/Text) */
+.template-img-split-left {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 4cqw;
+}
 
-  /* Prevent vertical layouts with RootImage from exceeding 38% height boundary.
-     Since container is inline-size, cqh is invalid.
-     We map 38% height of a 16:9 container using the formula: 38 * 0.5625 = 21.375cqw */
-  .presentation-slide.flex-col-reverse > .group\/resizable,
-  .presentation-slide.flex-col > .group\/resizable {
-    height: 21.375cqw !important;
-    width: 100% !important;
-  }
+/* Grids and Multi-Columns */
+.template-bullets-grid-4,
+.template-swot-analysis {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 3cqw;
+}
 
-  /* Make sure images within vertical layouts behave correctly */
-  .presentation-slide.flex-col-reverse > .group\/resizable img,
-  .presentation-slide.flex-col > .group\/resizable img {
-    height: 100% !important;
-    width: 100% !important;
-    object-fit: cover !important;
-  }
+.template-icons-grid-6 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto auto;
+  gap: 2cqw;
+}
 
-  /* Proportional scaling for Custom Bullet Items */
-  .presentation-slide .group\/bullet-item .flex-shrink-0 {
-    width: 2.2em !important;
-    height: 2.2em !important;
-    font-size: 1.1em !important;
-    border-radius: 0.4em !important;
-  }
+.template-text-three-column,
+.template-bullets-3-horizontal {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3cqw;
+}
 
-  .presentation-slide .group\/bullet-item .ml-4 {
-    margin-left: 0.8em !important;
-  }
+/* Horizontal Flows */
+.template-timeline-horizontal,
+.template-process-arrows {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 2cqw;
+}
 
-  /* Proportional scaling for Comparison Cards and Split Sides */
-  .presentation-slide .max-w-\[520px\] {
-    max-width: 100% !important;
-    gap: 0.8em !important;
-  }
+/* Comparisons */
+.template-compare-vs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4cqw;
+}
 
-  .presentation-slide .rounded-xl {
-    padding: 1em !important;
-    border-radius: 0.6em !important;
-    border-top-width: 0.25em !important;
-  }
+/* Chart and Table Specifics */
+.template-chart-bar-side {
+  display: grid;
+  grid-template-columns: 55% 45%;
+  align-items: center;
+  gap: 3cqw;
+}
 
-  .presentation-slide .col-start-2 .rounded-full {
-    width: 2em !important;
-    height: 2em !important;
-    font-size: 0.85em !important;
-  }
+.template-table-insight {
+  display: flex;
+  flex-direction: column;
+  gap: 2cqw;
+}
 
-  /* Table Sizing Optimization to prevent overflows */
-  .presentation-slide table {
-    min-width: 0 !important;
-    width: 100% !important;
-    font-size: 0.85em !important;
-  }
-
-  .presentation-slide .min-w-\[600px\] {
-    min-width: 0 !important;
-    width: 100% !important;
-    padding: 0.4em !important;
-  }
-
-  .presentation-slide td,
-  .presentation-slide th {
-    min-width: 0 !important;
-    max-width: none !important;
-    padding: 0.35em 0.5em !important;
-  }
-
-  /* Chart & Graph component heights */
-  .presentation-slide .h-64 {
-    height: 11.5em !important;
-  }
-
-  /* Cycle Element Proportional Sizing */
-  .presentation-slide .h-64.w-64 {
-    width: 10.5em !important;
-    height: 10.5em !important;
-  }
-
-  .presentation-slide .group\/cycle-item {
-    margin-bottom: 0.6em !important;
-  }
-
-  .presentation-slide .group\/cycle-item .p-4 {
-    padding: 0.6em !important;
-  }
-
-  .presentation-slide .group\/cycle-item .mb-2 {
-    margin-bottom: 0.3em !important;
-  }
-
-  .presentation-slide .group\/cycle-item .h-8.w-8 {
-    width: 1.7em !important;
-    height: 1.7em !important;
-  }
-
-  /* Scale down list elements margins slightly */
-  .presentation-slide ul,
-  .presentation-slide ol {
-    margin-top: 0.4em !important;
-    margin-bottom: 0.4em !important;
-  }
-  .presentation-slide li {
-    margin-bottom: 0.3em !important;
-  }
-
-  /* Prevent giant headings from overflowing */
-  .presentation-slide h1.presentation-heading {
-    font-size: 2.1em !important;
-    margin-bottom: 0.5em !important;
-  }
-  .presentation-slide h2.presentation-heading {
-    font-size: 1.7em !important;
-    margin-bottom: 0.4em !important;
-  }
-  .presentation-slide h3.presentation-heading {
-    font-size: 1.4em !important;
-    margin-bottom: 0.35em !important;
-  }
-
-  /* Tweak paragraphs margin */
-  .presentation-slide .presentation-paragraph {
-    margin-bottom: 0.5em !important;
-    line-height: 1.4 !important;
-  }
-
-  /* Scale comparison groups spacing */
-  .presentation-slide .gap-6 {
-    gap: 2cqw !important;
-  }
-
-  /* Optimized rules for horizontal split-screen layouts (flex-row and flex-row-reverse) */
-  .presentation-slide.flex-row,
-  .presentation-slide.flex-row-reverse {
-    font-size: 1.3cqw !important;
-  }
-
-  .presentation-slide.flex-row .group\/editor,
-  .presentation-slide.flex-row-reverse .group\/editor {
-    padding-top: 2.2cqw !important;
-    padding-bottom: 2.2cqw !important;
-    padding-left: 3.5cqw !important;
-    padding-right: 3.5cqw !important;
-  }
-
-  /* Scale down headings slightly in horizontal split layouts */
-  .presentation-slide.flex-row h1.presentation-heading,
-  .presentation-slide.flex-row-reverse h1.presentation-heading {
-    font-size: 1.9em !important;
-    margin-bottom: 0.4em !important;
-  }
-
-  .presentation-slide.flex-row h2.presentation-heading,
-  .presentation-slide.flex-row-reverse h2.presentation-heading {
-    font-size: 1.5em !important;
-    margin-bottom: 0.35em !important;
-  }
-
-  .presentation-slide.flex-row .presentation-paragraph,
-  .presentation-slide.flex-row-reverse .presentation-paragraph {
-    line-height: 1.35 !important;
-    margin-bottom: 0.4em !important;
-  }
-
-  /* Aggressive font scaling for complex horizontal split layouts containing tables, list items, cycle items, or columns */
-  .presentation-slide.flex-row:has(table),
-  .presentation-slide.flex-row-reverse:has(table) {
-    font-size: 1.1cqw !important;
-  }
-
-  .presentation-slide.flex-row:has(.grid-cols-2),
-  .presentation-slide.flex-row-reverse:has(.grid-cols-2) {
-    font-size: 1.1cqw !important;
-  }
-
-  .presentation-slide.flex-row:has(.group\/bullet-item),
-  .presentation-slide.flex-row-reverse:has(.group\/bullet-item) {
-    font-size: 1.2cqw !important;
-  }
-
-  .presentation-slide.flex-row:has(.group\/cycle-item),
-  .presentation-slide.flex-row-reverse:has(.group\/cycle-item) {
-    font-size: 1.1cqw !important;
-  }
+/* Vertical Stacks */
+.template-bullets-3-stack,
+.template-bullets-numbered-4 {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5cqw;
 }

@@ -81,47 +81,10 @@ export default function RootImage({
   };
 
   return (
-    <Resizable
-      enable={{
-        top: false,
-        right: !readOnly && layoutType === "left",
-        bottom: !readOnly && layoutType === "vertical",
-        left: !readOnly && layoutType === "right",
-        topRight: false,
-        bottomRight: false,
-        bottomLeft: false,
-        topLeft: false,
-      }}
-      size={sizeStyle}
-      className="relative shrink-0 group/resizable"
-      handleComponent={{
-        right:
-          !readOnly && layoutType === "left" ? (
-            <div
-              aria-label="resize-right"
-              className="h-full w-1 cursor-ew-resize rounded-sm bg-primary/70 opacity-0 transition-opacity duration-150 group-hover/resizable:opacity-100"
-            />
-          ) : undefined,
-        left:
-          !readOnly && layoutType === "right" ? (
-            <div
-              aria-label="resize-left"
-              className="h-full w-1 cursor-ew-resize rounded-sm bg-primary/70 opacity-0 transition-opacity duration-150 group-hover/resizable:opacity-100"
-            />
-          ) : undefined,
-        bottom:
-          !readOnly && layoutType === "vertical" ? (
-            <div
-              aria-label="resize-bottom"
-              className="h-1 w-full cursor-ns-resize rounded-sm bg-primary/70 opacity-0 transition-opacity duration-150 group-hover/resizable:opacity-100"
-            />
-          ) : undefined,
-      }}
-      onResizeStop={onResizeStop}
-    >
+    <>
       <div
         className={cn(
-          "h-full overflow-hidden border bg-background/80 shadow-md backdrop-blur-sm",
+          "h-full w-full overflow-hidden border bg-background/80 shadow-md backdrop-blur-sm relative group/resizable",
           isDragging && "opacity-50",
         )}
       >
@@ -228,6 +191,6 @@ export default function RootImage({
           ...image,
         }}
       />
-    </Resizable>
+    </>
   );
 }

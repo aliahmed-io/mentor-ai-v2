@@ -409,39 +409,35 @@ export function PresentationGenerationManager() {
     const accumulatedSlides: PlateSlide[] = [];
 
     try {
-      for (let i = 0; i < activeOutline.length; i++) {
+      const response = await fetch("/api/presentation/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mode: "deck",
+          title: activeTitle ?? activeInput ?? "",
+          prompt: activeInput ?? "",
+          outline: activeOutline,
+          language: activeLang,
+          tone: activeStyle,
+          textModel: activeTextModel,
+          searchResults: stateSearchResults,
+        }),
+        signal,
+      });
+
+      if (!response.ok) {
+        const err = (await response.json()) as { error?: string };
+        throw new Error(err.error ?? `Deck generation failed`);
+      }
+
+      const { slides: generatedSlides } = (await response.json()) as { 
+        slides: Array<{ xml: string }>;
+        orchestration: any[];
+      };
+
+      for (let i = 0; i < generatedSlides.length; i++) {
         if (signal.aborted) break;
-
-        const requiredComponent = getRequiredComponent(activeStyle, i);
-        const layout = getLayoutForSlide(i);
-
-        const response = await fetch("/api/presentation/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            mode: "slide",
-            title: activeTitle ?? activeInput ?? "",
-            prompt: activeInput ?? "",
-            outline: activeOutline,
-            outlineItem: activeOutline[i],
-            slideIndex: i,
-            totalSlides: activeOutline.length,
-            requiredComponent,
-            layout,
-            searchResults: stateSearchResults,
-            language: activeLang,
-            tone: activeStyle,
-            textModel: activeTextModel,
-          }),
-          signal,
-        });
-
-        if (!response.ok) {
-          const err = (await response.json()) as { error?: string };
-          throw new Error(err.error ?? `Slide ${i + 1} generation failed`);
-        }
-
-        const { xml } = (await response.json()) as { xml: string };
+        const { xml } = generatedSlides[i];
         const wrapped = xml.includes("<PRESENTATION")
           ? xml
           : `<PRESENTATION>${xml}</PRESENTATION>`;

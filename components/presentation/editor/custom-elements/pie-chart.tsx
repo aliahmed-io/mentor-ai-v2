@@ -38,9 +38,17 @@ export default function PieChartElement(props: PlateElementProps<TChartNode>) {
   const chartConfig: ChartConfig = {
     [valueKey]: {
       label: "Value",
-      color: "hsl(var(--chart-1))",
+      color: "var(--presentation-primary)",
     },
   };
+
+  const colors = [
+    "var(--presentation-primary)",
+    "var(--presentation-secondary)",
+    "var(--presentation-accent)",
+    "var(--presentation-text)",
+    "var(--presentation-muted)",
+  ];
 
   return (
     <PlateElement {...props}>
@@ -51,7 +59,7 @@ export default function PieChartElement(props: PlateElementProps<TChartNode>) {
         style={{
           backgroundColor: "var(--presentation-background)",
           color: "var(--presentation-text)",
-          borderColor: "hsl(var(--border))",
+          borderColor: "var(--presentation-accent)",
         }}
         contentEditable={false}
       >
@@ -72,9 +80,8 @@ export default function PieChartElement(props: PlateElementProps<TChartNode>) {
             >
               {dataArray.map((_entry, index) => (
                 <Cell
-                  // Use CSS variable color cycling if present, fallback to chart-1
                   key={`cell-${index}`}
-                  fill={`hsl(var(--chart-${(index % 5) + 1}))`}
+                  fill={colors[index % colors.length]}
                 />
               ))}
             </Pie>

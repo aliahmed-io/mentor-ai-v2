@@ -134,8 +134,10 @@ export type PlateSlide = {
   content: PlateNode[];
   rootImage?: RootImage;
   layoutType?: LayoutType | undefined;
+  layoutPercentages?: number[];
   alignment?: "start" | "center" | "end";
   bgColor?: string;
+  themeStyles?: Record<string, string>;
   width?: "S" | "M" | "L";
   isComplete?: boolean;
 };

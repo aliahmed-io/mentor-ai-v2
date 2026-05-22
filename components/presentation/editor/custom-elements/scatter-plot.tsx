@@ -45,8 +45,8 @@ export default function ScatterPlotElement(
   const yKey = getYKey(dataArray);
 
   const chartConfig: ChartConfig = {
-    [xKey]: { label: "X", color: "hsl(var(--chart-1))" },
-    [yKey]: { label: "Y", color: "hsl(var(--chart-2))" },
+    [xKey]: { label: "X", color: "var(--presentation-primary)" },
+    [yKey]: { label: "Y", color: "var(--presentation-secondary)" },
   };
 
   return (
@@ -58,7 +58,7 @@ export default function ScatterPlotElement(
         style={{
           backgroundColor: "var(--presentation-background)",
           color: "var(--presentation-text)",
-          borderColor: "hsl(var(--border))",
+          borderColor: "var(--presentation-accent)",
         }}
         contentEditable={false}
       >
@@ -78,7 +78,7 @@ export default function ScatterPlotElement(
               axisLine={false}
             />
             <ZAxis range={[60, 60]} />
-            <Scatter data={dataArray} fill={`var(--color-${yKey})`} />
+            <Scatter data={dataArray} fill="var(--presentation-primary)" />
             <ChartTooltip content={<ChartTooltipContent />} />
           </ScatterChart>
         </ChartContainer>

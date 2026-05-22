@@ -39,7 +39,7 @@ export default function BarGraphElement(props: PlateElementProps<TChartNode>) {
   const chartConfig: ChartConfig = {
     [valueKey]: {
       label: "Value",
-      color: "hsl(var(--chart-1))",
+      color: "var(--presentation-primary)",
     },
   };
 
@@ -52,7 +52,7 @@ export default function BarGraphElement(props: PlateElementProps<TChartNode>) {
         style={{
           backgroundColor: "var(--presentation-background)",
           color: "var(--presentation-text)",
-          borderColor: "hsl(var(--border))",
+          borderColor: "var(--presentation-accent)",
         }}
         contentEditable={false}
       >
@@ -63,7 +63,7 @@ export default function BarGraphElement(props: PlateElementProps<TChartNode>) {
             <YAxis tickLine={false} axisLine={false} />
             <Bar
               dataKey={valueKey}
-              fill={`var(--color-${valueKey})`}
+              fill="var(--presentation-primary)"
               radius={4}
             />
             <Legend />
