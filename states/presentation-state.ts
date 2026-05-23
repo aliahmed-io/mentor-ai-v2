@@ -64,8 +64,14 @@ interface PresentationState {
   slides: PlateSlide[]; // This now holds the new object structure
 
   // Individual slide template/prompt overrides (Keyed by Slide ID)
-  slideOverrides: Record<string, { templateId?: string; customPrompt?: string }>;
-  setSlideOverride: (id: string, override: { templateId?: string; customPrompt?: string }) => void;
+  slideOverrides: Record<
+    string,
+    { templateId?: string; customPrompt?: string }
+  >;
+  setSlideOverride: (
+    id: string,
+    override: { templateId?: string; customPrompt?: string },
+  ) => void;
 
   // Thinking content from AI responses
   outlineThinking: string; // Thinking content from outline generation

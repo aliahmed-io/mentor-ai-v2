@@ -33,7 +33,8 @@ export default function ExportPresentationPage() {
 
   useEffect(() => {
     if (presentationData) {
-      const presentationContent = presentationData.presentation?.content as unknown as {
+      const presentationContent = presentationData.presentation
+        ?.content as unknown as {
         slides: PlateSlide[];
         config: Record<string, unknown>;
       };

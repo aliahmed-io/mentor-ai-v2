@@ -75,12 +75,15 @@ export const ListItemSchema = z.object({
 export const CompareSlot = z.object({
   slotId: z.string(),
   type: z.literal("compare"),
-  sides: z.array(
-    z.object({
-      title: z.string(),
-      items: z.array(ListItemSchema).min(2).max(4),
-    })
-  ).min(2).max(3),
+  sides: z
+    .array(
+      z.object({
+        title: z.string(),
+        items: z.array(ListItemSchema).min(2).max(4),
+      }),
+    )
+    .min(2)
+    .max(3),
 });
 
 export const ChartDataPoint = z.object({
@@ -99,9 +102,7 @@ export const TableSlot = z.object({
   slotId: z.string(),
   type: z.literal("table"),
   headers: z.array(z.string()).min(2).max(4),
-  rows: z.array(
-    z.array(z.string()).min(2).max(4)
-  ).min(2).max(5),
+  rows: z.array(z.array(z.string()).min(2).max(4)).min(2).max(5),
 });
 
 export const TimelineItemSchema = z.object({
@@ -111,19 +112,31 @@ export const TimelineItemSchema = z.object({
 
 export const TimelineSlot = z.object({
   slotId: z.string(),
-  type: z.enum(["timeline", "cycle", "arrows", "arrow-vertical", "funnel", "roadmap", "pyramid", "staircase", "process"]),
+  type: z.enum([
+    "timeline",
+    "cycle",
+    "arrows",
+    "arrow-vertical",
+    "funnel",
+    "roadmap",
+    "pyramid",
+    "staircase",
+    "process",
+  ]),
   items: z.array(TimelineItemSchema).min(2).max(4),
 });
 
 export const SwotSlot = z.object({
   slotId: z.string(),
   type: z.literal("swot"),
-  quadrants: z.array(
-    z.object({
-      label: z.string(),
-      items: z.array(z.string()).min(2).max(3),
-    })
-  ).length(4),
+  quadrants: z
+    .array(
+      z.object({
+        label: z.string(),
+        items: z.array(z.string()).min(2).max(3),
+      }),
+    )
+    .length(4),
 });
 
 export const IconsSlot = z.object({
@@ -141,24 +154,28 @@ export const BoxesSlot = z.object({
 export const BeforeAfterSlot = z.object({
   slotId: z.string(),
   type: z.literal("before-after"),
-  sides: z.array(
-    z.object({
-      title: z.string(),
-      text: z.string(),
-    })
-  ).length(2),
+  sides: z
+    .array(
+      z.object({
+        title: z.string(),
+        text: z.string(),
+      }),
+    )
+    .length(2),
 });
 
 export const ProsConsSlot = z.object({
   slotId: z.string(),
   type: z.literal("pros-cons"),
-  sides: z.array(
-    z.object({
-      type: z.enum(["pros", "cons"]),
-      title: z.string(),
-      items: z.array(ListItemSchema).min(2).max(4),
-    })
-  ).length(2),
+  sides: z
+    .array(
+      z.object({
+        type: z.enum(["pros", "cons"]),
+        title: z.string(),
+        items: z.array(ListItemSchema).min(2).max(4),
+      }),
+    )
+    .length(2),
 });
 
 // ── Union of all slot types ────────────────────────────────────
@@ -201,9 +218,12 @@ export function getSchemaForTemplate(templateId: string): z.ZodSchema {
       return z.object({
         templateId: z.literal("title-hero"),
         slots: z.object({
-          "title": HeadingSlot.extend({ slotId: z.literal("title") }),
-          "subtitle": ParagraphSlot.extend({ slotId: z.literal("subtitle"), text: z.string() }),
-          "background": ImageSlot.extend({ slotId: z.literal("background") })
+          title: HeadingSlot.extend({ slotId: z.literal("title") }),
+          subtitle: ParagraphSlot.extend({
+            slotId: z.literal("subtitle"),
+            text: z.string(),
+          }),
+          background: ImageSlot.extend({ slotId: z.literal("background") }),
         }),
       });
 
@@ -211,9 +231,9 @@ export function getSchemaForTemplate(templateId: string): z.ZodSchema {
       return z.object({
         templateId: z.literal("img-split-left"),
         slots: z.object({
-          "image": ImageSlot.extend({ slotId: z.literal("image") }),
-          "heading": HeadingSlot.extend({ slotId: z.literal("heading") }),
-          "body": ParagraphSlot.extend({ slotId: z.literal("body") })
+          image: ImageSlot.extend({ slotId: z.literal("image") }),
+          heading: HeadingSlot.extend({ slotId: z.literal("heading") }),
+          body: ParagraphSlot.extend({ slotId: z.literal("body") }),
         }),
       });
 
@@ -221,8 +241,11 @@ export function getSchemaForTemplate(templateId: string): z.ZodSchema {
       return z.object({
         templateId: z.literal("big-number"),
         slots: z.object({
-          "stat": StatNumberSlot.extend({ slotId: z.literal("stat") }),
-          "context": ParagraphSlot.extend({ slotId: z.literal("context"), text: z.string() })
+          stat: StatNumberSlot.extend({ slotId: z.literal("stat") }),
+          context: ParagraphSlot.extend({
+            slotId: z.literal("context"),
+            text: z.string(),
+          }),
         }),
       });
 
@@ -230,10 +253,10 @@ export function getSchemaForTemplate(templateId: string): z.ZodSchema {
       return z.object({
         templateId: z.literal("chart-bar-side"),
         slots: z.object({
-          "chart": ChartSlot.extend({ slotId: z.literal("chart") }),
-          "heading": HeadingSlot.extend({ slotId: z.literal("heading") }),
-          "insight": ParagraphSlot.extend({ slotId: z.literal("insight") }),
-          "callout": CalloutSlot.extend({ slotId: z.literal("callout") })
+          chart: ChartSlot.extend({ slotId: z.literal("chart") }),
+          heading: HeadingSlot.extend({ slotId: z.literal("heading") }),
+          insight: ParagraphSlot.extend({ slotId: z.literal("insight") }),
+          callout: CalloutSlot.extend({ slotId: z.literal("callout") }),
         }),
       });
 
@@ -241,11 +264,11 @@ export function getSchemaForTemplate(templateId: string): z.ZodSchema {
       return z.object({
         templateId: z.literal("bullets-grid-4"),
         slots: z.object({
-          "heading": HeadingSlot.extend({ slotId: z.literal("heading") }),
-          "bullets": BulletsSlot.extend({
+          heading: HeadingSlot.extend({ slotId: z.literal("heading") }),
+          bullets: BulletsSlot.extend({
             slotId: z.literal("bullets"),
             items: z.array(BulletItemSchema).length(4),
-          })
+          }),
         }),
       });
 
@@ -253,12 +276,12 @@ export function getSchemaForTemplate(templateId: string): z.ZodSchema {
       return z.object({
         templateId: z.literal("timeline-horizontal"),
         slots: z.object({
-          "heading": HeadingSlot.extend({ slotId: z.literal("heading") }),
-          "timeline": TimelineSlot.extend({
+          heading: HeadingSlot.extend({ slotId: z.literal("heading") }),
+          timeline: TimelineSlot.extend({
             slotId: z.literal("timeline"),
             type: z.literal("timeline"),
             items: z.array(TimelineItemSchema).min(3).max(4),
-          })
+          }),
         }),
       });
 
@@ -266,16 +289,18 @@ export function getSchemaForTemplate(templateId: string): z.ZodSchema {
       return z.object({
         templateId: z.literal("compare-vs"),
         slots: z.object({
-          "heading": HeadingSlot.extend({ slotId: z.literal("heading") }),
-          "comparison": CompareSlot.extend({
+          heading: HeadingSlot.extend({ slotId: z.literal("heading") }),
+          comparison: CompareSlot.extend({
             slotId: z.literal("comparison"),
-            sides: z.array(
-              z.object({
-                title: z.string(),
-                items: z.array(ListItemSchema).length(3),
-              })
-            ).length(2),
-          })
+            sides: z
+              .array(
+                z.object({
+                  title: z.string(),
+                  items: z.array(ListItemSchema).length(3),
+                }),
+              )
+              .length(2),
+          }),
         }),
       });
 
@@ -283,12 +308,12 @@ export function getSchemaForTemplate(templateId: string): z.ZodSchema {
       return z.object({
         templateId: z.literal("process-arrows"),
         slots: z.object({
-          "heading": HeadingSlot.extend({ slotId: z.literal("heading") }),
-          "steps": TimelineSlot.extend({
+          heading: HeadingSlot.extend({ slotId: z.literal("heading") }),
+          steps: TimelineSlot.extend({
             slotId: z.literal("steps"),
             type: z.literal("arrows"),
             items: z.array(TimelineItemSchema).length(3),
-          })
+          }),
         }),
       });
 
@@ -296,13 +321,13 @@ export function getSchemaForTemplate(templateId: string): z.ZodSchema {
       return z.object({
         templateId: z.literal("table-insight"),
         slots: z.object({
-          "heading": HeadingSlot.extend({ slotId: z.literal("heading") }),
-          "table": TableSlot.extend({
+          heading: HeadingSlot.extend({ slotId: z.literal("heading") }),
+          table: TableSlot.extend({
             slotId: z.literal("table"),
             headers: z.array(z.string()).length(3),
             rows: z.array(z.array(z.string()).length(3)).min(3).max(4),
           }),
-          "takeaway": CalloutSlot.extend({ slotId: z.literal("takeaway") })
+          takeaway: CalloutSlot.extend({ slotId: z.literal("takeaway") }),
         }),
       });
 
@@ -310,21 +335,25 @@ export function getSchemaForTemplate(templateId: string): z.ZodSchema {
       return z.object({
         templateId: z.literal("text-three-column"),
         slots: z.object({
-          "heading": HeadingSlot.extend({ slotId: z.literal("heading") }),
-          "columns": BulletsSlot.extend({
+          heading: HeadingSlot.extend({ slotId: z.literal("heading") }),
+          columns: BulletsSlot.extend({
             slotId: z.literal("columns"),
-            items: z.array(BulletItemSchema.extend({
-              description: z.string(),
-            })).length(3),
-          })
+            items: z
+              .array(
+                BulletItemSchema.extend({
+                  description: z.string(),
+                }),
+              )
+              .length(3),
+          }),
         }),
       });
-      
+
     case "quote-spotlight":
       return z.object({
         templateId: z.literal("quote-spotlight"),
         slots: z.object({
-          "quote": QuoteSlot.extend({ slotId: z.literal("quote") })
+          quote: QuoteSlot.extend({ slotId: z.literal("quote") }),
         }),
       });
 
@@ -332,9 +361,9 @@ export function getSchemaForTemplate(templateId: string): z.ZodSchema {
       return z.object({
         templateId: z.literal("img-bottom-text-top"),
         slots: z.object({
-          "heading": HeadingSlot.extend({ slotId: z.literal("heading") }),
-          "body": ParagraphSlot.extend({ slotId: z.literal("body") }),
-          "image": ImageSlot.extend({ slotId: z.literal("image") })
+          heading: HeadingSlot.extend({ slotId: z.literal("heading") }),
+          body: ParagraphSlot.extend({ slotId: z.literal("body") }),
+          image: ImageSlot.extend({ slotId: z.literal("image") }),
         }),
       });
 
@@ -342,8 +371,8 @@ export function getSchemaForTemplate(templateId: string): z.ZodSchema {
       return z.object({
         templateId: z.literal("swot-analysis"),
         slots: z.object({
-          "heading": HeadingSlot.extend({ slotId: z.literal("heading") }),
-          "swot": SwotSlot.extend({ slotId: z.literal("swot") })
+          heading: HeadingSlot.extend({ slotId: z.literal("heading") }),
+          swot: SwotSlot.extend({ slotId: z.literal("swot") }),
         }),
       });
 
@@ -351,12 +380,12 @@ export function getSchemaForTemplate(templateId: string): z.ZodSchema {
       return z.object({
         templateId: z.literal("pyramid-3"),
         slots: z.object({
-          "heading": HeadingSlot.extend({ slotId: z.literal("heading") }),
-          "pyramid": TimelineSlot.extend({
+          heading: HeadingSlot.extend({ slotId: z.literal("heading") }),
+          pyramid: TimelineSlot.extend({
             slotId: z.literal("pyramid"),
             type: z.literal("pyramid"),
             items: z.array(TimelineItemSchema).length(3),
-          })
+          }),
         }),
       });
 
@@ -364,8 +393,8 @@ export function getSchemaForTemplate(templateId: string): z.ZodSchema {
       return z.object({
         templateId: z.literal("closing-cta"),
         slots: z.object({
-          "heading": HeadingSlot.extend({ slotId: z.literal("heading") }),
-          "contact": ParagraphSlot.extend({ slotId: z.literal("contact") })
+          heading: HeadingSlot.extend({ slotId: z.literal("heading") }),
+          contact: ParagraphSlot.extend({ slotId: z.literal("contact") }),
         }),
       });
 
@@ -380,12 +409,38 @@ export function getSchemaForTemplate(templateId: string): z.ZodSchema {
 
 export interface TemplateSlot {
   id: string;
-  type: "heading" | "paragraph" | "bullets" | "icons" | "chart" | "table"
-      | "timeline" | "cycle" | "compare" | "before-after" | "pros-cons"
-      | "pyramid" | "staircase" | "arrows" | "funnel" | "roadmap"
-      | "image" | "callout" | "stat-number" | "swot";
-  region: "full" | "left" | "right" | "top" | "bottom" | "center"
-        | "top-left" | "top-right" | "bottom-left" | "bottom-right";
+  type:
+    | "heading"
+    | "paragraph"
+    | "bullets"
+    | "icons"
+    | "chart"
+    | "table"
+    | "timeline"
+    | "cycle"
+    | "compare"
+    | "before-after"
+    | "pros-cons"
+    | "pyramid"
+    | "staircase"
+    | "arrows"
+    | "funnel"
+    | "roadmap"
+    | "image"
+    | "callout"
+    | "stat-number"
+    | "swot";
+  region:
+    | "full"
+    | "left"
+    | "right"
+    | "top"
+    | "bottom"
+    | "center"
+    | "top-left"
+    | "top-right"
+    | "bottom-left"
+    | "bottom-right";
   maxWords?: number;
   maxItems?: number;
   maxRows?: number;
@@ -419,7 +474,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: 100 centered
-    slots: []
+    slots: [],
   },
   {
     id: "img-split-left",
@@ -431,7 +486,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: 50/50
-    slots: []
+    slots: [],
   },
   {
     id: "quote-spotlight",
@@ -443,7 +498,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: 100 centered
-    slots: []
+    slots: [],
   },
   {
     id: "big-number",
@@ -455,7 +510,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: 100 centered
-    slots: []
+    slots: [],
   },
   {
     id: "bullets-grid-4",
@@ -467,7 +522,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: 2×2 grid
-    slots: []
+    slots: [],
   },
   {
     id: "chart-bar-side",
@@ -479,7 +534,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: 50/50
-    slots: []
+    slots: [],
   },
   {
     id: "timeline-horizontal",
@@ -491,7 +546,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2 + horiz bar
-    slots: []
+    slots: [],
   },
   {
     id: "compare-vs",
@@ -503,7 +558,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: 50/50
-    slots: []
+    slots: [],
   },
   {
     id: "process-arrows",
@@ -515,7 +570,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2 + 3 arrows
-    slots: []
+    slots: [],
   },
   {
     id: "table-insight",
@@ -527,7 +582,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: 100 stacked
-    slots: []
+    slots: [],
   },
   {
     id: "text-three-column",
@@ -539,7 +594,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: 33/33/33
-    slots: []
+    slots: [],
   },
   {
     id: "img-bottom-text-top",
@@ -551,7 +606,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: 40text/60img vert
-    slots: []
+    slots: [],
   },
   {
     id: "swot-analysis",
@@ -563,7 +618,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: 2×2 grid
-    slots: []
+    slots: [],
   },
   {
     id: "pyramid-3",
@@ -575,7 +630,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2 + pyramid
-    slots: []
+    slots: [],
   },
   {
     id: "closing-cta",
@@ -587,7 +642,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: 100 centered
-    slots: []
+    slots: [],
   },
   {
     id: "title-image-left",
@@ -599,7 +654,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: IMG, H1:10w, P:20w
-    slots: []
+    slots: [],
   },
   {
     id: "title-image-right",
@@ -611,7 +666,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H1:10w, P:20w, IMG
-    slots: []
+    slots: [],
   },
   {
     id: "section-header",
@@ -623,7 +678,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, P:15w
-    slots: []
+    slots: [],
   },
   {
     id: "section-image-bg",
@@ -635,7 +690,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: IMG(bg), H2:8w, P:12w
-    slots: []
+    slots: [],
   },
   {
     id: "text-single-para",
@@ -647,7 +702,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, P:60w
-    slots: []
+    slots: [],
   },
   {
     id: "text-two-para",
@@ -659,7 +714,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, P:40w, P:40w
-    slots: []
+    slots: [],
   },
   {
     id: "text-caption-left",
@@ -671,7 +726,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H3:6w + P:30w, content
-    slots: []
+    slots: [],
   },
   {
     id: "text-caption-right",
@@ -683,7 +738,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: content, H3:6w + P:30w
-    slots: []
+    slots: [],
   },
   {
     id: "text-two-column",
@@ -695,7 +750,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, 2×(H3:5w + P:35w)
-    slots: []
+    slots: [],
   },
   {
     id: "img-right-text-left",
@@ -707,7 +762,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, P:50w, IMG
-    slots: []
+    slots: [],
   },
   {
     id: "img-top-text-bottom",
@@ -719,7 +774,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: IMG, H2:8w, P:40w
-    slots: []
+    slots: [],
   },
   {
     id: "img-left-bullets-right",
@@ -731,7 +786,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: IMG, H2:8w, 3×(H3:5w + P:12w)
-    slots: []
+    slots: [],
   },
   {
     id: "img-right-bullets-left",
@@ -743,7 +798,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, 3×(H3:5w + P:12w), IMG
-    slots: []
+    slots: [],
   },
   {
     id: "img-two-col-text-center",
@@ -755,7 +810,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: IMG, H2:8w + P:35w, IMG
-    slots: []
+    slots: [],
   },
   {
     id: "img-fullbleed-overlay",
@@ -767,7 +822,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: IMG, H2:8w overlay, P:20w overlay
-    slots: []
+    slots: [],
   },
   {
     id: "bullets-3-horizontal",
@@ -779,7 +834,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, 3×(Icon + H3:5w + P:20w)
-    slots: []
+    slots: [],
   },
   {
     id: "bullets-3-stack",
@@ -791,7 +846,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, P:20w, 3×(H3:5w + P:18w)
-    slots: []
+    slots: [],
   },
   {
     id: "icons-row-5",
@@ -803,7 +858,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, 5×(Icon + Label:4w)
-    slots: []
+    slots: [],
   },
   {
     id: "icons-grid-6",
@@ -815,7 +870,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, 6×(Icon + Label:3w + P:10w)
-    slots: []
+    slots: [],
   },
   {
     id: "bullets-numbered-4",
@@ -827,7 +882,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, 4×(Step# + H3:5w + P:18w)
-    slots: []
+    slots: [],
   },
   {
     id: "bullets-img-split",
@@ -839,7 +894,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, 3×(H3:5w + P:12w), IMG
-    slots: []
+    slots: [],
   },
   {
     id: "chart-full",
@@ -851,7 +906,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, P:25w, Chart(4-6pts)
-    slots: []
+    slots: [],
   },
   {
     id: "chart-right-text-left",
@@ -863,7 +918,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, P:40w, Chart
-    slots: []
+    slots: [],
   },
   {
     id: "chart-two-side",
@@ -875,7 +930,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, Chart-A, Chart-B
-    slots: []
+    slots: [],
   },
   {
     id: "chart-bullets-below",
@@ -887,7 +942,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, Chart, 3×(Bullet:12w)
-    slots: []
+    slots: [],
   },
   {
     id: "key-stats-row",
@@ -899,7 +954,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, 4×(Number + Label:4w)
-    slots: []
+    slots: [],
   },
   {
     id: "table-full",
@@ -911,7 +966,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, P:20w, Table(3-4col × 4-5row)
-    slots: []
+    slots: [],
   },
   {
     id: "table-text-split",
@@ -923,7 +978,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:6w, Table(3×4), P:35w
-    slots: []
+    slots: [],
   },
   {
     id: "table-image-split",
@@ -935,7 +990,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:6w, Table(3×3), IMG
-    slots: []
+    slots: [],
   },
   {
     id: "table-comparison",
@@ -947,7 +1002,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, Table(3-4col × 5-6row, ✓/✗)
-    slots: []
+    slots: [],
   },
   {
     id: "compare-three-way",
@@ -959,7 +1014,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, 3×(H3:4w + 3×LI:6w)
-    slots: []
+    slots: [],
   },
   {
     id: "before-after",
@@ -971,7 +1026,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, 2×(H3:5w + P:30w)
-    slots: []
+    slots: [],
   },
   {
     id: "pros-cons",
@@ -983,7 +1038,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, Pros(3×LI:10w), Cons(3×LI:10w)
-    slots: []
+    slots: [],
   },
   {
     id: "compare-img",
@@ -995,7 +1050,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, 2×(H3:5w + 2×LI:8w), IMG
-    slots: []
+    slots: [],
   },
   {
     id: "timeline-vertical",
@@ -1007,7 +1062,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, P:15w, 4×(H3:5w + P:12w)
-    slots: []
+    slots: [],
   },
   {
     id: "process-vertical",
@@ -1019,7 +1074,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, 4×(Step# + H3:5w + P:15w)
-    slots: []
+    slots: [],
   },
   {
     id: "cycle-diagram",
@@ -1031,7 +1086,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, 4×(H3:4w + P:12w)
-    slots: []
+    slots: [],
   },
   {
     id: "funnel",
@@ -1043,7 +1098,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, 4×(H3:5w + P:12w)
-    slots: []
+    slots: [],
   },
   {
     id: "staircase",
@@ -1055,7 +1110,7 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, 4×(H3:5w + P:12w)
-    slots: []
+    slots: [],
   },
   {
     id: "roadmap",
@@ -1067,6 +1122,6 @@ export const TEMPLATES: LayoutTemplate[] = [
     bestFor: [],
     avoidAfter: [],
     // Raw slots: H2:8w, 4×(H3:5w + P:12w)
-    slots: []
+    slots: [],
   },
 ];

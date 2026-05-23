@@ -80,8 +80,34 @@ export function PresentationDashboard({
       {/* Editorial Header */}
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-border/80">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary-foreground/90 mb-3 select-none">
-            <Presentation className="size-3 text-primary" /> Slide Generation
+          <div className="flex items-center gap-3 mb-3">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary-foreground/90 select-none">
+              <Presentation className="size-3 text-primary" /> Slide Generation
+            </div>
+            <a
+              href="/notes"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-secondary/80 hover:bg-secondary border border-border/40 text-xs font-bold text-muted-foreground transition-colors cursor-pointer"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-file-text"
+              >
+                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                <path d="M10 9H8" />
+                <path d="M16 13H8" />
+                <path d="M16 17H8" />
+              </svg>
+              Try LaTeX Notes Generator
+            </a>
           </div>
           <h1 className="text-3xl sm:text-4xl font-serif font-extrabold tracking-tight text-foreground">
             Create Presentation

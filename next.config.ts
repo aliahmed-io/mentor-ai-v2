@@ -25,6 +25,7 @@ const nextConfig: NextConfig = {
       "react-icons",
     ],
   },
+  serverExternalPackages: ["pdf-parse", "pdfjs-dist", "mammoth"],
 };
 
 export default nextConfig;

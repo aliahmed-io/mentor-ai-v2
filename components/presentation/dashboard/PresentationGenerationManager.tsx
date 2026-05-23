@@ -431,7 +431,7 @@ export function PresentationGenerationManager() {
         throw new Error(err.error ?? `Deck generation failed`);
       }
 
-      const { slides: generatedSlides } = (await response.json()) as { 
+      const { slides: generatedSlides } = (await response.json()) as {
         slides: Array<{ xml: string }>;
         orchestration: any[];
       };

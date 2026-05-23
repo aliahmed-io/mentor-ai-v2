@@ -8,33 +8,26 @@ import {
   ChevronRight,
   Cpu,
   FileSpreadsheet,
+  FileText,
   Globe,
   Languages,
   LayoutGrid,
   MonitorCheck,
   Palette,
   Presentation,
+  Settings2,
   Sliders,
   Sparkles,
   Terminal,
   Tv,
-  Settings2,
   Type,
-  X,
-  FileText,
   Upload,
+  X,
 } from "lucide-react";
-import UploadForm from "@/components/UploadForm";
 import { useParams, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { getPresentation } from "@/app/_actions/presentation/presentationActions";
 import { getCustomThemeById } from "@/app/_actions/presentation/theme-actions";
 import { ThinkingDisplay } from "@/components/presentation/dashboard/ThinkingDisplay";
@@ -43,6 +36,13 @@ import { ToolCallDisplay } from "@/components/presentation/outline/ToolCallDispl
 import { ImageSourceSelector } from "@/components/presentation/theme/ImageSourceSelector";
 import { ThemeBackground } from "@/components/presentation/theme/ThemeBackground";
 import { ThemeModal } from "@/components/presentation/theme/ThemeModal";
+import UploadForm from "@/components/UploadForm";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -144,7 +144,9 @@ export default function PresentationGenerateWithIdPage() {
 
   const handleUploaded = (data: { sessionId: string; text: string }) => {
     if (!data) return;
-    setPresentationInput((prev) => (prev ? `${prev}\n\n` : "") + data.text);
+    setPresentationInput(
+      (presentationInput ? `${presentationInput}\n\n` : "") + data.text,
+    );
   };
 
   // Track if this is a fresh navigation or a revisit
@@ -394,7 +396,6 @@ export default function PresentationGenerateWithIdPage() {
       <div className="flex flex-col lg:flex-row h-[calc(100vh-4.5rem)] w-full overflow-hidden p-4 md:p-6 gap-6">
         {/* Left Sidebar - Settings & Themes */}
         <aside className="w-full lg:w-80 shrink-0 flex flex-col gap-4 h-full overflow-y-auto pr-2 pb-32 lg:pb-2 scrollbar-thin">
-          
           {/* Quick Settings Card */}
           <div className="rounded-2xl border border-border/30 bg-card/30 backdrop-blur-md p-4 space-y-5">
             <div className="flex items-center gap-2 mb-2">
@@ -403,11 +404,12 @@ export default function PresentationGenerateWithIdPage() {
                 Document Settings
               </h2>
             </div>
-            
+
             {/* Upload File */}
             <div className="space-y-3">
               <label className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
-                <Upload className="h-3.5 w-3.5 text-primary" /> Upload Knowledge Source
+                <Upload className="h-3.5 w-3.5 text-primary" /> Upload Knowledge
+                Source
               </label>
               <div className="rounded-xl border border-dashed border-border/50 p-3 bg-background/20 hover:bg-background/40 transition-all duration-200">
                 <UploadForm onUploaded={handleUploaded} />
@@ -480,20 +482,28 @@ export default function PresentationGenerateWithIdPage() {
                         onClick={() => setTextModel("gemini")}
                         className={cn(
                           "relative flex flex-col items-start p-2 rounded-lg border text-left transition-all",
-                          textModel === "gemini" ? "border-primary bg-primary/5" : "border-border/40 hover:bg-muted/40"
+                          textModel === "gemini"
+                            ? "border-primary bg-primary/5"
+                            : "border-border/40 hover:bg-muted/40",
                         )}
                       >
-                        <span className="text-[10px] font-bold">Google Gemini</span>
+                        <span className="text-[10px] font-bold">
+                          Google Gemini
+                        </span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setTextModel("openai")}
                         className={cn(
                           "relative flex flex-col items-start p-2 rounded-lg border text-left transition-all",
-                          textModel === "openai" ? "border-primary bg-primary/5" : "border-border/40 hover:bg-muted/40"
+                          textModel === "openai"
+                            ? "border-primary bg-primary/5"
+                            : "border-border/40 hover:bg-muted/40",
                         )}
                       >
-                        <span className="text-[10px] font-bold">OpenAI GPT</span>
+                        <span className="text-[10px] font-bold">
+                          OpenAI GPT
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -512,20 +522,26 @@ export default function PresentationGenerateWithIdPage() {
                       onClick={() => setWebSearchEnabled(!webSearchEnabled)}
                       className={cn(
                         "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none disabled:opacity-50",
-                        webSearchEnabled ? "bg-primary" : "bg-muted-foreground/35"
+                        webSearchEnabled
+                          ? "bg-primary"
+                          : "bg-muted-foreground/35",
                       )}
                     >
-                      <span className={cn(
-                        "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-background shadow transition",
-                        webSearchEnabled ? "translate-x-4" : "translate-x-0"
-                      )} />
+                      <span
+                        className={cn(
+                          "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-background shadow transition",
+                          webSearchEnabled ? "translate-x-4" : "translate-x-0",
+                        )}
+                      />
                     </button>
                   </div>
 
                   {/* Selectors Grid */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Language</span>
+                      <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
+                        Language
+                      </span>
                       <Select value={language} onValueChange={setLanguage}>
                         <SelectTrigger className="w-full rounded-md text-[10px] h-7 bg-background/40">
                           <SelectValue placeholder="Language" />
@@ -538,21 +554,30 @@ export default function PresentationGenerateWithIdPage() {
                       </Select>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Format</span>
+                      <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
+                        Format
+                      </span>
                       <Select value={pageStyle} onValueChange={setPageStyle}>
                         <SelectTrigger className="w-full rounded-md text-[10px] h-7 bg-background/40">
                           <SelectValue placeholder="Format" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="default">Default Ratio</SelectItem>
-                          <SelectItem value="traditional">Traditional</SelectItem>
+                          <SelectItem value="traditional">
+                            Traditional
+                          </SelectItem>
                           <SelectItem value="tall">Tall Book</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Vibe</span>
-                      <Select value={presentationStyle} onValueChange={setPresentationStyle}>
+                      <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
+                        Vibe
+                      </span>
+                      <Select
+                        value={presentationStyle}
+                        onValueChange={setPresentationStyle}
+                      >
                         <SelectTrigger className="w-full rounded-md text-[10px] h-7 bg-background/40">
                           <SelectValue placeholder="Vibe" />
                         </SelectTrigger>
@@ -566,7 +591,9 @@ export default function PresentationGenerateWithIdPage() {
                       </Select>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Visuals</span>
+                      <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
+                        Visuals
+                      </span>
                       <ImageSourceSelector
                         imageSource={imageSource}
                         imageModel={imageModel}
@@ -593,7 +620,11 @@ export default function PresentationGenerateWithIdPage() {
                 </h2>
               </div>
               <ThemeModal>
-                <Button variant="link" size="sm" className="h-auto p-0 text-[10px] text-primary">
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="h-auto p-0 text-[10px] text-primary"
+                >
                   Custom
                 </Button>
               </ThemeModal>
@@ -603,7 +634,9 @@ export default function PresentationGenerateWithIdPage() {
             <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-3 gap-2 max-h-[350px] lg:max-h-[none] scrollbar-thin content-start">
               {Object.entries(themes).map(([key, themeOption]) => {
                 const isSelected = theme === key;
-                const modeColors = isDark ? themeOption.colors.dark : themeOption.colors.light;
+                const modeColors = isDark
+                  ? themeOption.colors.dark
+                  : themeOption.colors.light;
 
                 return (
                   <button
@@ -613,11 +646,15 @@ export default function PresentationGenerateWithIdPage() {
                       "flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl border transition-all hover:scale-105",
                       isSelected
                         ? "border-primary bg-primary/10 shadow-sm"
-                        : "border-border/40 bg-background/20 hover:border-primary/30"
+                        : "border-border/40 bg-background/20 hover:border-primary/30",
                     )}
                   >
                     <div className="flex -space-x-1">
-                      {[modeColors.primary, modeColors.secondary, modeColors.accent].map((color, i) => (
+                      {[
+                        modeColors.primary,
+                        modeColors.secondary,
+                        modeColors.accent,
+                      ].map((color, i) => (
                         <div
                           key={i}
                           className="h-3.5 w-3.5 rounded-full ring-1 ring-background"
@@ -625,7 +662,10 @@ export default function PresentationGenerateWithIdPage() {
                         />
                       ))}
                     </div>
-                    <span className="text-[9px] font-semibold truncate w-full text-center" style={{ fontFamily: themeOption.fonts.heading }}>
+                    <span
+                      className="text-[9px] font-semibold truncate w-full text-center"
+                      style={{ fontFamily: themeOption.fonts.heading }}
+                    >
                       {themeOption.name}
                     </span>
                   </button>
@@ -637,7 +677,6 @@ export default function PresentationGenerateWithIdPage() {
 
         {/* Right Canvas - Prompt & Outline Grid */}
         <main className="flex-1 flex flex-col gap-6 h-full overflow-y-auto pb-32 lg:pb-16 pr-1 scrollbar-thin">
-          
           {/* Refine Outline Prompt (Top Bar) */}
           <div className="rounded-xl border border-border/30 bg-card/30 backdrop-blur-md p-4 shadow-sm">
             <h2 className="text-xs font-bold uppercase tracking-wider text-foreground mb-3 flex items-center gap-1.5">
@@ -658,7 +697,7 @@ export default function PresentationGenerateWithIdPage() {
                 disabled={isGeneratingOutline || !presentationInput.trim()}
                 className={cn(
                   "shrink-0 h-10 px-6 font-bold shadow-md",
-                  isGeneratingOutline ? "opacity-70" : "hover:shadow-lg"
+                  isGeneratingOutline ? "opacity-70" : "hover:shadow-lg",
                 )}
               >
                 {isGeneratingOutline ? (
@@ -672,10 +711,12 @@ export default function PresentationGenerateWithIdPage() {
           </div>
 
           {/* Minimalist Cognitive Processing Terminal */}
-          <div className={cn(
-            "rounded-xl border border-border/20 bg-slate-950 shadow-md relative overflow-hidden font-mono transition-all duration-300",
-            (isGeneratingOutline || outlineThinking) ? "p-4" : "p-3 hidden"
-          )}>
+          <div
+            className={cn(
+              "rounded-xl border border-border/20 bg-slate-950 shadow-md relative overflow-hidden font-mono transition-all duration-300",
+              isGeneratingOutline || outlineThinking ? "p-4" : "p-3 hidden",
+            )}
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Terminal className="h-3.5 w-3.5 text-emerald-500" />

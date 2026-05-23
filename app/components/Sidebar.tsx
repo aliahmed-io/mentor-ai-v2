@@ -9,6 +9,7 @@ import {
   Presentation,
   Settings,
   Timer,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -31,6 +32,7 @@ export default function Sidebar({
     { href: "/chatbot", label: "Chatbot", icon: MessageSquare },
     { href: "/quiz", label: "Quiz", icon: Brain },
     { href: "/flashcard", label: "Flashcard", icon: BookOpen },
+    { href: "/notes", label: "Notes", icon: FileText },
     { href: "/presentation", label: "Presentation", icon: Presentation },
     { href: "/pomodoro", label: "Pomodoro", icon: Timer },
     { href: "/calendar", label: "Calendar", icon: Calendar },

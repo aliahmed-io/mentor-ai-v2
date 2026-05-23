@@ -22,9 +22,10 @@ export function bakeThemeIntoSlides(
     typography,
   );
   const bg = snapshot.activeColors.background;
-  
+
   const colors = snapshot.activeColors;
-  const shadows = colorMode === "dark" ? snapshot.shadows.dark : snapshot.shadows.light;
+  const shadows =
+    colorMode === "dark" ? snapshot.shadows.dark : snapshot.shadows.light;
 
   const themeStyles = {
     "--presentation-primary": colors.primary,

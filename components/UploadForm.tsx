@@ -9,19 +9,19 @@ interface UploadFormProps {
 }
 
 export default function UploadForm({ onUploaded }: UploadFormProps) {
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!file) return;
+    if (!files.length) return;
 
     setLoading(true);
     setError(null);
 
     const fd = new FormData();
-    fd.append("file", file);
+    files.forEach((f) => fd.append("file", f));
 
     try {
       const r = await fetch("/api/upload", { method: "POST", body: fd });
@@ -43,7 +43,12 @@ export default function UploadForm({ onUploaded }: UploadFormProps) {
     <form onSubmit={onSubmit} className="flex flex-col gap-3">
       <Input
         type="file"
-        onChange={(e) => setFile(e.target.files?.[0] || null)}
+        multiple
+        onChange={(e) => {
+          if (e.target.files) {
+            setFiles(Array.from(e.target.files));
+          }
+        }}
         accept=".pdf,.docx,.pptx,.txt,.png,.jpg,.jpeg,.gif,.bmp,.tiff,.webp"
       />
 
@@ -52,10 +57,10 @@ export default function UploadForm({ onUploaded }: UploadFormProps) {
       <Button
         type="submit"
         variant="outline"
-        disabled={loading || !file}
+        disabled={loading || !files.length}
         className="border"
       >
-        {loading ? "Uploading..." : "Upload File"}
+        {loading ? "Uploading..." : `Upload ${files.length > 0 ? files.length + " File(s)" : "Files"}`}
       </Button>
     </form>
   );

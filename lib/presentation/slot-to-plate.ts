@@ -1,8 +1,10 @@
 import { nanoid } from "nanoid";
 import type { PlateNode } from "@/components/presentation/utils/parser";
-import type { GeneratedSlideContent, AnySlotContent } from "./layout-templates";
+import type { AnySlotContent, GeneratedSlideContent } from "./layout-templates";
 
-export function mapSlotsToPlateNodes(slide: GeneratedSlideContent): PlateNode[] {
+export function mapSlotsToPlateNodes(
+  slide: GeneratedSlideContent,
+): PlateNode[] {
   const nodes: PlateNode[] = [];
 
   for (const slot of slide.slots) {
@@ -27,7 +29,7 @@ function mapSlot(slot: AnySlotContent): PlateNode | PlateNode[] | null {
         type: "h2", // Always H2 by default except title
         children: [{ text: slot.text }],
       } as any; // Cast as PlateNode via any to bypass strict literal type checks temporarily
-      
+
     case "paragraph":
     case "callout":
       return {
@@ -40,7 +42,12 @@ function mapSlot(slot: AnySlotContent): PlateNode | PlateNode[] | null {
       return {
         id: nanoid(),
         type: "blockquote",
-        children: [{ text: slot.text + (slot.attribution ? ` - ${slot.attribution}` : "") }],
+        children: [
+          {
+            text:
+              slot.text + (slot.attribution ? ` - ${slot.attribution}` : ""),
+          },
+        ],
       } as any;
 
     case "image":
@@ -80,7 +87,7 @@ function mapSlot(slot: AnySlotContent): PlateNode | PlateNode[] | null {
       return {
         id: nanoid(),
         type: `chart-${slot.chartType || "bar"}`,
-        data: slot.data.map(d => ({ label: d.label, value: d.value })),
+        data: slot.data.map((d) => ({ label: d.label, value: d.value })),
         children: [{ text: "" }],
       } as any;
 

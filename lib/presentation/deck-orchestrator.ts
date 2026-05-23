@@ -1,8 +1,8 @@
 import { generateObject, type LanguageModel } from "ai";
 import {
   DeckOrchestrationResult,
-  TEMPLATES,
   type SlideBlueprint,
+  TEMPLATES,
 } from "./layout-templates";
 
 export interface DeckOrchestrationParams {
@@ -15,7 +15,7 @@ export interface DeckOrchestrationParams {
 }
 
 export async function orchestrateDeck(
-  params: DeckOrchestrationParams
+  params: DeckOrchestrationParams,
 ): Promise<SlideBlueprint[]> {
   const { model, title, outline, theme, tone, language } = params;
 

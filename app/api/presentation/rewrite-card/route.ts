@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const customApiKey = cookieStore.get("google_gemini_api_key")?.value;
 
     const google = createGoogleGenerativeAI({

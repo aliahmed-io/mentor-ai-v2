@@ -1,23 +1,27 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const markdownPath = path.join(__dirname, '../docs/presentation-architecture.md');
-const markdownContent = fs.readFileSync(markdownPath, 'utf-8');
+const markdownPath = path.join(
+  __dirname,
+  "../docs/presentation-architecture.md",
+);
+const markdownContent = fs.readFileSync(markdownPath, "utf-8");
 
 // A quick and dirty parser to extract the tables
 // The tables are defined between Category headings.
-const templateRegex = /\|\s*`([^`]+)`\s*\|\s*([^|]+)\s*\|\s*([^|]+)\s*\|\s*([^|]+)\s*\|\s*([^|]+)\s*\|/g;
+const templateRegex =
+  /\|\s*`([^`]+)`\s*\|\s*([^|]+)\s*\|\s*([^|]+)\s*\|\s*([^|]+)\s*\|\s*([^|]+)\s*\|/g;
 
 let match;
 const templates = [];
 
 while ((match = templateRegex.exec(markdownContent)) !== null) {
   // Ignore header rows
-  if (match[1] === 'ID' || match[1].includes('---')) continue;
+  if (match[1] === "ID" || match[1].includes("---")) continue;
 
   const id = match[1].trim();
   const name = match[2].trim();
@@ -94,7 +98,10 @@ for (const t of validTemplates) {
 
 output += `];\n`;
 
-const outputPath = path.join(__dirname, '../lib/presentation/layout-templates.ts');
+const outputPath = path.join(
+  __dirname,
+  "../lib/presentation/layout-templates.ts",
+);
 fs.appendFileSync(outputPath, output);
 
 console.log(`Appended ${validTemplates.length} templates.`);

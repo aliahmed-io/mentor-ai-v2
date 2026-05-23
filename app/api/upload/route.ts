@@ -12,33 +12,49 @@ const sessions =
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const file = formData.get("file") as File;
+    const files = formData.getAll("file") as File[];
 
-    if (!file) {
-      return NextResponse.json({ error: "no file" }, { status: 400 });
+    if (!files || files.length === 0) {
+      return NextResponse.json({ error: "no files" }, { status: 400 });
     }
 
-    // Convert File to buffer for processing
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    let combinedText = "";
 
-    // Create a temporary file path (Windows compatible)
-    const tempPath = `${process.env.TEMP || process.env.TMP || "/tmp"}/${Date.now()}-${file.name}`;
-    fs.writeFileSync(tempPath, buffer);
+    for (const file of files) {
+      // Convert File to buffer for processing
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      // Create a temporary file path (Windows compatible)
+      const tempPath = `${process.env.TEMP || process.env.TMP || "/tmp"}/${Date.now()}-${file.name}`;
+      fs.writeFileSync(tempPath, buffer);
+
+      try {
+        const text = await extractTextFromFile(tempPath, file.type);
+        if (text) {
+          combinedText += `\n\n--- Document: ${file.name} ---\n\n${text}`;
+        }
+      } finally {
+        // Clean up temporary file
+        try {
+          fs.unlinkSync(tempPath);
+        } catch (cleanupErr) {
+          console.warn("Failed to cleanup temp file:", cleanupErr);
+        }
+      }
+    }
 
     try {
-      const text = await extractTextFromFile(tempPath, file.type);
-
       // Create a session id
       const sessionId = Math.random().toString(36).slice(2, 9);
-      sessions.set(sessionId, { fileText: text, history: [] });
+      sessions.set(sessionId, { fileText: combinedText, history: [] });
       try {
         const session = await auth();
         await db.chatSession.create({
           data: {
             id: sessionId,
             userId: session?.user?.id ?? null,
-            fileText: text,
+            fileText: combinedText,
           },
         });
       } catch (e) {
@@ -47,15 +63,11 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         sessionId,
-        text: text.slice(0, 1000),
+        text: combinedText,
       });
-    } finally {
-      // Clean up temporary file
-      try {
-        fs.unlinkSync(tempPath);
-      } catch (cleanupErr) {
-        console.warn("Failed to cleanup temp file:", cleanupErr);
-      }
+    } catch (err: any) {
+      console.error("Session creation error:", err);
+      throw err;
     }
   } catch (err: any) {
     console.error("Upload API error:", err);

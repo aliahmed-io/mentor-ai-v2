@@ -13,7 +13,7 @@ export function resolvePresentationModel(
   if (textModel === "quality") {
     if (openaiKey) {
       const openai = createOpenAI({ apiKey: openaiKey });
-      return openai("gpt-5.5");
+      return openai("gpt-4o-mini");
     }
     if (geminiKey) {
       const google = createGoogleGenerativeAI({ apiKey: geminiKey });
@@ -23,7 +23,7 @@ export function resolvePresentationModel(
 
   if (textModel === "openai" && openaiKey) {
     const openai = createOpenAI({ apiKey: openaiKey });
-    return openai("gpt-5.5");
+    return openai("gpt-4o-mini");
   }
   if ((textModel === "gemini" || textModel === "quality") && geminiKey) {
     const google = createGoogleGenerativeAI({ apiKey: geminiKey });
@@ -35,7 +35,7 @@ export function resolvePresentationModel(
   }
   if (openaiKey) {
     const openai = createOpenAI({ apiKey: openaiKey });
-    return openai("gpt-5.5");
+    return openai("gpt-4o-mini");
   }
   return null;
 }

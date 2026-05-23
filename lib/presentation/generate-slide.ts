@@ -1,7 +1,7 @@
 import { generateObject, type LanguageModel } from "ai";
 import {
-  getSchemaForTemplate,
   GeneratedSlideContent,
+  getSchemaForTemplate,
 } from "./layout-templates";
 import { validateAndSanitizeSlot } from "./slot-validator";
 
@@ -20,7 +20,7 @@ export interface GenerateSingleSlideInput {
 }
 
 export async function generateSingleSlide(
-  input: GenerateSingleSlideInput
+  input: GenerateSingleSlideInput,
 ): Promise<GeneratedSlideContent> {
   const {
     model,
@@ -35,7 +35,7 @@ export async function generateSingleSlide(
   } = input;
 
   console.log(
-    `[generateSingleSlide] Starting parallel generation for slide ${slideIndex + 1}/${totalSlides} [Template: ${templateId}]`
+    `[generateSingleSlide] Starting parallel generation for slide ${slideIndex + 1}/${totalSlides} [Template: ${templateId}]`,
   );
 
   const schema = getSchemaForTemplate(templateId);
@@ -75,13 +75,13 @@ Your task is to write the exact content for a specific slide based on the provid
       });
 
       // Convert slots object back to array for compatibility with the rest of the pipeline
-      const slotsArray = Array.isArray(object.slots) 
-        ? object.slots 
+      const slotsArray = Array.isArray(object.slots)
+        ? object.slots
         : Object.values(object.slots);
 
       // Strict truncation safety net (The Guillotine)
       const sanitizedSlots = slotsArray.map((slot: any) =>
-        validateAndSanitizeSlot(slot, templateId)
+        validateAndSanitizeSlot(slot, templateId),
       );
 
       return {
@@ -91,13 +91,13 @@ Your task is to write the exact content for a specific slide based on the provid
     } catch (error) {
       lastReason = error instanceof Error ? error.message : String(error);
       console.warn(
-        `[generateSingleSlide] Attempt ${retries + 1} failed for slide ${slideIndex + 1}: ${lastReason}`
+        `[generateSingleSlide] Attempt ${retries + 1} failed for slide ${slideIndex + 1}: ${lastReason}`,
       );
       retries++;
     }
   }
 
   throw new Error(
-    `[generateSingleSlide] Failed to generate valid slide after ${MAX_RETRIES + 1} attempts. Detail: ${lastReason}`
+    `[generateSingleSlide] Failed to generate valid slide after ${MAX_RETRIES + 1} attempts. Detail: ${lastReason}`,
   );
 }

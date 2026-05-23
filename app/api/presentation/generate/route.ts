@@ -1,12 +1,12 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { orchestrateDeck } from "@/lib/presentation/deck-orchestrator";
 import {
   resolvePresentationModel,
   type TextModelTier,
 } from "@/lib/presentation/generate-model";
 import { generateSingleSlide } from "@/lib/presentation/generate-slide";
-import { orchestrateDeck } from "@/lib/presentation/deck-orchestrator";
 import { generatedSlideToXml } from "@/lib/presentation/slots-to-xml";
 import { auth } from "@/server/auth";
 
@@ -36,12 +36,14 @@ const slidesRequestSchema = z.object({
   templateId: z.string().optional(),
   creativeBrief: z.string().optional(),
   layout: z.string().optional(),
-  slideOverrides: z.record(
-    z.object({
-      templateId: z.string().optional(),
-      customPrompt: z.string().optional(),
-    })
-  ).optional(),
+  slideOverrides: z
+    .record(
+      z.object({
+        templateId: z.string().optional(),
+        customPrompt: z.string().optional(),
+      }),
+    )
+    .optional(),
 });
 
 export async function POST(req: Request) {
@@ -122,14 +124,20 @@ export async function POST(req: Request) {
         language,
       });
 
-      console.log(`[generate/route] Phase 1 Complete. Orchestrated ${orchestration.length} slides.`);
-      console.log(`[generate/route] Starting Phase 2: Parallel Slot Filling...`);
+      console.log(
+        `[generate/route] Phase 1 Complete. Orchestrated ${orchestration.length} slides.`,
+      );
+      console.log(
+        `[generate/route] Starting Phase 2: Parallel Slot Filling...`,
+      );
 
       // Map into factory functions so they don't execute immediately
       const slideTasks = orchestration.map((blueprint, index) => {
         const override = slideOverrides?.[(index + 1).toString()];
         const finalTemplateId = override?.templateId || blueprint.templateId;
-        const finalCreativeBrief = override?.customPrompt ? `${blueprint.creativeBrief}\nUSER INSTRUCTION: ${override.customPrompt}` : blueprint.creativeBrief;
+        const finalCreativeBrief = override?.customPrompt
+          ? `${blueprint.creativeBrief}\nUSER INSTRUCTION: ${override.customPrompt}`
+          : blueprint.creativeBrief;
 
         return () =>
           generateSingleSlide({
@@ -148,20 +156,22 @@ export async function POST(req: Request) {
       // Process in batches of 3 to avoid hitting Gemini free tier rate limits (429)
       const CONCURRENCY_LIMIT = 3;
       const settledResults: PromiseSettledResult<any>[] = [];
-      
+
       for (let i = 0; i < slideTasks.length; i += CONCURRENCY_LIMIT) {
         const batch = slideTasks.slice(i, i + CONCURRENCY_LIMIT);
-        console.log(`[generate/route] Processing batch ${Math.floor(i/CONCURRENCY_LIMIT) + 1} (${batch.length} slides)...`);
-        
-        const results = await Promise.allSettled(batch.map(task => task()));
+        console.log(
+          `[generate/route] Processing batch ${Math.floor(i / CONCURRENCY_LIMIT) + 1} (${batch.length} slides)...`,
+        );
+
+        const results = await Promise.allSettled(batch.map((task) => task()));
         settledResults.push(...results);
-        
+
         // Small delay between batches to respect RPM limits
         if (i + CONCURRENCY_LIMIT < slideTasks.length) {
-          await new Promise(r => setTimeout(r, 2000));
+          await new Promise((r) => setTimeout(r, 2000));
         }
       }
-      
+
       const slides = settledResults.map((res, index) => {
         if (res.status === "fulfilled") {
           const slideLayout = layout ?? (index % 2 === 0 ? "left" : "right");
@@ -169,17 +179,20 @@ export async function POST(req: Request) {
             ...res.value,
             slideIndex: index,
             layoutPercentages: orchestration[index].layoutPercentages,
-            xml: generatedSlideToXml(res.value, slideLayout)
+            xml: generatedSlideToXml(res.value, slideLayout),
           };
         } else {
-          console.error(`[generate/route] Slide ${index + 1} generation failed:`, res.reason);
+          console.error(
+            `[generate/route] Slide ${index + 1} generation failed:`,
+            res.reason,
+          );
           // Return a fallback blank slide matching the template if generation fails
           return {
             templateId: orchestration[index].templateId,
             slideIndex: index,
             slots: [],
             error: "Generation failed",
-            xml: `<SECTION layout="left"><H2>Error</H2><P>Generation failed for this slide.</P></SECTION>`
+            xml: `<SECTION layout="left"><H2>Error</H2><P>Generation failed for this slide.</P></SECTION>`,
           };
         }
       });
@@ -197,9 +210,10 @@ export async function POST(req: Request) {
       const item =
         outlineItem ?? effectiveOutline[index] ?? `Slide ${index + 1}`;
       const total = totalSlides ?? (effectiveOutline.length || 1);
-      
+
       const activeTemplateId = templateId ?? "title-hero";
-      const activeBrief = creativeBrief ?? "Generate generic content based on the outline topic.";
+      const activeBrief =
+        creativeBrief ?? "Generate generic content based on the outline topic.";
       const activeLayout = layout ?? "left";
 
       try {
@@ -218,7 +232,7 @@ export async function POST(req: Request) {
         return NextResponse.json({
           ...result,
           slideIndex: index,
-          xml: generatedSlideToXml(result, activeLayout)
+          xml: generatedSlideToXml(result, activeLayout),
         });
       } catch (error) {
         console.error("Single slide generation failed:", error);

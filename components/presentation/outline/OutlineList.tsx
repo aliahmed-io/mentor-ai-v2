@@ -9,9 +9,9 @@ import {
 } from "@dnd-kit/core";
 import {
   arrayMove,
+  rectSortingStrategy,
   SortableContext,
   sortableKeyboardCoordinates,
-  rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";

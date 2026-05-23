@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, X, LayoutTemplate, Sparkles, Send } from "lucide-react";
+import { GripVertical, LayoutTemplate, Send, Sparkles, X } from "lucide-react";
 import { memo, useEffect, useState } from "react";
 import ProseMirrorEditor from "@/components/prose-mirror/ProseMirrorEditor";
 import { cn } from "@/lib/utils";
@@ -163,7 +163,10 @@ export const OutlineItem = memo(function OutlineItem({
             placeholder="E.g., Make it funnier, focus on Q3 stats..."
             className="flex-1 bg-background/50 border border-border/50 rounded text-xs px-2 py-1 outline-none focus:border-primary"
           />
-          <button onClick={handleRewriteSubmit} className="p-1 hover:text-primary transition-colors">
+          <button
+            onClick={handleRewriteSubmit}
+            className="p-1 hover:text-primary transition-colors"
+          >
             <Send size={14} />
           </button>
         </div>
@@ -176,21 +179,29 @@ export const OutlineItem = memo(function OutlineItem({
           <select
             className="bg-transparent outline-none cursor-pointer text-xs"
             value={override.templateId || ""}
-            onChange={(e) => setSlideOverride(id, { templateId: e.target.value })}
+            onChange={(e) =>
+              setSlideOverride(id, { templateId: e.target.value })
+            }
           >
             {TEMPLATES.map((t) => (
-              <option key={t.id} value={t.id} className="bg-background text-foreground">
+              <option
+                key={t.id}
+                value={t.id}
+                className="bg-background text-foreground"
+              >
                 {t.label}
               </option>
             ))}
           </select>
         </div>
-        
+
         <button
           onClick={() => setIsRewriting(!isRewriting)}
           className={cn(
             "flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md transition-colors",
-            isRewriting ? "bg-primary/20 text-primary" : "hover:bg-primary/10 hover:text-primary text-muted-foreground"
+            isRewriting
+              ? "bg-primary/20 text-primary"
+              : "hover:bg-primary/10 hover:text-primary text-muted-foreground",
           )}
         >
           <Sparkles size={12} />

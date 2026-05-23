@@ -1,7 +1,7 @@
 import {
   type AnySlotContent,
-  type TemplateSlot,
   TEMPLATES,
+  type TemplateSlot,
 } from "./layout-templates";
 
 /**
@@ -26,7 +26,9 @@ export function validateAndSanitizeSlot(
 ): AnySlotContent {
   const template = TEMPLATES.find((t) => t.id === templateId);
   if (!template) {
-    console.warn(`[slot-validator] Template ${templateId} not found. Skipping validation.`);
+    console.warn(
+      `[slot-validator] Template ${templateId} not found. Skipping validation.`,
+    );
     return slotData;
   }
 
@@ -86,10 +88,14 @@ export function validateAndSanitizeSlot(
     case "table":
       return {
         ...slotData,
-        headers: slotData.headers.slice(0, 4).map((h) => truncateToWordBudget(h, 4)),
-        rows: slotData.rows.slice(0, 5).map((row) =>
-          row.slice(0, 4).map((cell) => truncateToWordBudget(cell, 8)),
-        ),
+        headers: slotData.headers
+          .slice(0, 4)
+          .map((h) => truncateToWordBudget(h, 4)),
+        rows: slotData.rows
+          .slice(0, 5)
+          .map((row) =>
+            row.slice(0, 4).map((cell) => truncateToWordBudget(cell, 8)),
+          ),
       };
     case "timeline":
     case "cycle":

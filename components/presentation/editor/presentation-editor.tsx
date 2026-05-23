@@ -195,7 +195,8 @@ const PresentationEditor = React.memo(
                       (readOnly || isGenerating) && "px-16",
                       !initialContent?.alignment && "justify-center",
                       initialContent?.alignment === "start" && "justify-start",
-                      initialContent?.alignment === "center" && "justify-center",
+                      initialContent?.alignment === "center" &&
+                        "justify-center",
                       initialContent?.alignment === "end" && "justify-end",
                     )}
                     id={id}
@@ -230,12 +231,15 @@ const PresentationEditor = React.memo(
                     initialContent.layoutType === "left" ||
                     initialContent.layoutType === "vertical";
 
-                  const firstPanelNode = isImageFirst ? rootImageNode : editorNode;
-                  const secondPanelNode = isImageFirst ? editorNode : rootImageNode;
+                  const firstPanelNode = isImageFirst
+                    ? rootImageNode
+                    : editorNode;
+                  const secondPanelNode = isImageFirst
+                    ? editorNode
+                    : rootImageNode;
 
-                  const defaultPercentages = initialContent.layoutPercentages || [
-                    50, 50,
-                  ];
+                  const defaultPercentages =
+                    initialContent.layoutPercentages || [50, 50];
 
                   return (
                     <ResizablePanelGroup

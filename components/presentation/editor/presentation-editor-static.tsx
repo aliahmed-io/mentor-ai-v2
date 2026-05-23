@@ -107,7 +107,12 @@ const PresentationEditorStaticView = React.memo(
           );
 
           const rootImageNode = initialContent?.rootImage ? (
-            <div className={cn("relative overflow-hidden", !isSplitLayout && "flex-1")}>
+            <div
+              className={cn(
+                "relative overflow-hidden",
+                !isSplitLayout && "flex-1",
+              )}
+            >
               <RootImageStatic
                 image={initialContent.rootImage}
                 layoutType={initialContent.layoutType}
@@ -127,18 +132,29 @@ const PresentationEditorStaticView = React.memo(
 
             const firstFlex = defaultPercentages[0];
             const secondFlex = defaultPercentages[1];
-            
+
             const firstPanelStyle = { flex: `${firstFlex} ${firstFlex} 0%` };
             const secondPanelStyle = { flex: `${secondFlex} ${secondFlex} 0%` };
 
             const isVertical = initialContent.layoutType === "vertical";
 
             return (
-              <div className={cn("flex h-full w-full", isVertical ? "flex-col" : "flex-row")}>
-                <div style={firstPanelStyle} className="h-full relative overflow-hidden">
+              <div
+                className={cn(
+                  "flex h-full w-full",
+                  isVertical ? "flex-col" : "flex-row",
+                )}
+              >
+                <div
+                  style={firstPanelStyle}
+                  className="h-full relative overflow-hidden"
+                >
                   {isImageFirst ? rootImageNode : editorNode}
                 </div>
-                <div style={secondPanelStyle} className="h-full relative overflow-hidden">
+                <div
+                  style={secondPanelStyle}
+                  className="h-full relative overflow-hidden"
+                >
                   {isImageFirst ? editorNode : rootImageNode}
                 </div>
               </div>

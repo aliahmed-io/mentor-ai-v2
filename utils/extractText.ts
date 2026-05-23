@@ -5,7 +5,7 @@ import fs from "node:fs";
 import AdmZip from "adm-zip";
 import { XMLParser } from "fast-xml-parser";
 import mammoth from "mammoth";
-import { PDFParse } from "pdf-parse";
+import pdfParse from "pdf-parse";
 import Tesseract from "tesseract.js";
 
 /**
@@ -22,11 +22,12 @@ export async function extractTextFromFile(filePath: string, mimeType?: string) {
     // PDF
     if (mimeType === "application/pdf" || lower.endsWith(".pdf")) {
       const buffer = fs.readFileSync(filePath);
-      const parser = new PDFParse({ data: buffer });
-      const data = await parser.getText();
-      if (typeof (parser as any).destroy === "function") {
-        await (parser as any).destroy();
-      }
+      // Handle CJS/ESM interop issues with pdf-parse
+      const parseFunction = typeof pdfParse === "function" 
+        ? pdfParse 
+        : (pdfParse as any).default ? (pdfParse as any).default : pdfParse;
+        
+      const data = await parseFunction(buffer);
       return data?.text ? data.text : "";
     }
 
