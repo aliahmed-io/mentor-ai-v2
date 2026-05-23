@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { getPresentation } from "@/app/_actions/presentation/presentationActions";
 import PresentationEditorStaticView from "@/components/presentation/editor/presentation-editor-static";
 import type { PlateSlide } from "@/components/presentation/utils/parser";
@@ -12,7 +12,7 @@ import {
   themes,
 } from "@/lib/presentation/themes";
 
-export default function ExportPresentationPage() {
+function ExportPresentationContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
   const [slides, setSlides] = useState<PlateSlide[]>([]);
@@ -57,13 +57,12 @@ export default function ExportPresentationPage() {
 
   useEffect(() => {
     if (themeData) {
-      setThemeVariables(themeData, false); // Default to light mode for print? Or pass it in. We'll use light.
+      setThemeVariables(themeData, false);
     }
   }, [themeData]);
 
   useEffect(() => {
     if (slides.length > 0 && !isLoading) {
-      // Trigger print automatically after a short delay to ensure images load
       const timer = setTimeout(() => {
         window.print();
       }, 1500);
@@ -154,5 +153,17 @@ export default function ExportPresentationPage() {
         ))}
       </div>
     </>
+  );
+}
+
+export default function ExportPresentationPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-screen w-screen items-center justify-center">
+        <p className="text-xl">Loading export environment...</p>
+      </div>
+    }>
+      <ExportPresentationContent />
+    </Suspense>
   );
 }

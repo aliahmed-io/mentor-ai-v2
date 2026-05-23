@@ -99,11 +99,7 @@ export default function QuizStudyPage({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           quizSetId: id,
-          percentage: r.percentage,
-          correct,
-          incorrect,
-          unanswered,
-          total,
+          userAnswers: Array.from(answers.entries()),
         }),
       });
     } catch {}

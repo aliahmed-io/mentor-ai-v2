@@ -24,9 +24,9 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Mentor-AI",
+  title: "Mentor-AI | Your Mindful Study Sanctuary",
   description:
-    "Mentor-AI – a unified study assistant by Ali Ahmed (hackathon project)",
+    "Mentor-AI – A unified ecosystem of intelligent study tools crafted with warmth. Unify your mind maps, slides, flashcards, and calendar events.",
 };
 
 export default function RootLayout({

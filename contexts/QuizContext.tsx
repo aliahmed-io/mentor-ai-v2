@@ -121,16 +121,18 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "COMPLETE_QUIZ" });
   };
 
-  const calculateResult = async () => {
-    const { questions, answers, setup } = state;
-
+  const calculateResult = async (
+    currentQuestions = state.questions,
+    currentAnswers = state.answers,
+    currentSetup = state.setup
+  ) => {
     let correctAnswers = 0;
     let incorrectAnswers = 0;
     let unanswered = 0;
     const quizAnswers = [];
 
-    for (const question of questions) {
-      const userAnswer = answers.get(question.id);
+    for (const question of currentQuestions) {
+      const userAnswer = currentAnswers.get(question.id);
       const isCorrect = userAnswer === question.correctAnswer;
 
       if (userAnswer === undefined) {
@@ -148,17 +150,17 @@ export function QuizProvider({ children }: { children: ReactNode }) {
       });
     }
 
-    const percentage = (correctAnswers / questions.length) * 100;
+    const percentage = (correctAnswers / currentQuestions.length) * 100;
 
     // Create basic result first
     const basicResult: QuizResult = {
-      totalQuestions: questions.length,
+      totalQuestions: currentQuestions.length,
       correctAnswers,
       incorrectAnswers,
       unanswered,
       percentage,
       answers: quizAnswers,
-      questions,
+      questions: currentQuestions,
       weakTopics: [],
       recommendations: [],
     };
@@ -166,9 +168,9 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "SET_RESULT", payload: basicResult });
 
     // Generate AI-powered analysis if setup is available
-    if (setup) {
+    if (currentSetup) {
       try {
-        const analysis = await analyzeQuizResults(basicResult, setup);
+        const analysis = await analyzeQuizResults(basicResult, currentSetup);
         const enhancedResult: QuizResult = {
           ...basicResult,
           weakTopics: analysis.weakTopics,
@@ -181,8 +183,8 @@ export function QuizProvider({ children }: { children: ReactNode }) {
         const topicCounts: Record<string, { correct: number; total: number }> =
           {};
 
-        for (const question of questions) {
-          const userAnswer = answers.get(question.id);
+        for (const question of currentQuestions) {
+          const userAnswer = currentAnswers.get(question.id);
           const isCorrect = userAnswer === question.correctAnswer;
 
           if (!topicCounts[question.topic]) {

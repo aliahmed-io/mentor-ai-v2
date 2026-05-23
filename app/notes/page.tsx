@@ -23,6 +23,7 @@ export default function NotesGeneratorPage() {
   const [documentText, setDocumentText] = useState("");
   const [topic, setTopic] = useState("");
   const [instructions, setInstructions] = useState("");
+  const [depth, setDepth] = useState<"short" | "normal" | "detailed">("normal");
   const [isGenerating, setIsGenerating] = useState(false);
   const [status, setStatus] = useState("");
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -46,7 +47,7 @@ export default function NotesGeneratorPage() {
       setIsTexFallback(false);
 
       // Phase 1: Generation
-      setStatus("Synthesizing AI Notes via Gemini 3.5 Flash...");
+      setStatus(`Synthesizing ${depth === "short" ? "concise" : depth === "detailed" ? "comprehensive" : "structured"} AI Notes via Gemini 2.5 Flash...`);
       const genRes = await fetch("/api/notes/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -54,6 +55,7 @@ export default function NotesGeneratorPage() {
           text: documentText,
           title: topic || "AI Notes",
           instructions: instructions,
+          depth,
         }),
       });
 
@@ -81,7 +83,6 @@ export default function NotesGeneratorPage() {
           setIsTexFallback(true);
           toast.warning("Compilation server is down. We've saved your notes as a .tex file instead. You can compile it locally or on Overleaf.");
           setStatus("");
-          setIsGenerating(false);
           return;
         }
 
@@ -154,9 +155,9 @@ export default function NotesGeneratorPage() {
           <div className="rounded-2xl border border-border/30 bg-card/30 backdrop-blur-md p-6 space-y-6 flex flex-col shadow-xl">
             <div className="flex items-center gap-2 border-b border-border/20 pb-3">
               <FileText className="h-5 w-5 text-primary" />
-              <h2 className="text-base font-bold uppercase tracking-wider text-foreground">
+              <p className="text-base font-bold uppercase tracking-wider text-foreground">
                 Knowledge Source
-              </h2>
+              </p>
             </div>
 
             <div className="space-y-3 flex-1">
@@ -183,6 +184,37 @@ export default function NotesGeneratorPage() {
                 placeholder="e.g., don't use icons, make it pink and girly, focus on definitions..."
                 disabled={isGenerating}
               />
+            </div>
+
+            {/* Depth / Length Selector */}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-muted-foreground">
+                Summary Depth
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {([
+                  { value: "short",    label: "Short",    sub: "Key ideas only" },
+                  { value: "normal",   label: "Normal",   sub: "Full coverage" },
+                  { value: "detailed", label: "Detailed",  sub: "Every detail" },
+                ] as const).map(({ value, label, sub }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    disabled={isGenerating}
+                    onClick={() => setDepth(value)}
+                    className={cn(
+                      "flex flex-col items-center justify-center rounded-xl border py-3 px-2 text-center transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
+                      depth === value
+                        ? "border-primary bg-primary/10 text-primary shadow-sm"
+                        : "border-border/40 bg-background/40 text-muted-foreground hover:border-primary/40 hover:bg-primary/5",
+                      isGenerating && "opacity-50 cursor-not-allowed"
+                    )}
+                  >
+                    <span className="text-xs font-bold">{label}</span>
+                    <span className="text-[10px] mt-0.5 opacity-70">{sub}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -252,6 +284,10 @@ export default function NotesGeneratorPage() {
                   onClick={() => {
                     setPdfUrl(null);
                     setDocumentText("");
+                    setTopic("");
+                    setInstructions("");
+                    setDepth("normal");
+                    setIsTexFallback(false);
                   }}
                   className="text-xs text-muted-foreground"
                 >

@@ -12,7 +12,12 @@ export async function POST(req: Request) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const tempPath = `${process.env.TEMP || process.env.TMP || "/tmp"}/${Date.now()}-${file.name}`;
+    
+    // Sanitize filename to prevent path traversal vulnerabilities
+    const ext = file.name.split('.').pop() || 'tmp';
+    const safeName = `${crypto.randomUUID()}.${ext.replace(/[^a-zA-Z0-9]/g, '')}`;
+    const tempPath = `${process.env.TEMP || process.env.TMP || "/tmp"}/${safeName}`;
+    
     fs.writeFileSync(tempPath, buffer);
 
     try {

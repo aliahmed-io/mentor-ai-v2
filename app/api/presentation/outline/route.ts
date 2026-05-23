@@ -90,7 +90,7 @@ export async function POST(req: Request) {
     let model;
     if (textModel === "openai" && openaiKey) {
       const openai = createOpenAI({ apiKey: openaiKey });
-      model = openai("gpt-5.5");
+      model = openai("gpt-4o-mini");
     } else if (textModel === "gemini" && geminiKey) {
       const google = createGoogleGenerativeAI({ apiKey: geminiKey });
       model = google("gemini-2.5-flash");
@@ -101,7 +101,7 @@ export async function POST(req: Request) {
     } else if (openaiKey) {
       // Fallback: OpenAI Key is present
       const openai = createOpenAI({ apiKey: openaiKey });
-      model = openai("gpt-5.5");
+      model = openai("gpt-4o-mini");
     } else {
       return NextResponse.json(
         {

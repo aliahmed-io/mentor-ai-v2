@@ -105,7 +105,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // ── Phase 1 + 2: Full Deck Parallel Generation ────────────
+    // ── Phase 1 + 2: Full Deck Parallel Generation (SSE Stream) ────────────
     if (mode === "deck") {
       if (!outline?.length) {
         return NextResponse.json(
@@ -128,12 +128,11 @@ export async function POST(req: Request) {
         `[generate/route] Phase 1 Complete. Orchestrated ${orchestration.length} slides.`,
       );
       console.log(
-        `[generate/route] Starting Phase 2: Parallel Slot Filling...`,
+        `[generate/route] Starting Phase 2: Parallel Slot Filling Stream...`,
       );
 
-      // Map into factory functions so they don't execute immediately
       const slideTasks = orchestration.map((blueprint, index) => {
-        const override = slideOverrides?.[(index + 1).toString()];
+        const override = slideOverrides?.[outline[index]];
         const finalTemplateId = override?.templateId || blueprint.templateId;
         const finalCreativeBrief = override?.customPrompt
           ? `${blueprint.creativeBrief}\nUSER INSTRUCTION: ${override.customPrompt}`
@@ -153,53 +152,89 @@ export async function POST(req: Request) {
           });
       });
 
-      // Process in batches of 3 to avoid hitting Gemini free tier rate limits (429)
-      const CONCURRENCY_LIMIT = 3;
-      const settledResults: PromiseSettledResult<any>[] = [];
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            // Send orchestration data first
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ type: "orchestration", data: orchestration })}\n\n`,
+              ),
+            );
 
-      for (let i = 0; i < slideTasks.length; i += CONCURRENCY_LIMIT) {
-        const batch = slideTasks.slice(i, i + CONCURRENCY_LIMIT);
-        console.log(
-          `[generate/route] Processing batch ${Math.floor(i / CONCURRENCY_LIMIT) + 1} (${batch.length} slides)...`,
-        );
+            const CONCURRENCY_LIMIT = 3;
+            for (let i = 0; i < slideTasks.length; i += CONCURRENCY_LIMIT) {
+              const batchIndices = Array.from(
+                { length: Math.min(CONCURRENCY_LIMIT, slideTasks.length - i) },
+                (_, k) => i + k,
+              );
 
-        const results = await Promise.allSettled(batch.map((task) => task()));
-        settledResults.push(...results);
+              console.log(
+                `[generate/route] Processing batch ${Math.floor(i / CONCURRENCY_LIMIT) + 1} (${batchIndices.length} slides)...`,
+              );
 
-        // Small delay between batches to respect RPM limits
-        if (i + CONCURRENCY_LIMIT < slideTasks.length) {
-          await new Promise((r) => setTimeout(r, 2000));
-        }
-      }
+              await Promise.all(
+                batchIndices.map(async (index) => {
+                  const task = slideTasks[index];
+                  try {
+                    const result = await task();
+                    const slideLayout =
+                      layout ?? (index % 2 === 0 ? "left" : "right");
+                    const slideData = {
+                      ...result,
+                      slideIndex: index,
+                      layoutPercentages: orchestration[index].layoutPercentages,
+                      xml: generatedSlideToXml(result, slideLayout),
+                    };
+                    controller.enqueue(
+                      encoder.encode(
+                        `data: ${JSON.stringify({ type: "slide", data: slideData })}\n\n`,
+                      ),
+                    );
+                  } catch (error) {
+                    console.error(
+                      `[generate/route] Slide ${index + 1} generation failed:`,
+                      error,
+                    );
+                    const errorSlide = {
+                      templateId: orchestration[index].templateId,
+                      slideIndex: index,
+                      slots: [],
+                      error: "Generation failed",
+                      xml: `<SECTION layout="left"><H2>Error</H2><P>Generation failed for this slide.</P></SECTION>`,
+                    };
+                    controller.enqueue(
+                      encoder.encode(
+                        `data: ${JSON.stringify({ type: "slide", data: errorSlide })}\n\n`,
+                      ),
+                    );
+                  }
+                }),
+              );
 
-      const slides = settledResults.map((res, index) => {
-        if (res.status === "fulfilled") {
-          const slideLayout = layout ?? (index % 2 === 0 ? "left" : "right");
-          return {
-            ...res.value,
-            slideIndex: index,
-            layoutPercentages: orchestration[index].layoutPercentages,
-            xml: generatedSlideToXml(res.value, slideLayout),
-          };
-        } else {
-          console.error(
-            `[generate/route] Slide ${index + 1} generation failed:`,
-            res.reason,
-          );
-          // Return a fallback blank slide matching the template if generation fails
-          return {
-            templateId: orchestration[index].templateId,
-            slideIndex: index,
-            slots: [],
-            error: "Generation failed",
-            xml: `<SECTION layout="left"><H2>Error</H2><P>Generation failed for this slide.</P></SECTION>`,
-          };
-        }
+              if (i + CONCURRENCY_LIMIT < slideTasks.length) {
+                await new Promise((r) => setTimeout(r, 2000));
+              }
+            }
+
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify({ type: "done" })}\n\n`),
+            );
+            controller.close();
+          } catch (err) {
+            console.error("Stream error:", err);
+            controller.error(err);
+          }
+        },
       });
 
-      return NextResponse.json({
-        slides,
-        orchestration,
+      return new Response(stream, {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          "Connection": "keep-alive",
+        },
       });
     }
 

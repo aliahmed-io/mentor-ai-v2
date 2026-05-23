@@ -172,11 +172,11 @@ export default function QuizResults({
                         <div className="flex items-start gap-3">
                           <div className="mt-1">
                             {!wasAnswered ? (
-                              <AlertCircle className="h-5 w-5 text-muted-foreground" />
+                              <AlertCircle className="h-5 w-5 text-amber-500" />
                             ) : isCorrect ? (
-                              <CheckCircle className="h-5 w-5 text-muted-foreground" />
+                              <CheckCircle className="h-5 w-5 text-emerald-500" />
                             ) : (
-                              <XCircle className="h-5 w-5 text-muted-foreground" />
+                              <XCircle className="h-5 w-5 text-destructive" />
                             )}
                           </div>
                           <div className="flex-1">
@@ -226,7 +226,36 @@ export default function QuizResults({
           </motion.div>
         </div>
 
-        {/* Recommendations removed by request */}
+        {/* Recommendations Section */}
+        {result.recommendations && result.recommendations.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-8"
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="w-6 h-6" />
+                  Study Recommendations
+                </CardTitle>
+                <CardDescription>
+                  Personalized advice to improve your score
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="list-disc pl-5 space-y-2">
+                  {result.recommendations.map((rec, i) => (
+                    <li key={i} className="text-muted-foreground">
+                      {rec}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
       </div>
     </div>
   );

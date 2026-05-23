@@ -6,9 +6,18 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await params;
   const doc = await db.chatDocument.findUnique({ where: { id } });
+  
   if (!doc) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (doc.userId !== session.user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
   return NextResponse.json({
     id: doc.id,
     title: doc.title,

@@ -148,6 +148,70 @@ export function RecentFlashcardsPanel() {
 
   if (sets.length === 0) return null;
 
+  const renderSetCard = (s: FlashSet) => (
+    <Card
+      key={s.id}
+      className="group relative overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+    >
+      {(s as any).thumbnailUrl ? (
+        <Link href={`/flashcard/${s.id}`} className="relative aspect-video">
+          <Image
+            src={(s as any).thumbnailUrl}
+            alt={s.topic || "Flashcards"}
+            fill
+            className="object-cover"
+          />
+        </Link>
+      ) : (
+        <Link href={`/flashcard/${s.id}`} className="relative aspect-video bg-muted">
+          <div className="flex h-full w-full items-center justify-center">
+            <BookOpen className="h-10 w-10 text-primary/60" />
+          </div>
+        </Link>
+      )}
+      <CardContent className="p-0">
+        <Link href={`/flashcard/${s.id}`} className="flex flex-col space-y-2 p-4">
+          <h3 className="line-clamp-1 text-lg font-semibold text-foreground">
+            {s.topic || "Untitled"}
+          </h3>
+          <div className="flex items-center text-xs text-muted-foreground">
+            <Calendar className="mr-1 h-3.5 w-3.5" />
+            {formatDate(s.createdAt)}
+          </div>
+        </Link>
+      </CardContent>
+      <div className="absolute right-2 top-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onClick={() => rename(s.id, s.topic)} className="cursor-pointer">
+              <Pencil className="mr-2 h-4 w-4" />
+              Rename
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                setSelectedId(s.id);
+                setDeleteOpen(true);
+              }}
+              className="cursor-pointer text-destructive"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </Card>
+  );
+
   return (
     <aside className="space-y-8">
       <div className="flex items-center justify-between">
@@ -174,81 +238,7 @@ export function RecentFlashcardsPanel() {
             </SheetHeader>
             <div className="mt-4 max-h-[70vh] overflow-y-auto">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {sets.map((s) => (
-                  <Card
-                    key={s.id}
-                    className="group relative overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
-                  >
-                    {(s as any).thumbnailUrl ? (
-                      <Link
-                        href={`/flashcard/${s.id}`}
-                        className="relative aspect-video"
-                      >
-                        <Image
-                          src={(s as any).thumbnailUrl}
-                          alt={s.topic || "Flashcards"}
-                          fill
-                          className="object-cover"
-                        />
-                      </Link>
-                    ) : (
-                      <Link
-                        href={`/flashcard/${s.id}`}
-                        className="relative aspect-video bg-muted"
-                      >
-                        <div className="flex h-full w-full items-center justify-center">
-                          <BookOpen className="h-10 w-10 text-primary/60" />
-                        </div>
-                      </Link>
-                    )}
-                    <CardContent className="p-0">
-                      <Link
-                        href={`/flashcard/${s.id}`}
-                        className="flex flex-col space-y-2 p-4"
-                      >
-                        <h3 className="line-clamp-1 text-lg font-semibold text-foreground">
-                          {s.topic || "Untitled"}
-                        </h3>
-                        <div className="flex items-center text-xs text-muted-foreground">
-                          <Calendar className="mr-1 h-3.5 w-3.5" />
-                          {formatDate(s.createdAt)}
-                        </div>
-                      </Link>
-                    </CardContent>
-                    <div className="absolute right-2 top-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm"
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuItem
-                            onClick={() => rename(s.id, s.topic)}
-                            className="cursor-pointer"
-                          >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Rename
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedId(s.id);
-                              setDeleteOpen(true);
-                            }}
-                            className="cursor-pointer text-destructive"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </Card>
-                ))}
+                {sets.map((s) => renderSetCard(s))}
               </div>
             </div>
           </SheetContent>
@@ -256,81 +246,7 @@ export function RecentFlashcardsPanel() {
       </div>
 
       <div className="grid grid-cols-1 gap-4">
-        {sets.slice(0, 3).map((s) => (
-          <Card
-            key={s.id}
-            className="group relative overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
-          >
-            {(s as any).thumbnailUrl ? (
-              <Link
-                href={`/flashcard/${s.id}`}
-                className="relative aspect-video"
-              >
-                <Image
-                  src={(s as any).thumbnailUrl}
-                  alt={s.topic || "Flashcards"}
-                  fill
-                  className="object-cover"
-                />
-              </Link>
-            ) : (
-              <Link
-                href={`/flashcard/${s.id}`}
-                className="relative aspect-video bg-muted"
-              >
-                <div className="flex h-full w-full items-center justify-center">
-                  <BookOpen className="h-10 w-10 text-primary/60" />
-                </div>
-              </Link>
-            )}
-            <CardContent className="p-0">
-              <Link
-                href={`/flashcard/${s.id}`}
-                className="flex flex-col space-y-2 p-4"
-              >
-                <h3 className="line-clamp-1 text-lg font-semibold text-foreground">
-                  {s.topic || "Untitled"}
-                </h3>
-                <div className="flex items-center text-xs text-muted-foreground">
-                  <Calendar className="mr-1 h-3.5 w-3.5" />
-                  {formatDate(s.createdAt)}
-                </div>
-              </Link>
-            </CardContent>
-            <div className="absolute right-2 top-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem
-                    onClick={() => rename(s.id, s.topic)}
-                    className="cursor-pointer"
-                  >
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Rename
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setSelectedId(s.id);
-                      setDeleteOpen(true);
-                    }}
-                    className="cursor-pointer text-destructive"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </Card>
-        ))}
+        {sets.slice(0, 3).map((s) => renderSetCard(s))}
       </div>
 
       {deleteOpen && (

@@ -29,7 +29,7 @@ export const OutlineItem = memo(function OutlineItem({
   const { slideOverrides, setSlideOverride } = usePresentationState();
   const [isSavingRewrite, setIsSavingRewrite] = useState(false);
 
-  const override = slideOverrides[id] || {};
+  const override = slideOverrides[title] || {};
 
   const TEMPLATES = [
     { id: "", label: "Auto (Let AI decide)" },
@@ -180,7 +180,10 @@ export const OutlineItem = memo(function OutlineItem({
             className="bg-transparent outline-none cursor-pointer text-xs"
             value={override.templateId || ""}
             onChange={(e) =>
-              setSlideOverride(id, { templateId: e.target.value })
+              setSlideOverride(title, {
+                ...override,
+                templateId: e.target.value,
+              })
             }
           >
             {TEMPLATES.map((t) => (

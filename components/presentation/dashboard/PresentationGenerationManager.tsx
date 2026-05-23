@@ -426,54 +426,81 @@ export function PresentationGenerationManager() {
         signal,
       });
 
-      if (!response.ok) {
-        const err = (await response.json()) as { error?: string };
+      if (!response.ok || !response.body) {
+        const err = (await response.json().catch(() => ({}))) as { error?: string };
         throw new Error(err.error ?? `Deck generation failed`);
       }
 
-      const { slides: generatedSlides } = (await response.json()) as {
-        slides: Array<{ xml: string }>;
-        orchestration: any[];
-      };
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n\n');
+        buffer = lines.pop() || "";
+        
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const dataStr = line.slice(6);
+            if (!dataStr.trim()) continue;
+            
+            try {
+              const event = JSON.parse(dataStr);
+              
+              if (event.type === "orchestration") {
+                // We could do something with orchestration if needed, but not required right now.
+                console.log("[generateSlidesSequentially] Orchestration received:", event.data);
+              } else if (event.type === "slide") {
+                if (signal.aborted) break;
+                const { xml } = event.data;
+                const wrapped = xml.includes("<PRESENTATION")
+                  ? xml
+                  : `<PRESENTATION>${xml}</PRESENTATION>`;
 
-      for (let i = 0; i < generatedSlides.length; i++) {
-        if (signal.aborted) break;
-        const { xml } = generatedSlides[i];
-        const wrapped = xml.includes("<PRESENTATION")
-          ? xml
-          : `<PRESENTATION>${xml}</PRESENTATION>`;
+                const parser = new SlideParser();
+                parser.parseChunk(wrapped);
+                parser.finalize();
+                const parsed = parser.getAllSlides();
+                const newSlide = parsed[parsed.length - 1] ?? parsed[0];
+                if (newSlide) {
+                  accumulatedSlides.push(newSlide);
+                  const merged = mergeRootImagesIntoSlides([...accumulatedSlides]);
+                  const {
+                    theme: activeTheme,
+                    customThemeData,
+                    presentationColorMode,
+                    config,
+                  } = usePresentationState.getState();
+                  const typography = config.typography as
+                    | { heading?: string; body?: string }
+                    | undefined;
+                  
+                  setSlides(
+                    bakeThemeIntoSlides(
+                      merged,
+                      typeof activeTheme === "string" ? activeTheme : "mystique",
+                      presentationColorMode,
+                      customThemeData,
+                      typography,
+                    ),
+                  );
 
-        const parser = new SlideParser();
-        parser.parseChunk(wrapped);
-        parser.finalize();
-        const parsed = parser.getAllSlides();
-        const newSlide = parsed[parsed.length - 1] ?? parsed[0];
-        if (newSlide) {
-          accumulatedSlides.push(newSlide);
-          const merged = mergeRootImagesIntoSlides([...accumulatedSlides]);
-          const {
-            theme: activeTheme,
-            customThemeData,
-            presentationColorMode,
-            config,
-          } = usePresentationState.getState();
-          const typography = config.typography as
-            | { heading?: string; body?: string }
-            | undefined;
-          setSlides(
-            bakeThemeIntoSlides(
-              merged,
-              typeof activeTheme === "string" ? activeTheme : "mystique",
-              presentationColorMode,
-              customThemeData,
-              typography,
-            ),
-          );
-
-          usePresentationState.getState().setGenerationProgress({
-            current: i + 1,
-            total: activeOutline.length,
-          });
+                  usePresentationState.getState().setGenerationProgress({
+                    current: accumulatedSlides.length,
+                    total: activeOutline.length,
+                  });
+                }
+              } else if (event.type === "done") {
+                console.log("[generateSlidesSequentially] Streaming complete.");
+              }
+            } catch (err) {
+              console.error("Error parsing SSE data:", err);
+            }
+          }
         }
       }
 
@@ -622,8 +649,10 @@ export function PresentationGenerationManager() {
 
   // 3. Sequential UDG Queue Worker Effect: consumes imageQueue serial item by serial item
   useEffect(() => {
+    let isMounted = true;
+
     const processQueue = async () => {
-      if (isQueueWorkerBusy.current) return;
+      if (!isMounted || isQueueWorkerBusy.current) return;
 
       const { imageQueue: currentQueue, popImageFromQueue } =
         usePresentationState.getState();
@@ -738,14 +767,20 @@ export function PresentationGenerationManager() {
         queuedSlideIds.current.delete(slideId);
         isQueueWorkerBusy.current = false;
 
-        // Brief timeout to avoid starvation and ensure React updates states
-        setTimeout(() => {
-          void processQueue();
-        }, 100);
+        if (isMounted) {
+          // Brief timeout to avoid starvation and ensure React updates states
+          setTimeout(() => {
+            void processQueue();
+          }, 100);
+        }
       }
     };
 
     void processQueue();
+
+    return () => {
+      isMounted = false;
+    };
   }, [
     imageQueue,
     completeRootImageGeneration,
@@ -760,6 +795,8 @@ export function PresentationGenerationManager() {
         cancelAnimationFrame(outlineRafIdRef.current);
         outlineRafIdRef.current = null;
       }
+      // Synchronously flush autosave on unmount
+      debouncedStreamSaveRef.current.flush();
     };
   }, []);
 

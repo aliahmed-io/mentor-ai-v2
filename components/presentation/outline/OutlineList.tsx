@@ -29,9 +29,11 @@ export function OutlineList() {
     outline: initialItems,
     setOutline,
     numSlides,
-    isGeneratingOutline,
     webSearchEnabled,
     outlineThinking,
+    slideOverrides,
+    setSlideOverride,
+    isGeneratingOutline,
   } = usePresentationState();
 
   const [items, setItems] = useState<OutlineItemType[]>(
@@ -77,6 +79,14 @@ export function OutlineList() {
   const handleTitleChange = useCallback(
     (id: string, newTitle: string) => {
       setItems((prevItems) => {
+        const itemToChange = prevItems.find((item) => item.id === id);
+        if (itemToChange && slideOverrides[itemToChange.title]) {
+          // Migrate the override to the new title key
+          const existingOverride = slideOverrides[itemToChange.title];
+          setSlideOverride(newTitle, existingOverride);
+          // Optional: we don't strictly need to delete the old key, but we could
+        }
+
         const newItems = prevItems.map((item) =>
           item.id === id ? { ...item, title: newTitle } : item,
         );
@@ -84,7 +94,7 @@ export function OutlineList() {
         return newItems;
       });
     },
-    [setOutline],
+    [setOutline, slideOverrides, setSlideOverride],
   );
 
   const handleAddCard = useCallback(() => {

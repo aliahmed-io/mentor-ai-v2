@@ -11,8 +11,11 @@ export async function GET(request: NextRequest) {
   );
   const anyDb = db as any;
   try {
+    if (!session?.user?.id) {
+      return NextResponse.json([]);
+    }
     const sets = await anyDb.quizSet.findMany({
-      where: session?.user?.id ? { userId: session.user.id } : {},
+      where: { userId: session.user.id },
       orderBy: { createdAt: "desc" },
       take: limit,
       select: {
@@ -26,8 +29,11 @@ export async function GET(request: NextRequest) {
     });
     return NextResponse.json(sets);
   } catch {
+    if (!session?.user?.id) {
+      return NextResponse.json([]);
+    }
     const sets = await anyDb.quizSet.findMany({
-      where: session?.user?.id ? { userId: session.user.id } : {},
+      where: { userId: session.user.id },
       orderBy: { createdAt: "desc" },
       take: limit,
       select: {

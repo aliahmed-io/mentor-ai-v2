@@ -18,12 +18,19 @@ Keep responses concise and readable.`;
 export async function POST(req: Request) {
   try {
     const { sessionId, message } = (await req.json()) as ChatBody;
-    if (!sessionId || !message || !message.trim()) {
+    if (
+      !sessionId ||
+      !message ||
+      typeof message !== "string" ||
+      !message.trim()
+    ) {
       return NextResponse.json(
-        { error: "Missing sessionId or message" },
+        { error: "Missing or invalid sessionId or message" },
         { status: 400 },
       );
     }
+
+    const sanitizedMessage = message.trim().slice(0, 5000);
 
     const session = await auth();
 
@@ -42,7 +49,7 @@ export async function POST(req: Request) {
       data: {
         sessionId: chatSession.id,
         role: "user",
-        content: message.trim(),
+        content: sanitizedMessage,
       },
     });
 

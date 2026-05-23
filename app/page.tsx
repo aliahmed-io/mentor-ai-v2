@@ -363,11 +363,13 @@ export default function Home() {
                     type="text"
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
-                    placeholder="Type: 'cell division' or 'study plan'..."
+                    placeholder="Demo Mode: Type 'cell division'..."
+                    aria-label="Demo Chat Input"
                     className="flex-1 text-xs bg-white border border-border rounded-full px-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-primary text-foreground"
                   />
                   <button
                     type="submit"
+                    aria-label="Send Demo Message"
                     className="size-8 rounded-full bg-primary hover:bg-primary/90 flex items-center justify-center text-primary-foreground transition-transform duration-100 active:scale-95 shadow-sm shrink-0"
                   >
                     <Send className="size-3.5" />
@@ -397,6 +399,7 @@ export default function Home() {
                       <button
                         key={tab.key}
                         onClick={() => setActiveTopic(tab.key)}
+                        aria-label={tab.label}
                         className={cn(
                           "flex-1 text-[10px] font-bold py-1.5 rounded-full transition-all duration-300",
                           activeTopic === tab.key
@@ -458,6 +461,7 @@ export default function Home() {
                   <div className="flex gap-2">
                     <button
                       onClick={toggleTimer}
+                      aria-label={timerRunning ? "Pause timer" : "Start timer"}
                       className="p-2 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-transform duration-100 active:scale-95"
                     >
                       {timerRunning ? (
@@ -468,6 +472,7 @@ export default function Home() {
                     </button>
                     <button
                       onClick={resetTimer}
+                      aria-label="Reset timer"
                       className="p-2 rounded-full bg-white hover:bg-secondary border border-border text-muted-foreground transition-transform duration-100 active:scale-95"
                     >
                       <RotateCcw className="size-3.5" />
@@ -502,6 +507,7 @@ export default function Home() {
                     {!flashcardFlipped ? (
                       <button
                         onClick={() => setFlashcardFlipped(true)}
+                        aria-label="Reveal Answer"
                         className="w-full py-2 text-[10px] font-bold bg-secondary hover:bg-secondary/70 text-foreground rounded-xl border border-border/55 transition-all"
                       >
                         Reveal Answer
@@ -510,12 +516,14 @@ export default function Home() {
                       <div className="flex gap-1.5">
                         <button
                           onClick={() => handleScoreResponse(2)}
+                          aria-label="Mark as easy"
                           className="flex-1 py-1.5 text-[9px] font-bold bg-primary text-primary-foreground rounded-lg shadow-sm"
                         >
                           Easy (+2)
                         </button>
                         <button
                           onClick={() => handleScoreResponse(-3)}
+                          aria-label="Mark as hard"
                           className="flex-1 py-1.5 text-[9px] font-bold bg-secondary text-muted-foreground rounded-lg border border-border"
                         >
                           Hard (-3)
@@ -676,7 +684,7 @@ export default function Home() {
       {/* Editorial Footer */}
       <footer className="py-12 border-t border-border px-6 text-center text-xs text-muted-foreground space-y-4 max-w-6xl mx-auto">
         <p className="font-light">
-          © 2026 Mentor AI Workspace. Crafted with absolute warmth by Ali Ahmed.
+          © {new Date().getFullYear()} Mentor AI Workspace. Crafted with absolute warmth by Ali Ahmed.
         </p>
         <div className="flex items-center justify-center gap-6 font-bold">
           <a href="#" className="hover:underline">

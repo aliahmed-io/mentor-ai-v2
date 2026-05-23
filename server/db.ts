@@ -44,13 +44,15 @@ export async function withDbRetry<T>(
         msg.includes("Can't reach database server") ||
         msg.includes("connection pool") ||
         code === "P1001" || // Can't reach database server
-        code === "P2024"; // Connection pool timeout
+        code === "P2024" || // Connection pool timeout
+        code === "P2034"; // Transaction failed due to a write conflict or a deadlock
       if (!isTransient || attempt === retries) {
         throw err;
       }
       lastError = err;
-      // Exponential backoff before retry
-      await new Promise((r) => setTimeout(r, delayMs * 2 ** attempt));
+      // Exponential backoff before retry with jitter to prevent thundering herd/starvation
+      const jitter = Math.random() * 100;
+      await new Promise((r) => setTimeout(r, delayMs * 2 ** attempt + jitter));
     }
   }
   throw lastError as Error;

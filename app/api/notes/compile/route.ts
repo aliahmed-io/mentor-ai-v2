@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     clearTimeout(timeoutId);
 
     const contentType = response.headers.get("content-type");
-    if (!response.ok || contentType !== "application/pdf") {
+    if (!response.ok || !contentType?.startsWith("application/pdf")) {
       if (response.status >= 500) {
         return NextResponse.json(
           { error: "Compilation service unavailable", details: "The public latex compilation server is currently down." },

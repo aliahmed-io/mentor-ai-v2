@@ -5,9 +5,64 @@ import { resolvePresentationModel } from "@/lib/presentation/generate-model";
 
 export const maxDuration = 60; // 60 seconds
 
+/**
+ * Programmatic auto-fixer: repairs the most common AI layout violations
+ * without triggering a costly AI retry. Applied to every generation.
+ */
+function autoFixLatex(latex: string): string {
+  let fixed = latex;
+
+  // 1. Remove markdown fences (belt-and-suspenders, also done later)
+  fixed = fixed.replace(/^```(latex)?\s*/gm, "").replace(/^```\s*$/gm, "").trim();
+
+  // 2. Replace bare \begin{tabular}{cols} with \begin{tabularx}{\textwidth}{cols}
+  //    and swap fixed-width p{} columns → X so text wraps.
+  fixed = fixed.replace(
+    /\\begin\{tabular\}(\{[^}]*\})/g,
+    (_match, cols) => {
+      const fixedCols = cols.replace(/p\{[^}]*\}/g, "X").replace(/l(?=[^l}])/g, "X");
+      return `\\begin{tabularx}{\\textwidth}${fixedCols}`;
+    }
+  );
+  fixed = fixed.replace(/\\end\{tabular\}/g, "\\end{tabularx}");
+
+  // 3. Replace \begin{tabularx}{<not \textwidth>}{...} → force \textwidth
+  fixed = fixed.replace(
+    /\\begin\{tabularx\}\{(?!\\textwidth)[^}]*\}/g,
+    "\\begin{tabularx}{\\textwidth}"
+  );
+
+  // 4. In tabularx col specs, replace p{...} with X for wrapping
+  fixed = fixed.replace(
+    /(\\begin\{tabularx\}\{[^}]*\}\{)([^}]*)(\})/g,
+    (_m, open, cols, close) => `${open}${cols.replace(/p\{[^}]*\}/g, "X")}${close}`
+  );
+
+  // 5. Remove multicols/multicol environments — wrap content inline
+  fixed = fixed.replace(/\\begin\{multicols\}\{[^}]*\}/g, "");
+  fixed = fixed.replace(/\\end\{multicols\}/g, "");
+  fixed = fixed.replace(/\\begin\{multicol\}\{[^}]*\}/g, "");
+  fixed = fixed.replace(/\\end\{multicol\}/g, "");
+  fixed = fixed.replace(/\\columnbreak/g, "");
+
+  // 6. Collapse minipage side-by-side blocks into sequential vertical content.
+  //    Pattern: \begin{minipage}{...} ... \end{minipage}
+  fixed = fixed.replace(/\\begin\{minipage\}\{[^}]*\}/g, "");
+  fixed = fixed.replace(/\\end\{minipage\}/g, "\\vspace{0.5em}");
+
+  // 7. Remove wrapfigure environments (keep the inner content)
+  fixed = fixed.replace(/\\begin\{wrapfigure\}\{[^}]*\}\{[^}]*\}/g, "");
+  fixed = fixed.replace(/\\end\{wrapfigure\}/g, "");
+
+  // 8. Remove \resizebox wrappers — strip them, keep inner content
+  fixed = fixed.replace(/\\resizebox\{[^}]*\}\{[^}]*\}\{/g, "");
+
+  return fixed;
+}
+
 function validateLatexLayout(latex: string): string[] {
   const errors: string[] = [];
-  
+
   if (latex.includes("\\begin{minipage}")) {
     errors.push("Do NOT use \\begin{minipage}. It causes side-by-side layout issues and page overflows.");
   }
@@ -20,13 +75,24 @@ function validateLatexLayout(latex: string): string[] {
   if (latex.includes("\\begin{wrapfigure}")) {
     errors.push("Do NOT use \\begin{wrapfigure}. It causes text wrapping overflow.");
   }
-  
+  if (/\\begin\{multicols?\}/.test(latex)) {
+    errors.push("Do NOT use \\begin{multicols}. Multi-column layouts cause text to flow off the right edge of the page. All content must flow in a single vertical column.");
+  }
+
   // Check if tabularx is used but missing an X column
-  const tabularxRegex = /\\begin\{tabularx\}\{[^\}]*\}\{([^}]*)\}/g;
+  const tabularxRegex = /\\begin\{tabularx\}\{[^}]*\}\{([^}]*)\}/g;
   let match;
   while ((match = tabularxRegex.exec(latex)) !== null) {
     if (!match[1].includes("X")) {
       errors.push(`Found a tabularx environment with column specifier {${match[1]}} that is missing an 'X' column. You MUST use at least one 'X' column so the text wraps properly.`);
+    }
+  }
+
+  // Check tabularx width is \textwidth
+  const tabularxWidthRegex = /\\begin\{tabularx\}\{([^}]*)\}/g;
+  while ((match = tabularxWidthRegex.exec(latex)) !== null) {
+    if (!match[1].includes("\\textwidth")) {
+      errors.push(`Found a tabularx with non-\\textwidth width '{${match[1]}}'. Tables MUST use \\begin{tabularx}{\\textwidth}{...} to stay within page bounds.`);
     }
   }
 
@@ -45,8 +111,11 @@ CRITICAL INSTRUCTIONS:
 7. CRITICAL TABLE RULE: For any tables, you MUST use \\begin{tabularx}{\\textwidth}{...} so they do not overflow the page bounds. You MUST use the 'X' column specifier for any columns containing descriptions, definitions, or paragraph text so the text wraps properly. NEVER use 'l', 'c', or 'r' for long text columns.
 
 COMMON MISTAKES TO AVOID (FATAL ERRORS):
-- NEVER use \\begin{minipage} or \\begin{wrapfigure}. Side-by-side layouts destroy page margins. All content must flow vertically.
+- NEVER use \\begin{minipage} or \\begin{wrapfigure}. Side-by-side layouts destroy page margins. All content must flow in a single vertical column.
+- NEVER use \\begin{multicols} or \\begin{multicol}. Multi-column newspaper-style layouts cause content to overflow the right edge of the page and get cut off.
 - NEVER use standard \\begin{tabular} or \\resizebox for tables. Always use \\begin{tabularx}{\\textwidth} with X columns for wrapping.
+- NEVER set a tabularx width to anything other than \\textwidth (e.g. do NOT write \\begin{tabularx}{0.5\\textwidth}). ALL tables must span the full \\textwidth.
+- NEVER use p{} column specifiers in tables. Always use X (from tabularx) for any column that contains more than a few words.
 - NEVER invent or use LaTeX packages or commands that are not explicitly defined in the provided preamble. Doing so will crash the compiler.
 - NEVER output markdown formatting (like \`\`\`latex). Output raw LaTeX code only.
 
@@ -131,9 +200,32 @@ Example Concept & This is a detailed explanation that will properly wrap inside 
 \\end{document}
 `;
 
+const DEPTH_INSTRUCTIONS: Record<string, string> = {
+  short: `DEPTH MODE: SHORT — Produce a high-signal summary only. Include:
+- A bullet list of the core key ideas and takeaways from each section (one line each).
+- A definition table for every domain-specific term or concept that appears in the source.
+- Nothing else. Omit examples, elaborations, and secondary points.
+- Target length: roughly 1–2 pages.
+- STRICT RULE: Every word you write must come directly from the source document. Do not infer, extrapolate, or add context that is not explicitly present in the provided text.`,
+
+  normal: `DEPTH MODE: NORMAL — Produce a well-structured study guide. Include:
+- All core ideas with a concise explanation of each (2–4 sentences per concept).
+- Definition tables for key terms.
+- A dedicated subsection titled "Likely Exam / Quiz Topics" at the end of each major section, listing the specific facts, mechanisms, or distinctions most likely to be tested.
+- Omit tangential asides, but keep all named models, frameworks, and processes.
+- STRICT RULE: Every word you write must come directly from the source document. Do not infer, extrapolate, or add context that is not explicitly present in the provided text.`,
+
+  detailed: `DEPTH MODE: DETAILED — Produce a comprehensive reformatted reference document. Include:
+- Every named concept, argument, example, model, statistic, and process found in the source.
+- Full explanations as they appear in the source — condense only truly redundant sentences (identical meaning stated multiple times); write each unique idea exactly once.
+- Preserve the exact wording of definitions, formulae, and proper nouns.
+- The output should feel like a clean, structured rewrite of the entire source, not a summary.
+- STRICT RULE: Every word you write must come directly from the source document. Do not infer, extrapolate, or add context that is not explicitly present in the provided text.`,
+};
+
 export async function POST(req: Request) {
   try {
-    const { text, title, instructions } = await req.json();
+    const { text, title, instructions, depth = "normal" } = await req.json();
 
     if (!text) {
       return NextResponse.json({ error: "No text provided" }, { status: 400 });
@@ -142,7 +234,7 @@ export async function POST(req: Request) {
     const cookieStore = await cookies();
     const customApiKey = cookieStore.get("google_gemini_api_key")?.value;
 
-    // Use quality tier (Gemini 1.5 Flash by default now to ensure validity)
+    // Use quality tier — resolves to Gemini 2.5 Flash
     const model = resolvePresentationModel("quality", {
       geminiKey: customApiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY,
     });
@@ -154,7 +246,9 @@ export async function POST(req: Request) {
       );
     }
 
-    let currentPrompt = `Generate comprehensive, visually appealing LaTeX notes for the following text. The title should be loosely based on "${title}".\n\n`;
+    const depthInstruction = DEPTH_INSTRUCTIONS[depth] ?? DEPTH_INSTRUCTIONS.normal;
+
+    let currentPrompt = `${depthInstruction}\n\nGenerate comprehensive, visually appealing LaTeX notes for the following text. The title should be loosely based on "${title}".\n\n`;
     if (instructions?.trim()) {
       currentPrompt += `USER SPECIFIC INSTRUCTIONS:\n${instructions}\n\n`;
     }
@@ -195,13 +289,10 @@ export async function POST(req: Request) {
         temperature: 0.3, // Low temp for structured, academic output
       });
 
-      // Clean markdown block wrappers if present
-      cleanedLatex = latexContent
-        .replace(/^```(latex)?/gm, "")
-        .replace(/```$/gm, "")
-        .trim();
+      // 1. Auto-fix common structural violations programmatically before any validation
+      cleanedLatex = autoFixLatex(latexContent);
 
-      // 1. Programmatic Structural Validation
+      // Step 2: Programmatic structural validation (after auto-fix)
       const structuralErrors = validateLatexLayout(cleanedLatex);
       if (structuralErrors.length > 0) {
         const errString = structuralErrors.map(e => "- " + e).join("\n");
@@ -223,7 +314,7 @@ export async function POST(req: Request) {
         continue; // Skip compilation and trigger AI retry immediately
       }
 
-      // 2. Test compilation
+      // Step 3: Test compilation against texlive.net
       const formData = new FormData();
       formData.append("filecontents[]", cleanedLatex);
       formData.append("filename[]", "document.tex");
@@ -292,7 +383,7 @@ export async function POST(req: Request) {
     if (!success) {
       console.error("Failed to generate compilable LaTeX after max attempts.");
       return NextResponse.json(
-        { error: "Failed to generate valid LaTeX after 3 attempts. The AI was unable to fix formatting errors.", details: compilationError },
+        { error: "Failed to generate valid LaTeX after multiple attempts. The AI was unable to fix the formatting errors.", details: compilationError },
         { status: 500 }
       );
     }

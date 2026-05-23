@@ -46,7 +46,7 @@ export default function FlashcardStudyPage() {
 
   useEffect(() => {
     setShowBack(false);
-  }, []);
+  }, [index]);
 
   const progress = useMemo(() => {
     if (!cards || cards.length === 0) return 0;
@@ -109,30 +109,69 @@ export default function FlashcardStudyPage() {
         <div className="text-xs text-muted-foreground">Progress</div>
       </div>
 
-      <Card className="select-none">
-        <CardHeader>
-          <CardTitle className="text-base text-muted-foreground">
-            {showBack ? "Answer" : "Question"}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="min-h-[160px] whitespace-pre-wrap text-base leading-7">
-            {showBack ? card.back : card.front}
-          </div>
-          {card.tags && card.tags.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {card.tags.map((t, i) => (
-                <span
-                  key={i}
-                  className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground"
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <div 
+        className="relative w-full cursor-pointer" 
+        style={{ perspective: "1000px" }}
+        onClick={() => setShowBack((s) => !s)}
+      >
+        <div
+          className="relative w-full transition-transform duration-500"
+          style={{ 
+            transformStyle: "preserve-3d",
+            transform: showBack ? "rotateY(180deg)" : "rotateY(0deg)"
+          }}
+        >
+          {/* Front */}
+          <Card 
+            className="w-full select-none"
+            style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
+          >
+            <CardHeader>
+              <CardTitle className="text-base text-muted-foreground">
+                Question
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 min-h-[240px]">
+              <div className="whitespace-pre-wrap text-base leading-7">
+                {card.front}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Back */}
+          <Card 
+            className="absolute inset-0 w-full select-none"
+            style={{ 
+              backfaceVisibility: "hidden", 
+              WebkitBackfaceVisibility: "hidden",
+              transform: "rotateY(180deg)" 
+            }}
+          >
+            <CardHeader>
+              <CardTitle className="text-base text-muted-foreground">
+                Answer
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 min-h-[240px]">
+              <div className="whitespace-pre-wrap text-base leading-7">
+                {card.back}
+              </div>
+              {card.tags && card.tags.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {card.tags.map((t, i) => (
+                    <span
+                      key={i}
+                      className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
